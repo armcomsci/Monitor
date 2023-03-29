@@ -12,6 +12,8 @@
  <link href="{{ asset('theme/plugins/sweetalerts/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/plugins/sweetalerts/sweetalert.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/plugins/notification/snackbar/snackbar.min.css') }}" rel="stylesheet" type="text/css" />
+ <link href="{{ asset('theme/assets/css/elements/avatar.css') }}" rel="stylesheet" type="text/css" />
+ <link href="{{ asset('theme/assets/css/users/user-profile.css') }}" rel="stylesheet" type="text/css" />
  <!--  END CUSTOM STYLE FILE  -->
  <style>
     .dataContain{
@@ -67,6 +69,12 @@
         top: 0;
         z-index: 100;
     }
+    .loaddingModal{
+        background-image: url("{{ asset('icon/truck.gif') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100%;
+    }
     .badge{
         cursor: pointer;
     }
@@ -111,12 +119,17 @@
                                 <div class="d-flex  ">
                                     <div class="p-2">                                        
                                         <button type="button" class="btn btn-secondary mt-1 mb-1 ml-2">
-                                            Score : <span class="badge badge-light">10 Goal </span>
+                                            Score <span class="badge badge-light ScoreJob">{{ round($Score,2) }} </span>
                                         </button>
                                     </div>
                                     <div class="p-2">
                                         <button type="button" class="btn btn-info mt-1 mb-1 ml-2">
-                                            งานทั้งหมด : <span class="badge badge-light"> {{ $AllJob }} </span>
+                                            งานทั้งหมด : <span class="badge badge-light CountJobAll">{{ $AllJob }} </span>
+                                        </button>
+                                    </div>
+                                    <div class="p-2">
+                                        <button type="button" class="btn btn-dark  mt-1 mb-1 ml-2 ShowJobClose" data-toggle="modal" data-target="#JobCloseData">
+                                            งานที่ปิดแล้วภายในเดือน : <span class="badge badge-light CountJobClose">{{ $CountCloseJob }}</span>
                                         </button>
                                     </div>
                                     <div class="ml-auto p-2">
@@ -171,7 +184,7 @@
                                                     <button class="btn btn-success mb-2 mr-2"><i class="fa-sharp fa-solid fa-road"></i> อัพเดทแผนที่</button>
                                                 </div>
                                                 
-                                                <div id="dlgLoading" class="loadingWidget"></div>
+                                                {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
                                                 <div id="map"></div>
                                             </div>
                                             <div class="col-4 ">
@@ -196,37 +209,50 @@
                                                                 {{-- <th>เลขตู้</th> --}}
                                                                 <th>ทะเบียนรถ/เลขตู้</th>
                                                                 <th>คนรถ/เบอร์โทร</th>
-                                                                <th>ประเภทรถ</th>
-                                                                <th>สถานะ</th>
+                                                                <th>เวลา เข้า/ออก</th>
+                                                                {{-- <th>สถานะ</th> --}}
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             @foreach ($Container as $emp)
-                                                                <tr class="dataContain" data-contain="{{ $emp->ContainerNo }}">
-                                                                    {{-- <td>{{ $emp->ContainerNo }}</td> --}}
-                                                                    <td >{{ $emp->VehicleCode }}<br>{{ $emp->ContainerNo }}</td>
-                                                                    <td class="text-break">{{ $emp->EmpDriverName." ".$emp->EmpDriverlastName }}<br>{{ $emp->EmpDriverTel }}</td>
-                                                                    <td class="CarType">
-                                                                        @switch($emp->CarType)
-                                                                            @case('CT001')
-                                                                                รถเล็ก
-                                                                                @break
-                                                                            @case('CT002')
-                                                                                รถกลาง
-                                                                                @break
-                                                                            @case('CT003')
-                                                                                รถใหญ่
-                                                                                @break
-                                                                        @endswitch
-                                                                    </td>
-                                                                    <td class="text-break">
-                                                                        @if($emp->updated_at != "")
-                                                                        <span class="badge outline-badge-danger shadow-none">ออกงาน : {{ ShowDate($emp->updated_at,"d-m-Y H:i") }}</span>
-                                                                        @else 
-                                                                        <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($emp->created_at,"d-m-Y H:i") }}</span>
-                                                                        @endif
-                                                                    </td>
-                                                                </tr>
+                                                                @if ($emp->status_transfer == '' || $emp->status_transfer == 'Y')
+                                                                    @php
+                                                                        $Carsize = '';
+                                                                        switch ($emp->CarType) {
+                                                                            case 'CT001':
+                                                                                $Carsize = 'รถเล็ก';
+                                                                                break;
+                                                                            case 'CT002':
+                                                                                $Carsize = 'รถกลาง';
+                                                                                break;
+                                                                            case 'CT003':
+                                                                                $Carsize = 'รถใหญ่';
+                                                                                break;
+                                                                        }
+                                                                    @endphp
+                                                                    <tr class="dataContain" data-contain="{{ $emp->ContainerNo }}" id="containNo-{{ $emp->ContainerNo }}">
+                                                                        {{-- <td>{{ $emp->ContainerNo }}</td> --}}
+                                                                        <td >
+                                                                            {{ $emp->VehicleCode }}({{ $Carsize }})
+                                                                        <br>{{ $emp->ContainerNo }}
+                                                                        </td>
+                                                                        <td class="text-break">
+                                                                            <div class="avatar">
+                                                                                <img alt="avatar" src="{{ asset('theme/assets/img/90x90.jpg') }}" class="rounded-circle" />
+                                                                            </div>
+                                                                            <div>
+                                                                                {{ $emp->EmpDriverName." ".$emp->EmpDriverlastName }}<br>{{ $emp->EmpDriverTel }}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="text-break">
+                                                                            @if($emp->updated_at != "")
+                                                                            <span class="badge outline-badge-danger shadow-none">ออกงาน : {{ ShowDate($emp->updated_at,"d-m-Y H:i") }}</span>
+                                                                            @else 
+                                                                            <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($emp->created_at,"d-m-Y H:i") }}</span>
+                                                                            @endif
+                                                                        </td>
+                                                                    </tr>
+                                                                @endif
                                                             @endforeach
                                                         </tbody>
                                                     </table>
@@ -273,6 +299,7 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="Product-TimeLine" role="tabpanel">
+                                        <div class="loaddingModal" style="height: 500px;"></div>
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="table-responsive" style="height: 630px">
@@ -308,6 +335,7 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="StatusJobTrans" role="tabpanel">
+                                        <div class="loaddingModal" style="height: 500px;"></div>
                                         <div class="row">
                                             <div class="offset-1 col-10">
                                                 <div class="mr-auto p-2">
@@ -338,6 +366,7 @@
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="History" role="tabpanel">
+                                        <div class="loaddingModal" style="height: 500px;"></div>
                                         <div class="row">
                                             <div class="offset-1 col-10">
                                                 <div class="mr-auto p-2">
@@ -482,25 +511,28 @@
                             </thead>
                             <tbody>
                                 @foreach ($Container as $JobTrans)
-                                    <tr data-contain="{{ $JobTrans->ContainerNo }}">
-                                        <td class="text-center">
-                                            <div class="n-chk">
-                                                <label class="new-control new-checkbox checkbox-warning">
-                                                <input type="checkbox" class="new-control-input" name="containerTrans[]" value="{{ $JobTrans->ContainerNo }}">
-                                                <span class="new-control-indicator"></span>
-                                                </label>
-                                            </div> 
-                                        </td>
-                                        <td>{{ $JobTrans->VehicleCode }}</td>
-                                        <td>{{ $JobTrans->EmpDriverName." ".$JobTrans->EmpDriverlastName }}<br>{{ $JobTrans->EmpDriverTel }}</td>
-                                        <td>
-                                            @if($JobTrans->updated_at != "")
-                                                <span class="badge outline-badge-danger shadow-none">ออกงาน : {{ ShowDate($JobTrans->updated_at,"d-m-Y H:i") }}</span>
-                                            @else 
-                                                <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($JobTrans->created_at,"d-m-Y H:i") }}</span>
-                                            @endif
-                                        </td>
-                                    </tr>
+                                    @if ($JobTrans->status_transfer == '' || $JobTrans->status_transfer == 'Y')
+                                        <tr>
+                                            <td class="text-center">
+                                                <div class="n-chk">
+                                                    <label class="new-control new-checkbox checkbox-warning">
+                                                    <input type="checkbox" class="new-control-input" name="containerTrans[]" value="{{ $JobTrans->ContainerNo }}">
+                                                    <span class="new-control-indicator"></span>
+                                                    </label>
+                                                </div> 
+                                            </td>
+                                            <td>{{ $JobTrans->VehicleCode }}({{ $Carsize }})
+                                                <br>{{ $JobTrans->ContainerNo }}</td>
+                                            <td>{{ $JobTrans->EmpDriverName." ".$JobTrans->EmpDriverlastName }}<br>{{ $JobTrans->EmpDriverTel }}</td>
+                                            <td>
+                                                @if($JobTrans->updated_at != "")
+                                                    <span class="badge outline-badge-danger shadow-none">ออกงาน : {{ ShowDate($JobTrans->updated_at,"d-m-Y H:i") }}</span>
+                                                @else 
+                                                    <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($JobTrans->created_at,"d-m-Y H:i") }}</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
@@ -574,6 +606,68 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="saveJobReceive"><i class="fa-regular fa-floppy-disk"></i> บันทึกข้อมูล</button>
                 <button class="btn btn-outline-danger" data-dismiss="modal"><i class="fa-solid fa-xmark"></i> ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- รายละเอียดปิดงาน --}}
+<div class="modal fade " id="ShowCloseJob" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="">สรุปงาน</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 750px;" id="ShowDetailJob">
+                <div class="loaddingModal"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="ConfirmCloseJob"><i class="fa-regular fa-floppy-disk"></i> ปิดงาน</button>
+                <button class="btn btn-outline-danger" data-dismiss="modal"><i class="fa-solid fa-xmark"></i> ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade " id="JobCloseData" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">งานที่ปิดแล้วภายในเดือน : </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 750px;" >
+                <div class="loaddingModal"></div>
+                <div class="table-responsive" style="height: 700px;" id="ContainerSuc">
+                    <div class="mr-auto p-2">
+                        <input type="text" class="form-control" id="findJobSuccess"  style="width: 80%" placeholder="ค้นหางาน">
+                    </div>
+                    <table class="table mb-4" id="AllJobClose">
+                        <thead>
+                            <th>ทะเบียนรถ/เลขตู้</th>
+                            <th>ข้อมูลคนรถ/เบอร์ติดต่อ</th>
+                            <th>เวลาปิดงาน</th>
+                            <th>รายละเอียด</th>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                <div id="ShowDataJobClose">
+                </div>
+            </div>
+            <div class="modal-footer footer-job-close">
+                <div class="d-flex">
+                    <div class="mr-auto p-2">
+                        <button class="btn btn-outline-warning mb-2" id="backToDataJob" data-toggle="tab" href="#home"><i class="flaticon-cancel-12"></i><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-left"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg> ย้อนกลับ</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -721,7 +815,7 @@
                     map.setExtent(points)
             }, 1000);
 
-            hideLoading();
+            // hideLoading();
         }else{
             $('#map').html('<h2>ไม่พบตำแหน่ง GPS</h2>')
         }
@@ -767,10 +861,15 @@
             });
             $('.event tbody').append(html_remark);
         }
-
-        if(response['AddBill'].ContainerNO != ""){
+        $('#ConfirmCloseJob').attr('data-container','');
+        // console.log(response['Drive'].statusTrans);
+        if(response['AddBill'].ContainerNO != "" && response['Drive'].statusTrans != "W"){
+            $('#ConfirmCloseJob').attr('data-container',response['AddBill'].ContainerNO);
             $('#closeJob,#AddBillTime').fadeIn(500);
             $('#AddBillTime').text('ส่งบิลเมื่อ : '+moment(response['AddBill'].Addbill_Time).format('D MMMM YYYY HH:mm'));
+        }else if(response['Drive'].statusTrans == "W"){
+            $('#AddBillTime').fadeIn(500);
+            $('#AddBillTime').text('ไม่สามารถปิดงานได้ : โอนงานไม่สำเร็จ');
         }
     }
 
@@ -798,12 +897,12 @@
         });
     }
 
-    function showLoading() {
-        document.getElementById("dlgLoading").style.display = "block";
-    }
-    function hideLoading() {
-        document.getElementById("dlgLoading").style.display = "none";
-    }
+    // function showLoading() {
+    //     document.getElementById("dlgLoading").style.display = "block";
+    // }
+    // function hideLoading() {
+    //     document.getElementById("dlgLoading").style.display = "none";
+    // }
 
     $(document).ready(function() {
         $("#findJob").keyup(function (e) {
@@ -849,6 +948,13 @@
                 $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
             });  
         });
+        
+        $('#findJobSuccess').keyup(function (e) {
+            var value = $(this).val().toLowerCase();
+            $(".AllJobClose tbody tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });  
+        });
 
         $('.dataContain').click(function (e) { 
             e.preventDefault();
@@ -864,7 +970,7 @@
                 // data: "data",
                 dataType: "json",
                 beforeSend:function(){
-                    showLoading();
+                    // showLoading();
                     $('#map').empty();
                 },
                 success: function (response) {
@@ -903,67 +1009,73 @@
         $('#icon-Product-tab').click(function (e) { 
             e.preventDefault();
             let Contain = $('.dataContain.activeTr').data('contain');
-            $.ajax({
-                type: "get",
-                url: url+"/DtOrderItem/"+Contain,
-                // data: "data",
-                dataType: "json",
-                beforeSend:function(){
-                    $('.ItemOrder tbody tr').remove();
-                    $('.tracking-list').empty();
-                },
-                success: function (response) {
-                    $('#ItemContain').text(Contain);
-                
-                    let html = '';
-                    let i = 1;
-                    $.each(response['OrderList'], function (index, value) { 
-                        if(value.Flag_st == 'Y'){
-                            bg_class = "shadow-none badge outline-badge-success";
-                            bg_text  = "ส่งสำเร็จ";
-                        }else if(value.Flag_st == 'N'){
-                            bg_class = "badge outline-badge-danger shadow-none";
-                            bg_text  = "ส่งไม่สำเร็จ";
-                        }else{
-                            bg_class = "badge outline-badge-secondary shadow-none";
-                            bg_text  = "อยู่ระหว่างจัดส่ง";
-                        }
-                        html += "<tr>"
-                        html += "<td>"+value.GoodCode+"</td>"
-                        html += "<td>"+value.GoodName+"</td>"
-                        html += "<td>"+value.GoodQty+"</td>"
-                        html += "<td>"+value.GoodUnit+"</td>"
-                        html += "<td><span class=\""+bg_class+"\">"+bg_text+"</span></td>"
-                        html += "</tr>"
-                        i++;
-                    });
-                    $('.ItemOrder tbody').append(html);
-                    if(response['CustList'] != ""){
-                        let html_cust = '';
-                        $.each(response['CustList'], function (index, value) { 
-                                let statusSend = '';
-                                if(value.Flag_st == 'Y'){
-                                    statusSend = 'Send_Success';
-                                }else{
-                                    statusSend = 'Send_not';
-                                }
-                                html_cust += "<div class=\"tracking-item\">";
-                                html_cust += "<div class=\"tracking-icon status-intransit "+statusSend+"\">";
-                                // html_cust += "<i class=\"fa fa-circle\"></i>"
-                                html_cust += "</div>";
-                                if(value.Flag_st_date != ""){
-                                    html_cust += "<div class=\"tracking-date\">"+moment(value.Flag_st_date).format('D MMMM YYYY')+"<span>"+moment(value.Flag_st_date).format('HH:mm')+"</span></div>";
-                                }else{
-                                    html_cust += "<div class=\"tracking-date\">-</div>";
-                                }
-                               
-                                html_cust += "<div class=\"tracking-content\">"+value.CustName+"<span>"+value.ShiptoAddr1+"</span></div>"
-                                html_cust += "</div>";
+            if(Contain != ""){
+                $.ajax({
+                    type: "get",
+                    url: url+"/DtOrderItem/"+Contain,
+                    // data: "data",
+                    dataType: "json",
+                    beforeSend:function(){
+                        $('.ItemOrder tbody tr').remove();
+                        $('.tracking-list').empty();
+                    },
+                    success: function (response) {
+                        $('.loaddingModal').css('display','none');
+                        $('#ItemContain').text(Contain);
+                    
+                        let html = '';
+                        let i = 1;
+                        $.each(response['OrderList'], function (index, value) { 
+                            if(value.Flag_st == 'Y'){
+                                bg_class = "shadow-none badge outline-badge-success";
+                                bg_text  = "ส่งสำเร็จ";
+                            }else if(value.Flag_st == 'N'){
+                                bg_class = "badge outline-badge-danger shadow-none";
+                                bg_text  = "ส่งไม่สำเร็จ";
+                            }else{
+                                bg_class = "badge outline-badge-secondary shadow-none";
+                                bg_text  = "อยู่ระหว่างจัดส่ง";
+                            }
+                            html += "<tr>"
+                            html += "<td>"+value.GoodCode+"</td>"
+                            html += "<td>"+value.GoodName+"</td>"
+                            html += "<td>"+value.GoodQty+"</td>"
+                            html += "<td>"+value.GoodUnit+"</td>"
+                            html += "<td><span class=\""+bg_class+"\">"+bg_text+"</span></td>"
+                            html += "</tr>"
+                            i++;
                         });
-                        $('.tracking-list').append(html_cust);
-                    }
-                }   
-            });
+                        $('.ItemOrder tbody').append(html);
+                        console.log(response['CustList']);
+                        if(response['CustList'] != ""){
+                            let html_cust = '';
+                            $.each(response['CustList'], function (index, value) { 
+                                    console.log(value.Flag_st_date);
+                                    let statusSend = '';
+                                    if(value.Flag_st == 'Y'){
+                                        statusSend = 'Send_Success';
+                                    }else{
+                                        statusSend = 'Send_not';
+                                    }
+                                    html_cust += "<div class=\"tracking-item\">";
+                                    html_cust += "<div class=\"tracking-icon status-intransit "+statusSend+"\">";
+                                    // html_cust += "<i class=\"fa fa-circle\"></i>"
+                                    html_cust += "</div>";
+                                    if(value.Flag_st_date != null){
+                                        html_cust += "<div class=\"tracking-date\">"+moment(value.Flag_st_date).format('D MMMM YYYY')+"<span>"+moment(value.Flag_st_date).format('HH:mm')+"</span></div>";
+                                    }else{
+                                        html_cust += "<div class=\"tracking-date\"></div>";
+                                    }
+                                
+                                    html_cust += "<div class=\"tracking-content\">"+value.CustName+"<span>"+value.ShiptoAddr1+"</span></div>"
+                                    html_cust += "</div>";
+                            });
+                            $('.tracking-list').append(html_cust);
+                        }
+                    }   
+                });
+            }
+            
         });
 
         $('#icon-StatusJobTrans-tab').click(function (e) { 
@@ -977,6 +1089,7 @@
                     $('.Statusjob tbody').empty();
                 },
                 success: function (response) {
+                    $('.loaddingModal').css('display','none');
                     let i = 1;
                     let html = '';
                     $.each(response, function (index, value) { 
@@ -1013,6 +1126,7 @@
                     $('.history tbody').empty();
                 },
                 success: function (response) {
+                    $('.loaddingModal').css('display','none');
                     let i = 1;
                     let html = '';
                     $.each(response, function (index, value) { 
@@ -1131,13 +1245,9 @@
         $('#ReturnJobTrans').click(function (e) { 
             e.preventDefault();
             getDataTransfer();
-        });
-
-        $('#ReturnJobTrans').click(function (e) { 
-            e.preventDefault();
-            getDataTransfer();
             $('#DataJobReceive thead').css('background','#ddf5f0');
-            $('#ReceiveTrans').text('ยืนยันรับงาน')
+            $('#ReceiveTrans').text('ยืนยันรับงาน');
+            $("#saveJobReceive").attr('data-type','Y');
         });
 
         $('#RejectJob').click(function (e) { 
@@ -1145,6 +1255,32 @@
             getDataTransfer();
             $('#DataJobReceive thead').css('background','#fff9ed')
             $('#ReceiveTrans').text('คืนงาน')
+            $("#saveJobReceive").attr('data-type','R');
+        });
+
+        $('.ShowJobClose').click(function (e) { 
+            e.preventDefault();
+            $.ajax({
+                type: "get",
+                url: url+"/GetDataJobClose",
+                // data: "data",
+                // dataType: "dataType",
+                success: function (response) {
+                    $('#AllJobClose tbody').empty();
+                    $('.loaddingModal').css('display','none');
+                    html = '';
+                    $.each(response, function (index, value) {  
+                   
+                        html += "<tr>"
+                        html += "<td>"+value.VehicleCode+"<br>"+value.ContainerNo+"</td>"
+                        html += "<td>"+value.EmpDriverName+" "+value.EmpDriverlastName+"<br>"+value.EmpDriverTel+"</td>"
+                        html += "<td><span class=\"badge outline-badge-success shadow-none\">"+moment(value.CloseTime).format('LLL')+"</span></td>";
+                        html += "<td><button class=\"btn btn-outline-secondary mb-2 CheckDetailJob \" data-contain=\""+value.ContainerNo+"\" ><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-arrow-right-circle\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 16 16 12 12 8\"></polyline><line x1=\"8\" y1=\"12\" x2=\"16\" y2=\"12\"></line></svg></button></td>"
+                        html += "</tr>"
+                    });
+                    $('#AllJobClose tbody').append(html);
+                }
+            });
         });
     });
 
@@ -1157,6 +1293,36 @@
         $('#EmpLogin').css('display','none');
         $('#SendJobTo').fadeIn(1500);
         $('.footer-save-transfer').css('display','block');
+    });
+
+    $(document).on('click','.CheckDetailJob',function(){
+        let ContainerNo = $(this).data('contain');
+        $.ajax({
+            type: "post",
+            url: url+"/DataCloseJob",
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: {ContainerNo:ContainerNo},
+            beforeSend:function(){
+                // showLoading();
+                $('.loaddingModal').css('display','block');
+                $('#ContainerSuc').css('display','none');
+            },
+            success: function (response) {
+                $('.loaddingModal').css('display','none');
+                $('#ShowDataJobClose').html(response);
+               
+                $('#ShowDataJobClose').fadeIn(1500);
+                $('.footer-job-close').css('display','block');
+                
+            }
+        });
+    });
+
+    $(document).on('click','#backToDataJob',function(){
+        $('#ShowDataJobClose').empty();
+        $('#ShowDataJobClose').css('display','none');
+        $('.footer-job-close').css('display','none');
+        $('#ContainerSuc').fadeIn(1000);
     });
 
     $(document).on('click','#backToEmp',function(){
@@ -1279,17 +1445,20 @@
         $('#jobReceSelect').html("งานที่เลือก : "+countChecked);
     });
     
-    $(document).on('click','input[name="container[]"]',function(){
+    $(document).on('change','input[name="container[]"]',function(e){
+        e.preventDefault();
         let countChecked = $('input[name="container[]"]:checked').length;
         $('#jobSelect').html("งานที่เลือก : "+countChecked);
     });
 
-    $(document).on('click','input[name="containerTrans[]"]',function(){
+    $(document).on('change','input[name="containerTrans[]"]',function(e){
+        e.preventDefault();
         let countChecked = $('input[name="containerTrans[]"]:checked').length;
         $('#jobTranSelect').html("งานที่เลือก : "+countChecked);
     });
 
-    $(document).on('click','#saveJob',function(){
+    $(document).on('click','#saveJob',function(e){
+        e.preventDefault();
         let container =  $('input[name="container[]"]:checked');
         if(container.length == 0){
             swal({
@@ -1345,6 +1514,7 @@
     });
 
     $(document).on('click','#saveJobTranfer',function(e){
+        e.preventDefault();
         let containerTrans =  $('input[name="containerTrans[]"]:checked').map(function () {
                                     return this.value;
                                 }).get();
@@ -1404,17 +1574,191 @@
         }
     });
 
+    $(document).on('click','#saveJobReceive',function(e){
+        e.preventDefault();
+        let containerRecev =  $('input[name="containerRecev[]"]:checked').map(function () {
+                                    return this.value;
+                                }).get();
+                                
+        let type           = $(this).data('type');
+        let SwalTxt;
+        if(type == "Y"){
+            SwalTxt = "ยืนยันรับงาน ?";
+        }else if(type == "R"){
+            SwalTxt = "ยืนยันคืนงาน ?";
+        }
+
+        if(containerRecev.length == 0){
+            swal({
+                title: 'กรุณาเลือกรายการ',
+                text: '',
+                type: 'error',
+                padding: '2em'
+            })
+        }else{
+            swal({
+                title: SwalTxt,
+                text: "จำนวนงาน : "+containerRecev.length,
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก',
+                padding: '2em'
+            }).then(function(result) {
+                if (result.value) {
+                    $.ajax({
+                        type: "post",
+                        url: url+"/SaveReceiveJob",
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        data: {'containerRecev':containerRecev,'type':type},
+                        // dataType: "dataType",
+                        success: function (response) {
+                            if(response.status == "success"){
+                                swal({
+                                    title: 'บันทึกสำเร็จ',
+                                    text: '',
+                                    type: 'success',
+                                    padding: '2em'
+                                }).then((result) => {
+                                    socket.emit('StatusJobTrans',{
+                                        // Receive : response.EmpCode,
+                                        Amount : response.CountJob,
+                                        Portname : response.PortName,
+                                        container : response.container,
+                                        Status : type
+                                    });
+                                    location.reload();
+                                })
+                            }else{
+                                swal({
+                                    title: 'Error',
+                                    text: response,
+                                    type: 'error',
+                                    padding: '2em'
+                                })
+                            }
+                        }
+                    });
+                }
+            })
+        }
+    });
+
+    $(document).on('click','#closeJob',function(e){
+        e.preventDefault();
+        $('#ShowCloseJob').modal('show');
+        
+        let ContainerNo = $('.activeTr').data('contain');
+        $.ajax({
+            type: "post",
+            url: url+"/DataCloseJob",
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: {ContainerNo:ContainerNo},
+            beforeSend:function(){
+                // showLoading();
+                // $('#ShowDetailJob').empty();
+            },
+            success: function (response) {
+                $('#ShowDetailJob').html(response);
+            }
+        });
+    });
+
+    $(document).on('click','#ConfirmCloseJob',function(e){
+        e.preventDefault();
+        let ContainerNo = $(this).data('container');
+        $.ajax({
+            type: "post",
+            url: url+"/ConfirmCloseJob",
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            success: function (response) {
+                if(response.status == "success"){
+                    $('#ShowCloseJob').modal('hide');
+                    let score    = parseFloat(response.Score);
+                    let ScoreJob = parseFloat($('.ScoreJob').text());
+                    let SumScore = score+ScoreJob;
+                    $('.ScoreJob').text(SumScore.toFixed(2));
+                    console.log(score,ScoreJob);
+                    Swal.fire({
+                        imageUrl: url+'/icon/award.gif',
+                        imageHeight: 250,
+                        text: "ยินดีด้วยคุณได้รับคะแนน : "+response.Score+" คะแนน"
+                    }).then((result) => {
+                        $('.activeTr').remove();
+                        $('.CountJobAll').text($('.allJob tbody tr').length);
+                       
+                        socket.emit('UpdateScore',{
+                            EmpAll : response.Port,
+                            Score : response.Score
+                        });
+
+                        let CountClose = parseInt($('.CountJobClose').text())+1;
+                        $('.CountJobClose').text(CountClose);
+                    });
+                }else{
+                    swal({
+                        title: 'Error',
+                        text: response.text,
+                        type: 'error',
+                        padding: '2em'
+                    })
+                }
+            },
+            error: function (response){
+                swal({
+                    title: 'Error',
+                    text: response.text,
+                    type: 'error',
+                    padding: '2em'
+                })
+            }
+        });
+    })
+
     socket.on('UpdateJobCount',(data)=>{
         $('.NewJob').html(data.CountJob);
     });
 
     socket.on('CountJob',(data) => {
-        // console.log(data);
-        if(data['res']['recordset']['0'].Job >= 1){
-            $('.NewJob').parent().addClass('blink_me');
-            $('.NewJob').html(data['res']['recordset']['0'].Job);
+        console.log(data);
+        if(data != ""){
+            if(data['res']['recordset']['0'].Job >= 1){
+                $('.NewJob').parent().addClass('blink_me');
+                $('.NewJob').html(data['res']['recordset']['0'].Job);
+            }   
         }
-       
+    });
+
+    socket.on('StatusJobReceive',(data)=>{
+            console.log(data);
+            let display =  '';
+            if(data.Status == "R"){
+                display = 'block';
+            }else if(data.Status == "Y"){
+                display = 'none';
+            }
+            $.each(data['container'], function (index, value) { 
+                $('#containNo-'+value).css('display',display);
+            });
+            // if(data.Receive == EmpCode){
+            //     let html = "ผู้ใช้งาน : "+data.Portname
+            //     if(data.Status == "R"){
+            //         let status = "คืนงานกลับ";
+            //         let color  = "#e95f2b";
+            //     }else if(data.Status == "Y"){
+            //         let status = "รับงานที่โอน";
+            //         let color  = "#009688";
+            //     }
+            //     Snackbar.show({
+            //         text: "<div style=\"padding:10px\" >"+html+"</div><div style=\"padding:10px\" > "+status+" จำนวน "+data.Amount+" !</div>",
+            //         pos: 'top-right',
+            //         maxWidth: '100%',
+            //         actionTextColor: '#fff',
+            //         backgroundColor: '#2196f3',
+            //         duration: 5000,
+            //         actionText: 'X'
+            //     });
+            // }
     });
 </script>
 @endsection

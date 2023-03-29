@@ -53,6 +53,10 @@
     .blink_me {
         animation: blinker 1s linear infinite;
     }
+    .notification-scroll{
+        overflow-x: auto;
+        height: 250px;
+    }
     .loadingWidget{
         opacity: 0 !important;
     }
@@ -112,6 +116,7 @@
         var EmpCode  = '{{ $Empcode }}';
        
         $(document).ready(function() {
+
             $('.logout').click(function (e) { 
                 e.preventDefault();
                 swal({
@@ -129,6 +134,39 @@
                     }
                 });
             });
+
+            $('#notificationDropdown').click(function (e) { 
+                e.preventDefault();
+                $.ajax({
+                    type: "get",
+                    url: url+"/GetNotify",
+                    // data: "data",
+                    // dataType: "dataType",
+                    beforeSend : function (){
+                        $('.notification-scroll').empty();
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        let html = '';
+                        $.each(response, function (index, value2) {  
+                            html += " <div class=\"dropdown-item\">"
+                            html +=  "<div class=\"media server-log\"><i class=\"fa-regular fa-bell pt-3\"></i>"
+                            html +=  "<div class=\"media-body\">"
+                            html +=  "<div class=\"data-info pl-3\">"
+                            html +=  "<h6>"+value2.text+"</h6>"
+                            html +=  "<p>"+moment(value2.Datetime).fromNow()+"</p>"
+                            html +=  "</div>"
+                            html +=  "<div class=\"icon-status\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-x\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg>"
+                            html +=  "</div>"
+                            html +=  "</div>"
+                            html +=  "</div>"
+                            html +=  "</div>";
+                        });
+                        $('.notification-scroll').append(html);
+                    }
+                });
+            });
+
             App.init();
             socket.on('Send_To_Monitor', (data) =>  {
           
@@ -232,12 +270,45 @@
                         onActionClick: (element) => {
                             element.style.opacity = 0;
                             $('#ReturnJobTrans').click();
-                            // location.reload();
+                            
                         }
                     });
-                    $('.NewJobReceive').text(data.Amount);
+
+                    let trans = parseInt($('.NewJobReceive').text());
+                    let ret   = parseInt($('.RetrunJob').text());
+
+                    trans = trans+data.Amount
+                    ret   = ret+data.Amount
+
+                    $('.NewJobReceive').text(trans);
+                    $('.RetrunJob').text(ret)
                 }
             })
+
+            socket.on('ShowUpdateScore',(data)=>{
+                if(socket.id != data.socket){
+                    let Score = parseFloat(data['data']['Score']);
+                    $.each(data['data']['EmpAll'], function (index, value) { 
+                        if(value.EmpCode == EmpCode){
+
+                            let ScoreJob = parseFloat($('.ScoreJob').text());
+                            let SumScore = Score+ScoreJob;
+                            $('.ScoreJob').text(SumScore)
+                            html = "<div class=\"row\"><div class=\"col-4 text-center\"><img src=\"http://localhost/monitor/icon/award.gif\" style=\"width:48px; height:48px;\"></div><div class=\"col-8\" style=\"color:black\"><h5>ยินดีด้วยคุณได้รับคะแนนเพิ่ม "+Score+"คะแนน</h5></h></div></div>"
+
+                            Snackbar.show({
+                                text: html,
+                                pos: 'top-right',
+                                maxWidth: '100%',
+                                actionTextColor: '#000',
+                                backgroundColor: '#fff',
+                                duration: 5000,
+                                actionText: 'X'
+                            });
+                        }
+                    });
+                }
+            });
         });
     </script>
     <script src="{{ asset('theme/assets/js/custom.js') }}"></script>

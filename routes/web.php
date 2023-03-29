@@ -21,6 +21,7 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/','dashboardController@index');
     Route::get('/createView','dashboardController@createView');
     Route::get('/GpsCarAll','dashboardController@gpsCarAll');
+    Route::get('/GetNotify','dashboardController@getNotify');
 
     Route::get('/Monitor','scoreboardController@index');
     Route::get('/DtMonitor/{Container}','scoreboardController@dataDt');
@@ -29,11 +30,16 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/SaveJob','scoreboardController@saveJob');
     // Route::post('/SaveClearJob','scoreboardController@saveClearJob');
     Route::post('/SaveTransferJob','scoreboardController@saveTransJob');
+    Route::post('/SaveReceiveJob','scoreboardController@saveReceive');
     Route::get('/GetUserLogin','scoreboardController@getUserLogin');
     Route::post('/SaveRemark','scoreboardController@saveRemark');
     Route::post('/ClearRemark','scoreboardController@clearRemark');
     Route::get('/GetHistory','scoreboardController@getHistory');
     Route::get('/GetJobStatus','scoreboardController@getJobTransStatus');
     Route::get('/JobReceive','scoreboardController@getReceive');
+    Route::post('/DataCloseJob','scoreboardController@dataCloseJob');
+    Route::post('ConfirmCloseJob','scoreboardController@CloseJob');
+    Route::get('/GetDataJobClose','scoreboardController@JobCloseAgo');
+   
 });
 

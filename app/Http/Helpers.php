@@ -1,4 +1,7 @@
 <?php 
+    use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Facades\Auth;
+
     function ShowDate($date,$format = "d/m/Y"){
         $date1      = date_create($date);
         $date2      = date_format($date1,$format);
@@ -21,4 +24,9 @@
         }
 		
 	}
+
+    function GetNotification(){
+        $Notify = DB::table('LMSNottification')->orderByDesc('Datetime')->limit(15)->get();
+        return $Notify;
+    }
 ?>

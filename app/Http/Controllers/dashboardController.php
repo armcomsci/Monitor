@@ -132,4 +132,9 @@ class dashboardController extends Controller
 
 
     }
+
+    public function getNotify(){
+        $notify = GetNotification();
+        return response()->json($notify, 200);
+    }
 }
