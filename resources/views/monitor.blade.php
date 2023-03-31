@@ -820,6 +820,7 @@
             $('#map').html('<h2>ไม่พบตำแหน่ง GPS</h2>')
         }
     }
+    var fullname = '{{ auth()->user()->Fullname }}';
 
     function dataCust(response){
         // console.log(response);
@@ -1553,7 +1554,7 @@
                                 }).then((result) => {
                                     socket.emit('SendJobTo',{
                                         SendForm : EmpCode,
-                                        SendFormName : $('#TransTo').text(),
+                                        SendFormName : fullname,
                                         Sendto : Sendto,
                                         Amount : containerTrans.length
                                     });
@@ -1684,7 +1685,13 @@
                         imageHeight: 250,
                         text: "ยินดีด้วยคุณได้รับคะแนน : "+response.Score+" คะแนน"
                     }).then((result) => {
-                        $('.activeTr').remove();
+                        $('.activeTr,#FullNameDrive,#TelDriv').remove();
+                        $('.Cust tbody tr').remove();
+                        $('.event tbody tr').remove();
+                        $('#AddBillTime').empty();
+                        $('#closeJob,#AddBillTime').css('display','none');
+                        $('#map').empty();
+
                         $('.CountJobAll').text($('.allJob tbody tr').length);
                        
                         socket.emit('UpdateScore',{

@@ -260,7 +260,7 @@
             socket.on('FormJob',(data)=>{
                 if(data.Sendto == EmpCode){
                     Snackbar.show({
-                        text: 'รับงานจาก : '+data.SendFormName+'<br> จำนวน : '+data.Amount+'งาน',
+                        text: 'มีงานใหม่โอนมาจาก : '+data.SendFormName+'<br> จำนวน : '+data.Amount+'งาน',
                         pos: 'top-right',
                         maxWidth: '100%',
                         actionTextColor: '#fff',

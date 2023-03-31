@@ -83,19 +83,19 @@ switch ($res['CarType']) {
                                                         <td>{{ $res['SendTime'] }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <td>ระยะเวลาในการส่ง</td>
+                                                        <td>ระยะเวลาจัดส่งถึงร้านสุดท้าย</td>
                                                         <td>{{ $res['ExitToSend'] }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <td>เวลาวางบิล</td>
+                                                        <td>เวลาส่งบิลคืนเจ้าหน้าที่</td>
                                                         <td>{{ $res['AddBill'] }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <td>ระยะเวลากลับมาวางบิล</td>
+                                                        <td>ระยะเวลาจากร้านสุดท้ายถึงคลัง</td>
                                                         <td>{{ $res['ExitToBill']  }}</td>
                                                     </tr>
                                                     <tr>
-                                                        <td>เวลารวมทั้งหมด</td>
+                                                        <td>ระยะเวลารวมทั้งหมด</td>
                                                         <td>{{ $res['TimeSendAll'] }}</td>
                                                     </tr>
                                                 </tbody>

@@ -652,8 +652,12 @@ class scoreboardController extends Controller
 
 
                 $score = round(1/$PortEmp,2);
+                
                 foreach ($Port as $key => $value) {
                     $ScoreUpdate['EmpCode']     = $value['EmpCode'];
+                    if($PortEmp == 3 && $value['EmpCode'] == Auth::user()->EmpCode){
+                        $score += 0.1;
+                    }
                     $ScoreUpdate['Score']       = $score;
                     $ScoreUpdate['ContainerNo'] = $data['Container'];
                     $ScoreUpdate['DateTime']    = now();
