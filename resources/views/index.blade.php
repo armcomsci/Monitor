@@ -223,7 +223,6 @@
                     showLoading();
                 },
                 success: function (response) {
-
                     initialize(response);
                 }
             });

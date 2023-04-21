@@ -40,6 +40,13 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/DataCloseJob','scoreboardController@dataCloseJob');
     Route::post('ConfirmCloseJob','scoreboardController@CloseJob');
     Route::get('/GetDataJobClose','scoreboardController@JobCloseAgo');
-   
+    
+    Route::get('/ChangeEmpDriv','empDrivController@index');
+    Route::post('/ChangeSaveEmp','empDrivController@save');
+
+    Route::get('/MonitorAll','monitorAdminController@index');
+    Route::post('/FindJobInPort','monitorAdminController@findjob');
+    Route::get('/JobInPortDetail/{container}','monitorAdminController@detail');
+    Route::post('/CustItem','monitorAdminController@dataItem');
 });
 

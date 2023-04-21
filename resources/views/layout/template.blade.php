@@ -286,15 +286,23 @@
             })
 
             socket.on('ShowUpdateScore',(data)=>{
+                // console.log(data);
                 if(socket.id != data.socket){
-                    let Score = parseFloat(data['data']['Score']);
-                    $.each(data['data']['EmpAll'], function (index, value) { 
+                 
+                    $.each(data['data']['Score'], function (index, value) { 
                         if(value.EmpCode == EmpCode){
-
+                            let Score    = parseFloat(value.Score);
                             let ScoreJob = parseFloat($('.ScoreJob').text());
                             let SumScore = Score+ScoreJob;
                             $('.ScoreJob').text(SumScore)
-                            html = "<div class=\"row\"><div class=\"col-4 text-center\"><img src=\"http://localhost/monitor/icon/award.gif\" style=\"width:48px; height:48px;\"></div><div class=\"col-8\" style=\"color:black\"><h5>ยินดีด้วยคุณได้รับคะแนนเพิ่ม "+Score+"คะแนน</h5></h></div></div>"
+
+                            let CountEmp = data['data']['Score'].length;
+                            let textSwal = '';
+                            if(CountEmp > 1){
+                                textSwal = " จากการทำงานร่วม "+CountEmp+" ท่าน";
+                            }
+
+                            html = "<div class=\"row\"><div class=\"col-4 text-center\"><img src=\"http://localhost/monitor/icon/award.gif\" style=\"width:48px; height:48px;\"></div><div class=\"col-8\" style=\"color:black\"><h5>ยินดีด้วยคุณได้รับคะแนนเพิ่ม "+Score+"คะแนน"+textSwal+"</h5></h></div></div>"
 
                             Snackbar.show({
                                 text: html,

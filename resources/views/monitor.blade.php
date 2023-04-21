@@ -1,87 +1,88 @@
 @extends('layout.template')
 
 @section('css')
- <!--  BEGIN CUSTOM STYLE FILE  -->
- <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/editors/quill/quill.snow.css') }}">
- <link rel="stylesheet" type="text/css" href="{{ asset('theme/assets/css/forms/theme-checkbox-radio.css') }}">
- <link href="{{ asset('theme/assets/css/apps/mailbox.css') }}" rel="stylesheet" type="text/css" />
- <link href="{{ asset('theme/assets/css/timeline.css') }}" rel="stylesheet" type="text/css">
+<!--  BEGIN CUSTOM STYLE FILE  -->
+<link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/editors/quill/quill.snow.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ asset('theme/assets/css/forms/theme-checkbox-radio.css') }}">
+<link href="{{ asset('theme/assets/css/apps/mailbox.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('theme/assets/css/timeline.css') }}" rel="stylesheet" type="text/css">
 
- <script src="{{ asset('theme/plugins/sweetalerts/promise-polyfill.js') }}"></script>
- <link rel="stylesheet" type="text/css" href="{{ asset('theme/assets/css/elements/alert.css') }}">
- <link href="{{ asset('theme/plugins/sweetalerts/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
- <link href="{{ asset('theme/plugins/sweetalerts/sweetalert.css') }}" rel="stylesheet" type="text/css" />
- <link href="{{ asset('theme/plugins/notification/snackbar/snackbar.min.css') }}" rel="stylesheet" type="text/css" />
- <link href="{{ asset('theme/assets/css/elements/avatar.css') }}" rel="stylesheet" type="text/css" />
- <link href="{{ asset('theme/assets/css/users/user-profile.css') }}" rel="stylesheet" type="text/css" />
- <!--  END CUSTOM STYLE FILE  -->
- <style>
-    .dataContain{
-        cursor: pointer;
-    }
-    .activeTr{
-        background-color: yellow;
-    }
-    .successFlag{
-        background-color: #77dd77;
-    }
-    .alertFlag{
-        background-color:  #ff6961;
-    }
-    .allJob > thead{
-        background-color: #4793ff 
-    }
-    .event > thead{
-        background-color: #ffb347;
-    }
-    .Cust > thead{
-        background-color: #009688;
-    }
-    .allJob > thead > tr >th, .event > thead > tr >th, .Cust > thead > tr >th, .history > thead > tr >th {
-        color: aliceblue;
-    }
-   
-    .modal{
-        z-index: 10001;
-    }
-    .swal2-container {
-        z-index: 10002 !important;
-    }
-    .footer-save-transfer,#SendJobTo{
-        display: none;
-    }
-    .table > tbody > tr > td{
-        vertical-align: top;
-    }
-    .Send_Success{
-        background-color: #2fa932 !important;
-    }
-    .Send_not{
-        background: darkgrey !important;
-    }
-    .border-map{
-        border: 2px solid #898989;
-        padding: 3px;
-        border-radius: 5%;
-    }
-    thead{
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    .loaddingModal{
-        background-image: url("{{ asset('icon/truck.gif') }}");
-        background-position: center;
-        background-repeat: no-repeat;
-        height: 100%;
-    }
-    .badge{
-        cursor: pointer;
-    }
-    #closeJob,#AddBillTime{
-        display: none;
-    }
- </style>
+<script src="{{ asset('theme/plugins/sweetalerts/promise-polyfill.js') }}"></script>
+<link rel="stylesheet" type="text/css" href="{{ asset('theme/assets/css/elements/alert.css') }}">
+<link href="{{ asset('theme/plugins/sweetalerts/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('theme/plugins/sweetalerts/sweetalert.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('theme/plugins/notification/snackbar/snackbar.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('theme/assets/css/elements/avatar.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('theme/assets/css/users/user-profile.css') }}" rel="stylesheet" type="text/css" />
+<!--  END CUSTOM STYLE FILE  -->
+<style>
+.dataContain{
+    cursor: pointer;
+}
+.activeTr{
+    background-color: yellow;
+}
+.successFlag{
+    background-color: #77dd77;
+}
+.alertFlag{
+    background-color:  #ff6961;
+}
+.allJob > thead{
+    background-color: #4793ff 
+}
+.event > thead{
+    background-color: #ffb347;
+}
+.Cust > thead{
+    background-color: #009688;
+}
+.allJob > thead > tr >th, .event > thead > tr >th, .Cust > thead > tr >th, .history > thead > tr >th {
+    color: aliceblue;
+}
+
+.modal{
+    z-index: 10001;
+}
+.swal2-container {
+    z-index: 10002 !important;
+}
+.footer-save-transfer,#SendJobTo{
+    display: none;
+}
+.table > tbody > tr > td{
+    vertical-align: top;
+}
+.Send_Success{
+    background-color: #2fa932 !important;
+}
+.Send_not{
+    background: darkgrey !important;
+}
+.border-map{
+    border: 2px solid #898989;
+    padding: 3px;
+    border-radius: 5%;
+}
+thead{
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.loaddingModal{
+    background-image: url("{{ asset('icon/truck.gif') }}");
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 100%;
+    display: none;
+}
+.badge{
+    cursor: pointer;
+}
+#closeJob,#AddBillTime{
+    display: none;
+}
+</style>
 @endsection
 
 @section('sub-header')
@@ -116,7 +117,7 @@
                         <div class="mail-box-container">
                             <div class="mail-overlay"></div>
                             <div id="mailbox-inbox" class="accordion mailbox-inbox">
-                                <div class="d-flex  ">
+                                <div class="d-flex">
                                     <div class="p-2">                                        
                                         <button type="button" class="btn btn-secondary mt-1 mb-1 ml-2">
                                             Score <span class="badge badge-light ScoreJob">{{ round($Score,2) }} </span>
@@ -209,7 +210,7 @@
                                                                 {{-- <th>เลขตู้</th> --}}
                                                                 <th>ทะเบียนรถ/เลขตู้</th>
                                                                 <th>คนรถ/เบอร์โทร</th>
-                                                                <th>เวลา เข้า/ออก</th>
+                                                                <th>สถานะตู้</th>
                                                                 {{-- <th>สถานะ</th> --}}
                                                             </tr>
                                                         </thead>
@@ -245,10 +246,16 @@
                                                                             </div>
                                                                         </td>
                                                                         <td class="text-break">
-                                                                            @if($emp->updated_at != "")
-                                                                            <span class="badge outline-badge-danger shadow-none">ออกงาน : {{ ShowDate($emp->updated_at,"d-m-Y H:i") }}</span>
-                                                                            @else 
-                                                                            <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($emp->created_at,"d-m-Y H:i") }}</span>
+                                                                            @if(empty($emp->flag_job) && empty($emp->flag_exit))
+                                                                                <span class="badge outline-badge-danger shadow-none">ยังไม่รับงาน</span>
+                                                                            @elseif(empty($emp->flag_exit) && $emp->flag_job == 'Y')
+                                                                                <span class="badge outline-badge-success shadow-none">รับงาน</span>
+                                                                            @elseif(empty($emp->flag_exit) && $emp->flag_job == 'N') 
+                                                                                <span class="badge outline-badge-danger shadow-none">ปฏิเศษงาน</span>
+                                                                            @elseif($emp->flag_exit == "Y" && $emp->flag_job == "Y")
+                                                                                <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($emp->created_at,"d-m-Y H:i") }}</span>
+                                                                            @elseif($emp->flag_exit == "N" && $emp->flag_job == "Y") 
+                                                                                <span class="badge outline-badge-danger shadow-none">ออกงาน: {{ ShowDate($emp->updated_at,"d-m-Y H:i") }}</span>
                                                                             @endif
                                                                         </td>
                                                                     </tr>
@@ -308,10 +315,10 @@
                                                     </div>
                                                     <table class="table table-bordered table-hover table-striped mb-4 ItemOrder" style="height: auto;">
                                                         <thead style="background-color:gold;">
-                                                                <th>รหัสสินค้า</th>
-                                                                <th>สินค้า</th>
+                                                                <th>สินค้า/รหัสสินค้า</th>
                                                                 <th>จำนวน</th>
                                                                 <th>หน่วย</th>
+                                                                <th>ชื่อร้าน</th>
                                                                 <th class="">สถานะ</th>
                                                                 {{-- <th>ส่งเมื่อ</th> --}}
                                                         </thead>
@@ -414,6 +421,7 @@
                 </button>
             </div>
             <div class="modal-body" style="height: 750px;">
+                <div class="loaddingModal" ></div>
                 <div class="table-responsive" style="height: 700px;">
                     <div class="mr-auto p-2">
                         <input type="text" class="form-control" id="findJobEmpty" style="width: 80%" placeholder="ค้นหางาน">
@@ -427,7 +435,7 @@
                         </div>
                     </div>
                     <table class="table mb-4" id="JobEpmTyPort">
-                        <thead>
+                        <thead style="background: #8ce49b">
                             <tr>
                                 <th class="text-center">
                                     <div class="n-chk">
@@ -437,11 +445,11 @@
                                         </label>
                                     </div>
                                 </th>
-                                {{-- <th>เลขตู้</th> --}}
+                                <th>ทะเบียนรถ/เลขตู้</th>
                                 <th>ข้อมูลคนรถ/เลขตู้</th>
-                                {{-- <th>เบอร์ติดต่อ</th> --}}
-                                <th>รับสินค้า</th>
-                                <th>ออกจากคลัง</th>
+                                <th>สถานะ</th>
+                                <th>เวลา รับงาน/ออกงาน</th>
+                                {{-- <th>ออกจากคลัง</th> --}}
                             </tr>
                         </thead>
                         <tbody>
@@ -525,10 +533,16 @@
                                                 <br>{{ $JobTrans->ContainerNo }}</td>
                                             <td>{{ $JobTrans->EmpDriverName." ".$JobTrans->EmpDriverlastName }}<br>{{ $JobTrans->EmpDriverTel }}</td>
                                             <td>
-                                                @if($JobTrans->updated_at != "")
-                                                    <span class="badge outline-badge-danger shadow-none">ออกงาน : {{ ShowDate($JobTrans->updated_at,"d-m-Y H:i") }}</span>
-                                                @else 
+                                                @if(empty($JobTrans->flag_job) && empty($JobTrans->flag_exit))
+                                                    <span class="badge outline-badge-danger shadow-none">ยังไม่รับงาน</span>
+                                                @elseif(empty($JobTrans->flag_exit) && $JobTrans->flag_job == 'Y')
+                                                    <span class="badge outline-badge-success shadow-none">รับงาน</span>
+                                                @elseif(empty($JobTrans->flag_exit) && $JobTrans->flag_job == 'N') 
+                                                    <span class="badge outline-badge-danger shadow-none">ปฏิเศษงาน</span>
+                                                @elseif($JobTrans->flag_exit == "Y" && $JobTrans->flag_job == "Y")
                                                     <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($JobTrans->created_at,"d-m-Y H:i") }}</span>
+                                                @elseif($JobTrans->flag_exit == "N" && $JobTrans->flag_job == "Y") 
+                                                    <span class="badge outline-badge-danger shadow-none">ออกงาน: {{ ShowDate($JobTrans->updated_at,"d-m-Y H:i") }}</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -592,7 +606,7 @@
                                 </th>
                                 {{-- <th>เลขตู้</th> --}}
                                 <th>ทะเบียนรถ</th>
-                                <th>ข้อมูลคนรถ/เบอร์ติดต่อ</th>
+                                <th>ข้อมูลคนรถ/เบอร์ติดต่อ/สถานะ</th>
                                 <th>ผู้โอน</th>
                                 <th>เวลาโอน</th>
                             </tr>
@@ -672,7 +686,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('script')
@@ -884,11 +897,27 @@
                 $('#DataJobReceive tbody').empty();
                 let html = '';
                 $.each(response, function (index, value) {  
+                    let html_status = '';
+
+                    if(value.flag_job == null){
+                        html_status += "<span class=\"badge outline-badge-danger shadow-none\">รอรับงาน</span>";
+                    }else if(value.flag_job == 'Y' && value.flag_check == null){
+                        html_status += "<span class=\"badge outline-badge-success shadow-none\">รับงาน</span>";
+                    }else if(value.flag_job == 'N'  && value.flag_check == null){
+                        html_status += "<span class=\"badge outline-badge-danger shadow-none\">ปฏิเศษงาน</span>";
+                    }
+                    else if(value.flag_check == 'Y' && value.flag_job != ''){
+                        html_status += "<span class=\"badge outline-badge-success shadow-none\">เข้ารับ : "+moment(value.created_at).format('LLL')+"</span>";
+                    }
+                    else if(value.flag_check == 'N' && value.flag_job != ''){
+                        html_status += "<span class=\"badge outline-badge-danger shadow-none\">ออกงาน : "+moment(value.updated_at).format('LLL')+"</span>";
+                    }
+
                     html += "<tr>"
                     html += "<td><div class=\"n-chk\"><label class=\"new-control new-checkbox checkbox-success\"><input type=\"checkbox\" class=\"new-control-input\" name=\"containerRecev[]\" value=\""+value.ContainerNo+"\"><span class=\"new-control-indicator\"></span></label></div></td>"
                     html += "<td>"+value.VehicleCode+"<br>"+value.ContainerNo+"</td>"
-                    html += "<td>"+value.EmpDriverName+" "+value.EmpDriverlastName+"<br>"+value.EmpDriverTel+"</td>"
-                    html += "<td>"+value.Fullname+"</td>"
+                    html += "<td>"+value.EmpDriverName+" "+value.EmpDriverlastName+"<br>"+value.EmpDriverTel+"<br>"+html_status+"</td>"
+                    html += "<td>"+value.Fullname+"</td>" 
                     html += "<td><span class=\"badge outline-badge-success shadow-none\">"+moment(value.Datetime).format('LLL')+"</span></td>"
                     html += "</tr>"
                 });
@@ -1019,13 +1048,17 @@
                     beforeSend:function(){
                         $('.ItemOrder tbody tr').remove();
                         $('.tracking-list').empty();
+                        $('.loaddingModal').css('display','block');
+                        // $('.loaddingModal').next().css('display','none');
                     },
                     success: function (response) {
+                        // $('.loaddingModal').next().css('display','block');
                         $('.loaddingModal').css('display','none');
                         $('#ItemContain').text(Contain);
                     
                         let html = '';
                         let i = 1;
+                  
                         $.each(response['OrderList'], function (index, value) { 
                             if(value.Flag_st == 'Y'){
                                 bg_class = "shadow-none badge outline-badge-success";
@@ -1038,20 +1071,20 @@
                                 bg_text  = "อยู่ระหว่างจัดส่ง";
                             }
                             html += "<tr>"
-                            html += "<td>"+value.GoodCode+"</td>"
-                            html += "<td>"+value.GoodName+"</td>"
+                            html += "<td>"+value.GoodName+"<br>"+value.GoodCode+"</td>"
                             html += "<td>"+value.GoodQty+"</td>"
                             html += "<td>"+value.GoodUnit+"</td>"
+                            html += "<td class=\"text-break\">"+value.CustName+"</td>"
                             html += "<td><span class=\""+bg_class+"\">"+bg_text+"</span></td>"
                             html += "</tr>"
                             i++;
                         });
                         $('.ItemOrder tbody').append(html);
-                        console.log(response['CustList']);
+                        // console.log(response['CustList']);
                         if(response['CustList'] != ""){
                             let html_cust = '';
                             $.each(response['CustList'], function (index, value) { 
-                                    console.log(value.Flag_st_date);
+                                    // console.log(value.Flag_st_date);
                                     let statusSend = '';
                                     if(value.Flag_st == 'Y'){
                                         statusSend = 'Send_Success';
@@ -1088,6 +1121,7 @@
                 // dataType: "dataType",
                 beforeSend : function (){
                     $('.Statusjob tbody').empty();
+                    $('.loaddingModal').css('display','block');
                 },
                 success: function (response) {
                     $('.loaddingModal').css('display','none');
@@ -1125,6 +1159,7 @@
                 // dataType: "dataType",
                 beforeSend : function (){
                     $('.history tbody').empty();
+                    $('.loaddingModal').css('display','block');
                 },
                 success: function (response) {
                     $('.loaddingModal').css('display','none');
@@ -1171,19 +1206,37 @@
                             url: url+"/GetJobEmptyPort",
                             beforeSend : function (){
                                 $('#JobEpmTyPort tbody').empty();
+                                $('.loaddingModal').next().css('display','none');
+                                $('.loaddingModal').css('display','block');
                             },
                             success: function (response) {
+                                $('.loaddingModal').next().css('display','block');
+                                $('.loaddingModal').css('display','none');
                                 check_tr = $('.All_Job_Empty').length;
                                 if(check_tr == 0){
                                     html = '';
                                     $.each(response, function (index, value) { 
+                                            // console.log(value.created_at,value.updated_at)
                                             html += "<tr class=\"All_Job_Empty\">"
                                             html += "<td class=\"text-center\"><div class=\"n-chk\"><label class=\"new-control new-checkbox checkbox-success\"><input type=\"checkbox\" class=\"new-control-input\" name=\"container[]\" value=\""+value.ContainerNo+"\"><span class=\"new-control-indicator\"></span></label></div></td>";
-                                            // html += "<td>"+value.ContainerNo+"</td>"
+                                            html += "<td>"+value.VehicleCode+"<br>"+value.ContainerNo+"</td>"
                                             html += "<td>ชื่อ : "+value.EmpDriverName+" "+value.EmpDriverlastName+"<br>เบอร์ : "+value.EmpDriverTel+"</td>"
-                                            // html += "<td>"+value.EmpDriverTel+"</td>"
-                                            html += "<td><span class=\"badge outline-badge-danger shadow-none\">"+moment(value.created_at).format('LLL')+"</span></td>";
-                                            html += "<td><span class=\"badge outline-badge-success shadow-none\">"+moment(value.updated_at).format('LLL')+"</span></td>";
+                                            if(value.flag_job == ''){
+                                                html += "<td><span class=\"badge outline-badge-danger shadow-none\">รอรับงาน</span></td>";
+                                            }else if(value.flag_job == 'Y'){
+                                                html += "<td><span class=\"badge outline-badge-success shadow-none\">รับงาน</span></td>";
+                                            }else if(value.flag_job == 'N'){
+                                                html += "<td><span class=\"badge outline-badge-danger shadow-none\">ปฏิเศษงาน</span></td>";
+                                            }
+                                            if(value.flag_check == 'Y'){
+                                                html += "<td class=\"text-break\"><span class=\"badge outline-badge-success shadow-none\">"+moment(value.created_at).format('LLL')+"</span></td>";
+                                            }
+                                            else if(value.flag_check == 'N'){
+                                                html += "<td class=\"text-break\"><span class=\"badge outline-badge-danger shadow-none\">"+moment(value.updated_at).format('LLL')+"</span></td>";
+                                            }else{
+                                                html += "<td></td>";
+                                            }
+                                            
                                             html += "</tr>"
                                     })
                                     $('#JobEpmTyPort tbody').append(html);
@@ -1266,6 +1319,9 @@
                 url: url+"/GetDataJobClose",
                 // data: "data",
                 // dataType: "dataType",
+                beforeSend : function(){
+                    $('.loaddingModal').css('display','block');
+                },
                 success: function (response) {
                     $('#AllJobClose tbody').empty();
                     $('.loaddingModal').css('display','none');
@@ -1656,10 +1712,12 @@
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             data: {ContainerNo:ContainerNo},
             beforeSend:function(){
+                $('.loaddingModal').css('display','block');
                 // showLoading();
                 // $('#ShowDetailJob').empty();
             },
             success: function (response) {
+                $('.loaddingModal').css('display','none');
                 $('#ShowDetailJob').html(response);
             }
         });
@@ -1675,17 +1733,27 @@
             success: function (response) {
                 if(response.status == "success"){
                     $('#ShowCloseJob').modal('hide');
-                    let score    = parseFloat(response.Score);
-                    let ScoreJob = parseFloat($('.ScoreJob').text());
-                    let SumScore = score+ScoreJob;
-                    $('.ScoreJob').text(SumScore.toFixed(2));
-                    console.log(score,ScoreJob);
+                    let score = 0;
+                    $.each(response.Score, function (index, value) {  
+                        if(value.EmpCode == EmpCode){
+                            score    = parseFloat(value.Score);
+                            let ScoreJob = parseFloat($('.ScoreJob').text());
+                            let SumScore = score+ScoreJob;
+                            $('.ScoreJob').text(SumScore.toFixed(2));
+                            return;
+                        }
+                    });
+                    let CountEmp = response.Score.length;
+                    let textSwal = '';
+                    if(CountEmp > 1){
+                        textSwal = " จากการทำงานร่วม "+CountEmp+" ท่าน";
+                    }
                     Swal.fire({
                         imageUrl: url+'/icon/award.gif',
                         imageHeight: 250,
-                        text: "ยินดีด้วยคุณได้รับคะแนน : "+response.Score+" คะแนน"
+                        text: "ยินดีด้วยคุณได้รับคะแนน : "+score+" คะแนน"+textSwal
                     }).then((result) => {
-                        $('.activeTr,#FullNameDrive,#TelDriv').remove();
+                        $('.activeTr,#FullNameDrive,#TelDriv').empty();
                         $('.Cust tbody tr').remove();
                         $('.event tbody tr').remove();
                         $('#AddBillTime').empty();
@@ -1695,7 +1763,7 @@
                         $('.CountJobAll').text($('.allJob tbody tr').length);
                        
                         socket.emit('UpdateScore',{
-                            EmpAll : response.Port,
+                            // EmpAll : response.Port,
                             Score : response.Score
                         });
 
@@ -1723,11 +1791,12 @@
     })
 
     socket.on('UpdateJobCount',(data)=>{
+        // console.log(data);
         $('.NewJob').html(data.CountJob);
     });
 
     socket.on('CountJob',(data) => {
-        console.log(data);
+        // console.log(data);
         if(data != ""){
             if(data['res']['recordset']['0'].Job >= 1){
                 $('.NewJob').parent().addClass('blink_me');
@@ -1740,13 +1809,14 @@
             console.log(data);
             let display =  '';
             if(data.Status == "R"){
-                display = 'block';
+                display = 'revert';
             }else if(data.Status == "Y"){
                 display = 'none';
             }
             $.each(data['container'], function (index, value) { 
                 $('#containNo-'+value).css('display',display);
             });
+            $('.CountJobAll').text($('.allJob tbody tr').length);
             // if(data.Receive == EmpCode){
             //     let html = "ผู้ใช้งาน : "+data.Portname
             //     if(data.Status == "R"){

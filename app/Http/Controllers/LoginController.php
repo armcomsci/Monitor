@@ -25,16 +25,19 @@ class LoginController extends Controller
     }
 
     public function index(){
+        // dd( DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')->limit(10)->get());
         return view('login');
     }
     
     public function checkLogin(Request $req){
         DB::beginTransaction();
-
+       
         $validator = Validator::make($req->all(), [
             'username' => 'required',
             'password' => 'required',
         ]);
+       
+        // dd(Hash::make($req->password));
         if ($validator->fails()) {
             $error = $validator->errors()->first();
             $res['status'] = "01";
@@ -55,6 +58,8 @@ class LoginController extends Controller
                     $EmpCode = Auth::user()->EmpCode;
 
                     $this->updateLog($EmpCode);
+
+                    
                     
                     $Count_Contain =  $this->CheckPort('1');
         
@@ -66,7 +71,7 @@ class LoginController extends Controller
                     if($CheckLoginDay == 1){
 
                         $TodayJob  =  round( (($Count_Contain)/2) , 0 , PHP_ROUND_HALF_UP );
-                        
+
                         $UpdateJob =  $this->RandomPort($EmpCode,$TodayJob);
 
                     }else{
@@ -126,7 +131,6 @@ class LoginController extends Controller
         try {
             // $CheckLogin = $this->CountUserOnline($EmpCode);
 
-
             $CheckJobUpdate =  DB::table('LMSJob_Contain')
                                 ->where('EmpCode',$EmpCode)
                                 ->whereRaw("CONVERT(varchar,Datetime,112) = '$this->Curent_date'")
@@ -137,32 +141,36 @@ class LoginController extends Controller
 
                 $UpdatePort['Port'] = $EmpCode;
                 $UpdatePort['Port_Updated'] = now();
-
-                $Count =   DB::table('LMDBM.dbo.lmEmpContainers')
-                        ->whereRaw("id IN ( SELECT TOP($TodayJob) id FROM LMDBM.dbo.lmEmpContainers WHERE CONVERT(varchar,updated_at,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date' AND Port IS NULL AND flag = 'N' ORDER BY RAND() )")
-                        ->update($UpdatePort);
-                                
-                $select = DB::table('LMDBM.dbo.lmEmpContainers')
-                                ->where('Port',$EmpCode)
-                                ->whereRaw("CONVERT(varchar,Port_Updated,112) = '$this->Curent_date'")
-                                ->select('ContainerNo','Port');
-
+                
+                // $Count =   DB::table('LMDBM.dbo.lmEmpContainers')
+                //         ->whereRaw("id IN ( SELECT TOP($TodayJob) id FROM LMDBM.dbo.lmEmpContainers WHERE CONVERT(varchar,updated_at,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date' AND Port IS NULL AND flag = 'N' ORDER BY RAND() )")
+                //         ->update($UpdatePort);
+                $select = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
+                            ->leftjoin('LMSJob_Contain as contain','m_contain.ContainerNo','contain.ContainerNo')
+                            ->whereNull('contain.EmpCode')
+                            ->whereRaw("CONVERT(varchar,SaveDate,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date'  ")
+                            ->select('m_contain.ContainerNo')
+                            ->selectRaw("'$EmpCode' as EmpCode")
+                            ->limit($TodayJob)
+                            ->orderByRaw('RAND()');
+               
                 DB::table('LMSJob_Contain')->insertUsing(['ContainerNo','EmpCode'],$select);
 
 
                 $log    =  new scoreboardController();
-                $detail = "รับงานใหม่ จำนวน ".$Count." งาน";
+                $detail = "รับงานใหม่ จำนวน ".$TodayJob." งาน";
                 $code   = "00";
                 $log->saveLogEvent($detail,$code);
             }
 
             $AllJob = DB::table('LMSJob_Contain')
                         ->where('EmpCode',$EmpCode)
+                        ->where('Status','N')
                         // ->whereRaw("CONVERT(varchar,Datetime,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date'")
                         ->select('ContainerNo','Port')
                         ->count();
-
             return $AllJob;
+        
         } catch (\Throwable $th) {
             DB::rollback();
             return $th->getMessage();
@@ -197,14 +205,15 @@ class LoginController extends Controller
 
     public function CheckPort($count){
         try {
-            $CheckPort = DB::table('LMDBM.dbo.lmEmpContainers as Container');
+            $CheckPort = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
+                        ->leftjoin('LMSJob_Contain as contain','m_contain.ContainerNo','contain.ContainerNo');
             if($count == '1'){
-                $CheckPort =   $CheckPort->whereNull('Port');
-                $CheckPort =   $CheckPort->whereRaw("CONVERT(varchar,updated_at,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date' ")
+                $CheckPort =   $CheckPort->whereNull('contain.EmpCode');
+                $CheckPort =   $CheckPort->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date' ")
                                 ->count();
             }elseif($count == '2'){
-                $CheckPort =   $CheckPort->whereNull('Port');
-                $CheckPort =   $CheckPort->whereRaw("CONVERT(varchar,updated_at,112) = '$this->Curent_date' ")
+                $CheckPort =   $CheckPort->whereNull('contain.EmpCode');
+                $CheckPort =   $CheckPort->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) = '$this->Curent_date' ")
                                 ->count();
             }
           

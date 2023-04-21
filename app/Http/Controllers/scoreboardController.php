@@ -14,28 +14,30 @@ class scoreboardController extends Controller
 
         $Port    = Auth::user()->EmpCode;
 
-        $Container = DB::table('LMDBM.dbo.lmEmpContainers as contain')
-                        ->join('LMDBM.dbo.lmEmpDriv as Driv','contain.Empcode','Driv.EmpDriverCode')
+        $Container = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
+                        ->join('LMSJob_Contain as job','m_contain.ContainerNo','job.ContainerNo')
+                        ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')
+                        ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                         ->join('DTDBM.dbo.vEMTransp as transp','Driv.TranspID','transp.TranspID')
                         ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
-                        ->join('LMSJob_Contain as job','contain.ContainerNo','job.ContainerNo')
                         ->leftjoin('LMSJobLog_Contain as job_transfer','contain.ContainerNo','job_transfer.ContainerNo')
-                        ->select('contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','job_transfer.Status as status_transfer')
+                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','job_transfer.Status as status_transfer','m_contain.ConfirmFlag as flag_job','contain.flag as flag_exit')
                         ->distinct()
                         ->where([
                                 'CDriv.IsDefault'=>'Y',
                                 // 'contain.flag'=>'N',
-                                'contain.Port'=>$Port,
+                                'job.EmpCode'=>$Port,
                                 'job.status'=>'N'
                             ])
                         ->get();
-
+     
         $Login    =  new LoginController();
         $CountJob =  $Login->CheckPort(1);
 
-        $AllJob   =  DB::table('LMSJob_Contain')
-                        ->where('EmpCode',$Port)
-                        ->where('status','N')
+        $AllJob   =  DB::table('LMSJob_Contain as job')
+                        ->join('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain','job.ContainerNo','m_contain.ContainerNo')
+                        ->where('job.EmpCode',$Port)
+                        ->where('job.status','N')
                         ->count();
 
         // $start = new Carbon('first day of last month');
@@ -58,14 +60,16 @@ class scoreboardController extends Controller
     }
 
     public function dataDt($Container){
-        $dataHd     = DB::connection('sqlsrv')->table('LMDBM.dbo.lmEmpContainers as contain')
-                        ->join('LMDBM.dbo.lmEmpDriv as Driv','contain.Empcode','Driv.EmpDriverCode')
+        $dataHd     = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
+                        ->join('LMSJob_Contain as job','m_contain.ContainerNo','job.ContainerNo')
+                        ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')
+                        ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                         ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
-                        ->select('contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel')
+                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel')
                         ->selectRaw("(select top(1) status from LMSJobLog_Contain where ContainerNo = '$Container' order by Datetime desc) as statusTrans ")
                         ->where('CDriv.IsDefault','Y')
                         // ->where('contain.flag','N')
-                        ->where('contain.ContainerNo',$Container)
+                        ->where('m_contain.ContainerNo',$Container)
                         ->first();
 
         $VehicleCode = str_replace(array('-',' '),'',$dataHd->VehicleCode);
@@ -112,14 +116,16 @@ class scoreboardController extends Controller
             $Ago_date    = date('Ymd',strtotime(' -1 day'));
         }
 
-        $Container  = DB::table('LMDBM.dbo.lmEmpContainers as contain')
-                        ->join('LMDBM.dbo.lmEmpDriv as Driv','contain.Empcode','Driv.EmpDriverCode')
+        $Container  = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
+                        ->leftjoin('LMSJob_Contain as job','m_contain.ContainerNo','job.ContainerNo')
+                        ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')
+                        ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                         ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
-                        ->select('contain.ContainerNo','contain.created_at','contain.updated_at','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel')
+                        ->select('m_contain.ContainerNo','contain.created_at','contain.updated_at','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel','m_contain.ConfirmFlag as flag_job','contain.flag as flag_check')
                         ->distinct()
                         ->where('CDriv.IsDefault','Y')
-                        ->whereNull('contain.Port')
-                        ->whereRaw("CONVERT(varchar,contain.updated_at,112) BETWEEN '$Ago_date' AND '$Curent_date' ")
+                        ->whereNull('job.EmpCode')
+                        ->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) BETWEEN '$Ago_date' AND '$Curent_date' ")
                         ->get();
 
 
@@ -129,18 +135,19 @@ class scoreboardController extends Controller
     public function JobCloseAgo(){
         $Port    = Auth::user()->EmpCode;
 
-        $Container = DB::table('LMDBM.dbo.lmEmpContainers as contain')
-                    ->join('LMDBM.dbo.lmEmpDriv as Driv','contain.Empcode','Driv.EmpDriverCode')
+        $Container = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
+                    ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')
+                    ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                     ->join('DTDBM.dbo.vEMTransp as transp','Driv.TranspID','transp.TranspID')
                     ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
                     ->join('LMSJob_Contain as job','contain.ContainerNo','job.ContainerNo')
                     ->leftjoin('LMSJobLog_Contain as job_transfer','contain.ContainerNo','job_transfer.ContainerNo')
-                    ->select('contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','job_transfer.Status as status_transfer','job.CloseTime')
+                    ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','job_transfer.Status as status_transfer','job.CloseTime')
                     ->distinct()
                     ->where([
                             'CDriv.IsDefault'=>'Y',
                             // 'contain.flag'=>'N',
-                            'contain.Port'=>$Port,
+                            'job.EmpCode'=>$Port,
                             'job.status'=>'Y'
                         ])
                     ->get();
@@ -151,7 +158,7 @@ class scoreboardController extends Controller
     public function dataOrderItem($Container){
         $Data['OrderList']     =  DB::connection('sqlsrv_2')
                                     ->table('nlmMatchContain_dt')
-                                    ->select('GoodCode','GoodName','GoodQty','GoodUnit','Flag_st')
+                                    ->select('GoodCode','CustName','GoodName','GoodQty','GoodUnit','Flag_st')
                                     ->where('ContainerNO',$Container)
                                     ->get();
 
@@ -185,12 +192,13 @@ class scoreboardController extends Controller
         $EmpCode    = Auth::user()->EmpCode;
 
         $data =  DB::table('LMSJobLog_Contain as log_contain')
-                    ->join('LMDBM.dbo.lmEmpContainers as contain','log_contain.ContainerNo','contain.ContainerNo')
+                    ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','log_contain.ContainerNo','contain.ContainerNo')
+                    ->leftjoin('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain','log_contain.ContainerNo','m_contain.ContainerNo')
                     ->join('LMDBM.dbo.lmEmpDriv as Driv','contain.Empcode','Driv.EmpDriverCode')
                     ->join('DTDBM.dbo.vEMTransp as transp','Driv.TranspID','transp.TranspID')
                     ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
                     ->join('LMSusers as user','log_contain.SendTo','user.Empcode')
-                    ->select('contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','user.Fullname','log_contain.Datetime','log_contain.Status')
+                    ->select('contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','user.Fullname','log_contain.Datetime','log_contain.Status','m_contain.ConfirmFlag as flag_job','contain.flag as flag_check')
                     ->where('log_contain.EmpCode',$EmpCode)
                     // ->where('log_contain.Status','W')
                     ->orderbyDesc('log_contain.Datetime')
@@ -222,12 +230,13 @@ class scoreboardController extends Controller
     public function dataJobTransfer(){
         $EmpCode    = Auth::user()->EmpCode;
         $data =  DB::table('LMSJobLog_Contain as log_contain')
-                    ->join('LMDBM.dbo.lmEmpContainers as contain','log_contain.ContainerNo','contain.ContainerNo')
-                    ->join('LMDBM.dbo.lmEmpDriv as Driv','contain.Empcode','Driv.EmpDriverCode')
+                    ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','log_contain.ContainerNo','contain.ContainerNo')
+                    ->leftjoin('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain','log_contain.ContainerNo','m_contain.ContainerNo')
+                    ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                     ->join('DTDBM.dbo.vEMTransp as transp','Driv.TranspID','transp.TranspID')
                     ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
                     ->join('LMSusers as user','log_contain.Empcode','user.Empcode')
-                    ->select('contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','user.Fullname','log_contain.Datetime')
+                    ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','user.Fullname','log_contain.Datetime','m_contain.ConfirmFlag as flag_job','contain.flag as flag_check')
                     ->where([
                         'CDriv.IsDefault'=>'Y',
                     ])
@@ -242,18 +251,15 @@ class scoreboardController extends Controller
     public function saveJob(Request $req){
         DB::beginTransaction();
         try {
-            $container = $req->container;
+            $container = array_unique($req->container);
 
             foreach ($container as $key => $value) {
                 $SaveJob['ContainerNo'] = $value;
                 $SaveJob['EmpCode']     = Auth::user()->EmpCode;
 
                 $CheckIn = DB::table('LMSJob_Contain')->insert($SaveJob);
-                if($CheckIn){
-                    $UpdateCon['Port']          = Auth::user()->EmpCode;
-                    $UpdateCon['Port_Updated']  = now();
-                    DB::table('LMDBM.dbo.lmEmpContainers')->where('ContainerNo',$value)->update($UpdateCon);
-                }else{
+
+                if(!$CheckIn){
                     DB::rollback();
                 }
               
@@ -280,9 +286,10 @@ class scoreboardController extends Controller
     public function saveReceive(Request $req){
         DB::beginTransaction();
         try {
-            $container = $req->containerRecev;
+            $container = array_unique($req->containerRecev);
             $type      = $req->type;
             $EmpCode   =  Auth::user()->EmpCode;
+            // dd($req);
             foreach ($container as $key => $value) {
                 $log['ContainerNo'] = $value;
                 $log['Status']      = $type;
@@ -292,9 +299,9 @@ class scoreboardController extends Controller
 
                 if($type == "Y"){
  
-                    $UpdateCon['Port']          = $EmpCode;
-                    $UpdateCon['Port_Updated']  = now();
-                    DB::table('LMDBM.dbo.lmEmpContainers')->where('ContainerNo',$value)->update($UpdateCon);
+                    // $UpdateCon['Port']          = $EmpCode;
+                    // $UpdateCon['Port_Updated']  = now();
+                    // DB::table('LMDBM.dbo.lmEmpContainers')->where('ContainerNo',$value)->update($UpdateCon);
 
                     $updatePort['EmpCode']      = $EmpCode;
                     $updatePort['Datetime']      = now();
@@ -363,7 +370,7 @@ class scoreboardController extends Controller
 
         DB::beginTransaction();
         try {
-            $container = $req->containerTrans;
+            $container = array_unique($req->containerTrans);
             foreach ($container as $key => $value) {
                 $log['EmpCode']     = Auth::user()->EmpCode;
                 $log['ContainerNo'] = $value;
@@ -404,6 +411,7 @@ class scoreboardController extends Controller
         // 05 = ลบ Remark
         // 06 = รับงานที่โอนมา
         // 07 = ปิดงาน
+        // 08 = เปลี่ยนคนรถ
     
         DB::beginTransaction();
         try {
@@ -476,16 +484,19 @@ class scoreboardController extends Controller
     public function dataCloseJob(Request $req){
         $Container  = $req->ContainerNo;
         $EmpCode    = Auth::user()->EmpCode;
-
+        
         // ข้อมูลคนรถ
-        $data['EmpDrive']   =   DB::table('LMDBM.dbo.lmEmpContainers as contain')
-                                    ->join('LMDBM.dbo.lmEmpDriv as Driv','contain.Empcode','Driv.EmpDriverCode')
+        $data['EmpDrive']   =   DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
+                                    ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')    
+                                    ->join('LMSJob_Contain as job','m_contain.ContainerNo','job.ContainerNo')        
+                                    ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                                     ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
                                     ->join('DTDBM.dbo.vEMTransp as transp','Driv.TranspID','transp.TranspID')
-                                    ->select('contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel','contain.updated_at','contain.created_at','transp.CarType')
-                                    ->where('contain.ContainerNo',$Container)
+                                    ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel','contain.updated_at','contain.created_at','transp.CarType')
+                                    ->where('m_contain.ContainerNo',$Container)
+                                    ->where('job.EmpCode',$EmpCode)
                                     ->first();
-
+   
         $dateS = Carbon::now()->startOfMonth()->subMonth(1);
         $dateE = Carbon::now()->startOfMonth(); 
         // ข้อมูลตู้
@@ -652,27 +663,37 @@ class scoreboardController extends Controller
 
 
                 $score = round(1/$PortEmp,2);
-                
+                // dd($Port,$score);
+                $i = 0;
                 foreach ($Port as $key => $value) {
                     $ScoreUpdate['EmpCode']     = $value['EmpCode'];
+                    
                     if($PortEmp == 3 && $value['EmpCode'] == Auth::user()->EmpCode){
-                        $score += 0.1;
+                        $scoreSum = $score+0.01;
+                    }else{
+                        $scoreSum = $score;
                     }
-                    $ScoreUpdate['Score']       = $score;
+                    round($scoreSum,2);
+
+                    $ScoreUpdate['Score']       = $scoreSum;
                     $ScoreUpdate['ContainerNo'] = $data['Container'];
                     $ScoreUpdate['DateTime']    = now();
+
+                    $EmpScore[$i]['EmpCode']   =    $value['EmpCode'];
+                    $EmpScore[$i]['Score']     =    $scoreSum;
 
                     $CheckScore = DB::table('LMSScoreJob')->insert($ScoreUpdate);
                     if(!$CheckScore){
                         DB::rollback();
                     }
+                    $i++;
                 }
-                
+               
                 $res['status']  = "success";
                 $res['Port']    = $Port;
-                $res['Score']   = $score;
+                $res['Score']   = $EmpScore;
 
-                $detail = "ปิดงานตู้ : ".$data['Container']." รับคะแนน : ".$score;
+                $detail = "ปิดงานตู้ : ".$data['Container']." รับคะแนน : ".$scoreSum;
                 $code   = "07";
                 $log    = $this->saveLogEvent($detail,$code);
     

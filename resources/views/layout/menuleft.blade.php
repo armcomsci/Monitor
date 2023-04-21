@@ -35,6 +35,12 @@
                     <li>
                         <a href="{{ url('/Monitor') }}">ติดตามรถ</a>
                     </li>
+                    <li>
+                        <a href="{{ url('/MonitorAll') }}">ติดตามรถทั้งหมด</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/ChangeEmpDriv') }}">เปลี่ยนคนรถ</a>
+                    </li>
                 </ul>
             </li>
     
