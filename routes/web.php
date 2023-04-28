@@ -48,5 +48,15 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/FindJobInPort','monitorAdminController@findjob');
     Route::get('/JobInPortDetail/{container}','monitorAdminController@detail');
     Route::post('/CustItem','monitorAdminController@dataItem');
+
+    Route::get('/AddEmpDrive','addEmpController@index');
+    Route::post('/FilterEmp','addEmpController@filter_emp');
+    Route::post('/SaveWorkDate','addEmpController@save');
+    Route::post('/ChangeStatusEmp','addEmpController@change_status');
+
+    Route::get('/AddCar','addCarController@index');
+    Route::post('/GetEventSet','addCarController@GetEvent');
+    Route::get('/EventCarSet','addCarController@event');
+    Route::post('/SaveTranspDate','addCarController@saveDate');
 });
 

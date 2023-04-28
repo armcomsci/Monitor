@@ -184,14 +184,14 @@
                     actionText: 'X'
                 });
 
-                var html_check_in =  "<tr>";
-                    html_check_in += "<td class=\"text-center text-success\">"+res.ContainerNO+"</td>";
-                    html_check_in += "<td class=\"text-success\">"+res.EmpDriverFullName+"</td>";
-                    html_check_in += "<td><span class=\"badge outline-badge-success shadow-none\">"+moment.utc(res.created_at).format('HH:mm')+"</span></td>";
-                    html_check_in += "</tr>"; 
+                // var html_check_in =  "<tr>";
+                //     html_check_in += "<td class=\"text-center text-success\">"+res.ContainerNO+"</td>";
+                //     html_check_in += "<td class=\"text-success\">"+res.EmpDriverFullName+"</td>";
+                //     html_check_in += "<td><span class=\"badge outline-badge-success shadow-none\">"+moment.utc(res.created_at).format('HH:mm')+"</span></td>";
+                //     html_check_in += "</tr>"; 
 
-                $("#tb-last-checkin tbody").prepend(html_check_in).fadeIn(1000);
-                $('#tb-last-checkin tr:last').remove();
+                // $("#tb-last-checkin tbody").prepend(html_check_in).fadeIn(1000);
+                // $('#tb-last-checkin tr:last').remove();
 
 
                 $.each(data[1]['CountCheckIN']['recordset'], function (i, value) {
@@ -229,14 +229,15 @@
                     actionText: 'X'
                 });
 
-                var html_check_out =  "<tr>";
-                    html_check_out += "<td class=\"text-center text-danger\">"+res.ContainerNO+"</td>";
-                    html_check_out += "<td class=\"text-danger\">"+res.EmpDriverFullName+"</td>";
-                    html_check_out += "<td><span class=\"badge outline-badge-danger shadow-none\">"+moment.utc(res.updated_at).format('HH:mm')+"</span></td>";
-                    html_check_out += "</tr>"; 
+                // var html_check_out =  "<tr>";
+                //     html_check_out += "<td class=\"text-center text-danger\">"+res.ContainerNO+"</td>";
+                //     html_check_out += "<td class=\"text-danger\">"+res.EmpDriverFullName+"</td>";
+                //     html_check_out += "<td><span class=\"badge outline-badge-danger shadow-none\">"+moment.utc(res.updated_at).format('HH:mm')+"</span></td>";
+                //     html_check_out += "</tr>"; 
 
-                $("#tb-last-checkout tbody").prepend(html_check_out).fadeIn(1000);
-                $('#tb-last-checkout tr:last').remove();
+                // $("#tb-last-checkout tbody").prepend(html_check_out).fadeIn(1000);
+                // $('#tb-last-checkout tr:last').remove();
+                
                 $.each(data[1]['CountCheckOut']['recordset'], function (i, value) {
                     let alltran = parseInt($('#All-EmpDrive-'+value.CarType).text());
                     let transp  = parseInt(value.transp);

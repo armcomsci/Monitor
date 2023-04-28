@@ -52,15 +52,16 @@
                    $SumCarType = $data['SumCarDriv_'.$CarType]->SumEmp;
                 }
                 $perCentEmp =  round(($SumCarType/$item->SumDrive)*100, 0, PHP_ROUND_HALF_UP);
+
                 if($perCentEmp < 80){
                     $colorBar = "bg-gradient-warning";
-                }else if($perCentEmp >= 80 && $perCentEmp < 100) {
+                }else if($perCentEmp >= 80 ) {
                     $colorBar = "bg-gradient-success";
                 }
                 // $colorBar = "bg-gradient-success";
                 
             @endphp
-            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
+            <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing mt-1">
                 <div class="widget widget-three">
                     <div class="widget-heading">
                         <h5 class="">{{ $item->CarTypeName }}</h5>

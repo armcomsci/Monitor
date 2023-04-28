@@ -67,30 +67,33 @@ class LoginController extends Controller
                     
                     $OldJob         = $this->OldJob($EmpCode);
 
-                   
-                    if($CheckLoginDay == 1){
+                    if(Auth::user()->type == 1){
+                        if($CheckLoginDay == 1){
 
-                        $TodayJob  =  round( (($Count_Contain)/2) , 0 , PHP_ROUND_HALF_UP );
+                            $TodayJob  =  round( (($Count_Contain)/2) , 0 , PHP_ROUND_HALF_UP );
 
-                        $UpdateJob =  $this->RandomPort($EmpCode,$TodayJob);
+                            $UpdateJob =  $this->RandomPort($EmpCode,$TodayJob);
 
-                    }else{
-
-                        $Count_Contain_Port =  $this->CheckJobEmp($EmpCode);
-                        // dd($Count_Contain_Port,$Count_Contain,$OldJob,$CheckLoginDay);
-                        $avg_Job            = round((($Count_Contain_Port+$Count_Contain)+$OldJob)/$CheckLoginDay, 0 , PHP_ROUND_HALF_UP );
-                       
-                        if($avg_Job > $Count_Contain_Port){
-                            $TodayJob = $Count_Contain_Port;
                         }else{
-                            $TodayJob = $avg_Job;
-                        }
-                            
-                        $UpdateJob          =  $this->RandomPort($EmpCode,$TodayJob);
-                    }  
-                    $status = "00";
-                    $text   = "งานทั้งหมด : ".$UpdateJob;
 
+                            $Count_Contain_Port =  $this->CheckJobEmp($EmpCode);
+                            // dd($Count_Contain_Port,$Count_Contain,$OldJob,$CheckLoginDay);
+                            $avg_Job            = round((($Count_Contain_Port+$Count_Contain)+$OldJob)/$CheckLoginDay, 0 , PHP_ROUND_HALF_UP );
+                        
+                            if($avg_Job > $Count_Contain_Port){
+                                $TodayJob = $Count_Contain_Port;
+                            }else{
+                                $TodayJob = $avg_Job;
+                            }
+                                
+                            $UpdateJob          =  $this->RandomPort($EmpCode,$TodayJob);
+                        }  
+                        $status = "00";
+                        $text   = "งานทั้งหมด : ".$UpdateJob;
+                    }else{
+                        $status = "00";
+                        $text   = "ยินดีต้อนรับ : ".Auth::user()->Fullname;
+                    }
                     DB::commit();
 
                 }else{
