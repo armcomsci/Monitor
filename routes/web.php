@@ -44,6 +44,9 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/ChangeEmpDriv','empDrivController@index');
     Route::post('/ChangeSaveEmp','empDrivController@save');
 
+    Route::get('/ChangeTimeDriv','changeTimeController@index');
+    Route::post('/SaveTimeEmp','changeTimeController@save');
+
     Route::get('/MonitorAll','monitorAdminController@index');
     Route::post('/FindJobInPort','monitorAdminController@findjob');
     Route::get('/JobInPortDetail/{container}','monitorAdminController@detail');

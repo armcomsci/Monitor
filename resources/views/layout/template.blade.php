@@ -146,7 +146,7 @@
                         $('.notification-scroll').empty();
                     },
                     success: function (response) {
-                        console.log(response);
+                        // console.log(response);
                         let html = '';
                         $.each(response, function (index, value2) {  
                             html += " <div class=\"dropdown-item\">"
@@ -171,8 +171,14 @@
             socket.on('Send_To_Monitor', (data) =>  {
           
                 var res             = data[0]['CheckIn']['recordset']['0']
-                var html            = res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode;
-             
+                // console.log(res);
+                var html            = "คนรถ : คุณ"+res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode+"<br> เลขตู้ : "+res.ContainerNO;
+
+                if(res.Fullname != null){
+                    html += "<br> ผู้ดูแล : "+res.Fullname
+                }else{
+                    html += "<br> ผู้ดูแล : -";
+                }
 
                 Snackbar.show({
                     text: "<div style=\"padding:10px\" >"+html+"</div><div style=\"padding:10px\" >แสกนเข้ารับสินค้า !</div>",
@@ -192,7 +198,6 @@
 
                 // $("#tb-last-checkin tbody").prepend(html_check_in).fadeIn(1000);
                 // $('#tb-last-checkin tr:last').remove();
-
 
                 $.each(data[1]['CountCheckIN']['recordset'], function (i, value) {
                     let alltran = parseInt($('#All-EmpDrive-'+value.CarType).text());
@@ -217,8 +222,13 @@
             socket.on('Send_To_Monitor_Checkout', (data) =>  {
                
                 var res  = data[0]['CheckOut']['recordset']['0']
-                var html = res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode;
-             
+                // console.log(res);
+                var html = "คนรถ : คุณ"+res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode+"<br> เลขตู้ : "+res.ContainerNO;;
+                if(res.Fullname != null){
+                    html += "<br> ผู้ดูแล : "+res.Fullname
+                }else{
+                    html += "<br> ผู้ดูแล : -";
+                }
                 Snackbar.show({
                     text:"<div style=\"padding:10px\" >"+html+"</div><div style=\"padding:10px\" >แสกนออกจากคลังสินค้า !</div>",
                     pos: 'top-right',

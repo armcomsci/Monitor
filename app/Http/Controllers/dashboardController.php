@@ -26,7 +26,8 @@ class dashboardController extends Controller
         $data['SumCarDriv_CT001']             =   $this->SumCarDriv('CT001',$dateNow2);
 
         $data['SumCarDriv_CT002']             =   $this->SumCarDriv('CT002',$dateNow2);  
-
+        // dd($data);
+        
         $data['SumCarDriv_CT003']             =   $this->SumCarDriv('CT003',$dateNow2);
 
         $arraySelect                    =   array('empDrive.EmpDriverName','empDrive.EmpDriverLastName','Container.ContainerNO','Container.created_at');

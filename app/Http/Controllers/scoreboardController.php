@@ -125,7 +125,8 @@ class scoreboardController extends Controller
                         ->distinct()
                         ->where('CDriv.IsDefault','Y')
                         ->whereNull('job.EmpCode')
-                        ->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) BETWEEN '$Ago_date' AND '$Curent_date' ")
+                        ->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) >= '20230501' ")
+                        // ->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) BETWEEN '$Ago_date' AND '$Curent_date' ")
                         ->get();
 
 
@@ -182,7 +183,7 @@ class scoreboardController extends Controller
                         ->select('LMSLog_login.*','LMSusers.Fullname');
         // $userOnline  = $userOnline->where('LMSLog_login.Status_online','Y');
         $userOnline  = $userOnline->where('LMSLog_login.EmpCode','<>',Auth::user()->EmpCode);
-        $userOnline  = $userOnline->whereRaw("CONVERT(varchar,LMSLog_login.Login_time,112) = '$Curent_date' ");
+        $userOnline  = $userOnline->whereRaw("CONVERT(varchar,LMSLog_login.Login_time,112) LIKE '%$Curent_date%' ");
         $userOnline  = $userOnline->get();
 
         return response()->json($userOnline, 200);
@@ -412,7 +413,8 @@ class scoreboardController extends Controller
         // 06 = รับงานที่โอนมา
         // 07 = ปิดงาน
         // 08 = เปลี่ยนคนรถ
-    
+        // 09 = แก้ไขเวลาเข้า/ออก คนรถ
+        
         DB::beginTransaction();
         try {
             $data['EmpCode']    = Auth::user()->EmpCode;

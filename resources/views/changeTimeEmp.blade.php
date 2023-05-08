@@ -14,12 +14,15 @@
  <link href="{{ asset('theme/plugins/notification/snackbar/snackbar.min.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/assets/css/elements/avatar.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/assets/css/users/user-profile.css') }}" rel="stylesheet" type="text/css" />
- <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/select2/select2.min.css') }}">
+ <link rel="stylesheet" href="{{ asset('theme/assets/css/daterangepicker.css') }}">
  <style>
     thead{
         position: sticky;
         top: 0;
         z-index: 100;
+    }
+    i{
+        cursor: pointer;
     }
  </style>
 @endsection
@@ -63,9 +66,9 @@
                                                 <th>เลขตู้</th>
                                                 <th>ทะเบียนรถ</th>
                                                 <th>คนรถ/เบอร์โทร</th>
-                                                <th>สถานะรับงาน</th>
-                                                <th>เวลารับงาน</th>
-                                                <th class="text-center">เปลี่ยนคนรถ</th>
+                                                <th class="text-center">สถานะรับงาน</th> 
+                                                <th class="text-center">แก้ไขเวลาเข้า</th>
+                                                <th class="text-center">แก้ไขเวลาออก</th>
                                         </thead>
                                         <tbody>
                                             @foreach ($Container as $item)
@@ -96,22 +99,26 @@
                                                             {{ $item->EmpDriverName." ".$item->EmpDriverlastName }}<br>{{ $item->EmpDriverTel }}
                                                         </div>
                                                     </td>
-                                                    <td class="text-break">
+                                                    <td class="text-break text-center">
                                                         @if(empty($item->flag_job) && empty($item->flag_exit))
                                                             <span class="badge outline-badge-danger shadow-none">ยังไม่รับงาน</span>
-                                                        @elseif($item->flag_job == 'Y')
+                                                        @elseif($item->flag_job == 'Y' && empty($item->flag_exit))
                                                             <span class="badge outline-badge-success shadow-none">รับงาน</span>
-                                                        @elseif($item->flag_job == 'N') 
+                                                        @elseif($item->flag_job == 'N' && empty($item->flag_exit)) 
                                                             <span class="badge outline-badge-danger shadow-none">ปฏิเศษงาน</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        @if($item->ConfirmDate != '')
-                                                            <span class="badge outline-badge-success shadow-none">รับงานเมื่อ : {{ ShowDate($item->ConfirmDate,"d-m-Y H:i") }}</span>
+                                                        @elseif($item->flag_exit == "Y" && $item->flag_job == "Y")
+                                                            <span class="badge outline-badge-success shadow-none">เข้ารับ : {{ ShowDate($item->created_at,"d-m-Y H:i") }}</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-center">
-                                                        <i class="fa-solid fa-arrows-spin fa-2xl OldEmp" data-toggle="modal" data-target="#ChangeEmpDriv" style="color: #0955d7;"></i>
+                                                        @if($item->flag_job == 'Y' && empty($item->flag_exit))
+                                                        <i class="fa-solid fa-right-to-bracket OldEmp fa-2xl" data-toggle="modal" data-target="#EditTimeJoin" style="color: #06e136;" data-time="join"></i>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if($item->flag_exit == "Y" && $item->flag_job == "Y")
+                                                            <i class="fa-solid fa-right-from-bracket OldEmp fa-2xl" data-toggle="modal" data-target="#EditTimeJoin" style="color: #ef2a4b;" data-time="exit"></i>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -126,11 +133,11 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="ChangeEmpDriv" tabindex="-1" role="dialog" aria-labelledby="ChangeEmpDriv" aria-hidden="true">
+<div class="modal fade" id="EditTimeJoin" tabindex="-1" role="dialog" aria-labelledby="EditTimeJoin" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalCenterTitle">เปลี่ยนคนรถตู้ : <span id="ContainerNo"></span></h5>
+                <h5 class="modal-title" id="EditTimeTitle"></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
@@ -142,29 +149,11 @@
                 <div class="newEmp">
                    <form id="ConfirmEmp" onSubmit="myFunctionName(); return false">
                         <div class="form-group row mt-4">
-                            <label class="col-3 col-form-label"  style="text-align:right">คนรถใหม่ : </label>
+                            <label class="col-3 col-form-label"  style="text-align:right">แก้ไขเวลา : </label>
                             <div class="col-9">
-                                <select class="form-control basic" name="NewEmpDriv">
-                                    <option></option>
-                                    @foreach ($EmpName as $emp)
-                                        @php
-                                            $Carsize = '';
-                                            switch ($emp->CarTypeCode) {
-                                                case 'CT001':
-                                                    $Carsize = 'รถเล็ก';
-                                                    break;
-                                                case 'CT002':
-                                                    $Carsize = 'รถกลาง';
-                                                    break;
-                                                case 'CT003':
-                                                    $Carsize = 'รถใหญ่';
-                                                    break;
-                                            }
-                                        @endphp
-                                        <option value="{{ $emp->EmpDriverCode }}">{{ $emp->EmpDriverName }} ({{ $Carsize }})</option>
-                                    @endforeach
-                                </select>
+                                <input type="text" id="TimeSave" class="form-control" name="TimeSave" />
                                 <input type="hidden" name="container"> 
+                                <input type="hidden" name="flag"> 
                             </div>
                         </div>
                    </form>
@@ -180,17 +169,42 @@
 @endsection
 
 @section('script')
-<script src="{{ asset('theme/plugins/select2/select2.min.js') }}"></script>
+<script src="{{ asset('theme/assets/js/daterangepicker.js') }}"></script>
 <script>
-    $(".basic").select2({
-        // tags: true,
-        dropdownParent: $("#ChangeEmpDriv")
-    });
     $(document).ready(function () {
+
+        moment.locale('th');
+
+        $('#TimeSave').daterangepicker({
+            startDate: moment(), // set the initial start date
+            minDate: moment().subtract(7, 'days'), // set the initial end date to today
+            maxDate : moment(),
+            timePicker: true, // enable time picker
+            timePicker24Hour: true, // use 24-hour time format
+            // timePickerIncrement: 15, // increment time by 15 minutes
+            opens: 'left', // position the picker to the left of the input
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY-MM-DD HH:mm', // set the format of the selected date range
+            }
+        });
+
         $('.OldEmp').click(function (e) { 
             e.preventDefault();
+            let option  = $(this).data('time');
             let container   = $(this).parent().parent().data('contain');
-            let oldEmp      = $(this).parent().prev().prev().prev().children().clone();
+
+            let oldEmp
+            if(option == "join"){
+                oldEmp      = $(this).parent().prev().prev().children().clone();
+                $('#EditTimeTitle').text('แก้ไขเวลาเข้า : '+container);
+                $("input[name='flag']").val(option);
+            }else if(option == "exit"){
+                oldEmp      = $(this).parent().prev().prev().prev().children().clone();
+                $('#EditTimeTitle').text('แก้ไขเวลาออก : '+container);
+                $("input[name='flag']").val(option);
+            }
+
             $('#ContainerNo').text(container);
             $("input[name='container']").val(container);
             $('.dataOldEmp').empty();
@@ -198,10 +212,10 @@
         });
 
         $('#saveChange').click(function(e){
-            let NewEmpDriv = $("select[name='NewEmpDriv']").val();
-            if(NewEmpDriv == ""){
+            let TimeSave = $("select[name='TimeSave']").val();
+            if(TimeSave == ""){
                 swal({
-                    title: 'กรุณาระบุคนรถ',
+                    title: 'กรุณาระบุเวลา',
                     text: '',
                     type: 'error',
                     padding: '2em'
@@ -210,7 +224,7 @@
             }else{
                 $.ajax({
                     type: "post",
-                    url: url+"/ChangeSaveEmp",
+                    url: url+"/SaveTimeEmp",
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     data: $('#ConfirmEmp').serialize(),
                     // dataType: "dataType",

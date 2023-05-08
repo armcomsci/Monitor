@@ -59,8 +59,6 @@ class LoginController extends Controller
 
                     $this->updateLog($EmpCode);
 
-                    
-                    
                     $Count_Contain =  $this->CheckPort('1');
         
                     $CheckLoginDay  = $this->CountUserOnline();
@@ -77,7 +75,7 @@ class LoginController extends Controller
                         }else{
 
                             $Count_Contain_Port =  $this->CheckJobEmp($EmpCode);
-                            // dd($Count_Contain_Port,$Count_Contain,$OldJob,$CheckLoginDay);
+
                             $avg_Job            = round((($Count_Contain_Port+$Count_Contain)+$OldJob)/$CheckLoginDay, 0 , PHP_ROUND_HALF_UP );
                         
                             if($avg_Job > $Count_Contain_Port){
@@ -151,7 +149,8 @@ class LoginController extends Controller
                 $select = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
                             ->leftjoin('LMSJob_Contain as contain','m_contain.ContainerNo','contain.ContainerNo')
                             ->whereNull('contain.EmpCode')
-                            ->whereRaw("CONVERT(varchar,SaveDate,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date'  ")
+                            ->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) >= '20230501' ")
+                            // ->whereRaw("CONVERT(varchar,SaveDate,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date'  ")
                             ->select('m_contain.ContainerNo')
                             ->selectRaw("'$EmpCode' as EmpCode")
                             ->limit($TodayJob)
@@ -212,7 +211,8 @@ class LoginController extends Controller
                         ->leftjoin('LMSJob_Contain as contain','m_contain.ContainerNo','contain.ContainerNo');
             if($count == '1'){
                 $CheckPort =   $CheckPort->whereNull('contain.EmpCode');
-                $CheckPort =   $CheckPort->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date' ")
+                $CheckPort =   $CheckPort->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) >= '20230501' ")
+                // $CheckPort =   $CheckPort->whereRaw("CONVERT(varchar,m_contain.SaveDate,112) BETWEEN '$this->Ago_date' AND '$this->Curent_date' ")
                                 ->count();
             }elseif($count == '2'){
                 $CheckPort =   $CheckPort->whereNull('contain.EmpCode');

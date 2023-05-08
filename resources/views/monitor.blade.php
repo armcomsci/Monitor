@@ -79,7 +79,7 @@ thead{
 .badge{
     cursor: pointer;
 }
-#closeJob,#AddBillTime{
+#closeJob,#AddBillTime,.footer-job-close{
     display: none;
 }
 </style>
@@ -216,7 +216,7 @@ thead{
                                                         </thead>
                                                         <tbody>
                                                             @foreach ($Container as $emp)
-                                                                @if ($emp->status_transfer == '' || $emp->status_transfer == 'Y')
+                                                                @if ($emp->status_transfer == '' || $emp->status_transfer != 'W')
                                                                     @php
                                                                         $Carsize = '';
                                                                         switch ($emp->CarType) {
@@ -519,7 +519,21 @@ thead{
                             </thead>
                             <tbody>
                                 @foreach ($Container as $JobTrans)
-                                    @if ($JobTrans->status_transfer == '' || $JobTrans->status_transfer == 'Y')
+                                    @if ($JobTrans->status_transfer == '' || $JobTrans->status_transfer != 'W')
+                                        @php
+                                            $Carsize = '';
+                                            switch ($JobTrans->CarType) {
+                                                case 'CT001':
+                                                    $Carsize = 'รถเล็ก';
+                                                    break;
+                                                case 'CT002':
+                                                    $Carsize = 'รถกลาง';
+                                                    break;
+                                                case 'CT003':
+                                                    $Carsize = 'รถใหญ่';
+                                                    break;
+                                            }
+                                        @endphp
                                         <tr>
                                             <td class="text-center">
                                                 <div class="n-chk">
@@ -638,7 +652,7 @@ thead{
             <div class="modal-body" style="height: 750px;" id="ShowDetailJob">
                 <div class="loaddingModal"></div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer save-close-job">
                 <button type="button" class="btn btn-primary" id="ConfirmCloseJob"><i class="fa-regular fa-floppy-disk"></i> ปิดงาน</button>
                 <button class="btn btn-outline-danger" data-dismiss="modal"><i class="fa-solid fa-xmark"></i> ยกเลิก</button>
             </div>
@@ -1540,9 +1554,15 @@ thead{
                         url: url+"/SaveJob",
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         data: container.serialize(),
+                        beforeSend:function(){
+                            $('#saveJob').attr('disabled',true);                            
+                            // $('.save-close-job').css('display','none')
+                            // showLoading();
+                            // $('#ShowDetailJob').empty();
+                        },
                         // dataType: "dataType",
                         success: function (response) {
-                        
+                            $('#saveJob').attr('disabled',false);
                             if(response.status == "success"){
                                 swal({
                                     title: 'บันทึกสำเร็จ',
@@ -1599,8 +1619,15 @@ thead{
                         url: url+"/SaveTransferJob",
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         data: {'containerTrans':containerTrans,'sendto':Sendto},
+                        beforeSend:function(){
+                            $('#saveJobTranfer').attr('disabled',true);                            
+                            // $('.save-close-job').css('display','none')
+                            // showLoading();
+                            // $('#ShowDetailJob').empty();
+                        },
                         // dataType: "dataType",
                         success: function (response) {
+                            $('#saveJobTranfer').attr('disabled',false); 
                             if(response == "success"){
                                 swal({
                                     title: 'บันทึกสำเร็จ',
@@ -1668,8 +1695,15 @@ thead{
                         url: url+"/SaveReceiveJob",
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                         data: {'containerRecev':containerRecev,'type':type},
+                        beforeSend:function(){
+                            $('#saveJobReceive').attr('disabled',true);                            
+                            // $('.save-close-job').css('display','none')
+                            // showLoading();
+                            // $('#ShowDetailJob').empty();
+                        },
                         // dataType: "dataType",
                         success: function (response) {
+                            $('#saveJobReceive').attr('disabled',false);  
                             if(response.status == "success"){
                                 swal({
                                     title: 'บันทึกสำเร็จ',
@@ -1713,10 +1747,13 @@ thead{
             data: {ContainerNo:ContainerNo},
             beforeSend:function(){
                 $('.loaddingModal').css('display','block');
+                
+                // $('.save-close-job').css('display','none')
                 // showLoading();
                 // $('#ShowDetailJob').empty();
             },
             success: function (response) {
+                // $('.save-close-job').css('display','block')
                 $('.loaddingModal').css('display','none');
                 $('#ShowDetailJob').html(response);
             }
@@ -1769,6 +1806,9 @@ thead{
 
                         let CountClose = parseInt($('.CountJobClose').text())+1;
                         $('.CountJobClose').text(CountClose);
+
+                        let CountJobAll = parseInt($('.CountJobAll').text())-1;
+                        $('.CountJobAll').text(CountJobAll);
                     });
                 }else{
                     swal({
@@ -1796,7 +1836,7 @@ thead{
     });
 
     socket.on('CountJob',(data) => {
-        // console.log(data);
+        console.log(data);
         if(data != ""){
             if(data['res']['recordset']['0'].Job >= 1){
                 $('.NewJob').parent().addClass('blink_me');

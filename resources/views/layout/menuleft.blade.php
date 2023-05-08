@@ -40,6 +40,9 @@
                     <li>
                         <a href="{{ url('/ChangeEmpDriv') }}">เปลี่ยนคนรถ</a>
                     </li>
+                    <li>
+                        <a href="{{ url('/ChangeTimeDriv') }}">แก้ไขเวลาคนรถ</a>
+                    </li>
                     @else 
                     <li>
                         <a href="{{ url('/MonitorAll') }}">ติดตามรถทั้งหมด</a>

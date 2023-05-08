@@ -43,13 +43,14 @@ class empDrivController extends Controller
     }
     
     public function save(Request $req){
-        DB::beginTransaction();
-
+        
         $Container  = $req->container;
         $NewEmp     = $req->NewEmpDriv;
         $Port       = Auth::user()->EmpCode;
 
         try {
+            DB::beginTransaction();
+
             $DataEmp   =  DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
                         ->join('dbwins_new1.dbo.EMEmp as EMEmp','lmEmpDriv.EmpDriverCode','EMEmp.EmpCode')
@@ -83,14 +84,15 @@ class empDrivController extends Controller
             $EmpID         = $DataEmp->EmpID;
             $EmpDriverName = $DataEmp->EmpDriverName;
 
-            // DB::table('TMSDBM.dbo.nTMConTain_hd')->where('ContainerNo',$Container)->update(['EmpDriverCode'=>$EmpDriverCode]);
+            DB::table('TMSDBM.dbo.nTMConTain_hd')->where('ContainerNo',$Container)->update(['EmpDriverCode'=>$EmpDriverCode]);
+            
+            DB::commit();
 
             $updateCon['EmpID']     = $EmpID;
             $updateCon['EmpCode']   = $EmpDriverCode;
             $updateCon['EmpName']   = $EmpDriverName;
-            // DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain')->where('ContainerNo',$Container)->update($updateCon);
-            
-            DB::commit();
+            DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain')->where('ContainerNo',$Container)->update($updateCon);
+
             return "success";
 
         } catch (\Throwable $th) {
