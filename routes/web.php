@@ -26,6 +26,7 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/Monitor','scoreboardController@index');
     Route::get('/DtMonitor/{Container}','scoreboardController@dataDt');
     Route::get('/DtOrderItem/{Container}','scoreboardController@dataOrderItem');
+    Route::get('/GetCommentJob/{Container}','scoreboardController@dataComment');
     Route::get('/GetJobEmptyPort','scoreboardController@dataJob');
     Route::post('/SaveJob','scoreboardController@saveJob');
     // Route::post('/SaveClearJob','scoreboardController@saveClearJob');
@@ -61,5 +62,14 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/GetEventSet','addCarController@GetEvent');
     Route::get('/EventCarSet','addCarController@event');
     Route::post('/SaveTranspDate','addCarController@saveDate');
+
+    Route::get('/ReportEmpDriver','ReportController@EmpDriver');
+    Route::post('/FindEmpRun','ReportController@find');
+    Route::get('/ReportJobClose','ReportController@reportJobClose');
+    Route::post('/FindJobClose','ReportController@findCloseJob');
+    Route::get('/JobCloseOrderItem/{Container}','ReportController@JobCloseOrderItem');
+
+    Route::get('/CancelContain','cancelContainController@index');
+    Route::post('/ReturnFlagContainer','cancelContainController@confirmReturn');
 });
 

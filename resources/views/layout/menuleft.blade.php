@@ -34,21 +34,28 @@
                 <ul class="collapse submenu list-unstyled" id="app" data-parent="#accordionExample">
                    
                     @if (auth()->user()->type == 1)
-                    <li>
-                        <a href="{{ url('/Monitor') }}">ติดตามรถ</a>
-                    </li>
-                    <li>
-                        <a href="{{ url('/ChangeEmpDriv') }}">เปลี่ยนคนรถ</a>
-                    </li>
-                    <li>
-                        <a href="{{ url('/ChangeTimeDriv') }}">แก้ไขเวลาคนรถ</a>
-                    </li>
+                        <li>
+                            <a href="{{ url('/Monitor') }}">ติดตามรถ</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/ChangeEmpDriv') }}">เปลี่ยนคนรถ</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/ChangeTimeDriv') }}">แก้ไขเวลาคนรถ</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/CancelContain') }}">คืนสถานะตู้</a>
+                        </li>
                     @else 
-                    <li>
-                        <a href="{{ url('/MonitorAll') }}">ติดตามรถทั้งหมด</a>
-                        <a href="{{ url('/AddEmpDrive') }}">กำหนดคนรถ</a>
-                        <a href="{{ url('/AddCar') }}">กำหนดเที่ยวรถ</a>
-                    </li>    
+                        <li>
+                            <a href="{{ url('/MonitorAll') }}">ติดตามรถทั้งหมด</a>
+                        </li>    
+                        <li>
+                            <a href="{{ url('/AddEmpDrive') }}">กำหนดคนรถ</a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/AddCar') }}">กำหนดเที่ยวรถ</a>
+                        </li>
                     @endif
                 </ul>
             </li>
@@ -64,8 +71,13 @@
                     </div>
                 </a>
                 <ul class="collapse submenu list-unstyled" id="report" data-parent="#accordionExample">
+                    @if (auth()->user()->type != 1)
                     <li>
-                        <a href="#"> Basic </a>
+                        <a href="{{ url('/ReportJobClose') }}">งานที่ปิดแล้วทั้งหมด</a>
+                    </li>
+                    @endif
+                    <li>
+                        <a href="{{ url('/ReportEmpDriver') }}">จำนวนเที่ยวของคนรถ</a>
                     </li>
                 </ul>
             </li>

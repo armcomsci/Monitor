@@ -72,7 +72,7 @@ class changeTimeController extends Controller
             }
 
             $dataCon['EmpID']       = $dataEmp->EmpID;
-            $dataCon['EmpCode']     = $dataEmp->EmpDriverName." ".$dataEmp->EmpDriverlastName;
+            $dataCon['EmpCode']     = $dataEmp->EmpDriverCode;
             $dataCon['ContainerNo'] = $container;
             $dataCon['flag']        = $status;
             if($CheckContainer == 0){
@@ -105,6 +105,15 @@ class changeTimeController extends Controller
             $MaxID = DB::table('LMDBM.dbo.lmEmpTran_Now')->select('EmpTranID')->orderByDesc('EmpTranID')->first();
             $MaxID = $MaxID->EmpTranID+1;
 
+            $empRun = DB::table($tableLm);
+            if($CurentDate != $Stamp_date){
+                $empRun = $empRun->where('Stamp_Date',$Stamp_date);
+            }            
+            $empRun = $empRun->where('EmpDriverCode',$dataEmp->EmpDriverCode);
+            $empRun = $empRun->where('Past','<>','C');
+            $empRun = $empRun->count();
+            $empRun = $empRun+1;
+            // dd($empRun,$dataEmp->EmpDriverCode);
             $tranNow['EmpTranID']           = $MaxID;
             $tranNow['EmpDriverCode']       = $dataEmp->EmpDriverCode;
             $tranNow['EmpDriverFullName']   = $dataEmp->EmpDriverName." ".$dataEmp->EmpDriverlastName;
@@ -115,18 +124,27 @@ class changeTimeController extends Controller
             if($flag == "join"){
                 $tranNow['Time_Entry']      = $Stamp_Time;
                 $tranNow['Time_Work']       = $Stamp_Time;
+                $tranNow['EmpStamp_Times']      = $empRun;
             }elseif($flag == "exit"){
-                $timeWork = DB::table('LMDBM.dbo.lmEmpTran_Sent')->select('Time_Entry','Time_Work')->where('Contain_Default',$container)->first();
-
+                $timeWork = DB::table($tableLm)->select('Time_Entry','Time_Work')->where('Contain_Default',$container)->first();
+                // dd($container);
                 $tranNow['Time_Entry']      = $timeWork->Time_Entry;
                 $tranNow['Time_Work']       = $timeWork->Time_Work;
                 $tranNow['Time_exit']       = $Stamp_Time;
             }
-            $tranNow['EmpStamp_Times']      = 1;
+          
             $tranNow['Contain_Default']     = $container;
             $tranNow['Past']                = "N";   
 
             $CheckContain = DB::table($tableLm)->where('Contain_Default',$container)->count();
+
+            $updateRun = DB::table($tableLm);
+            if($CurentDate != $Stamp_date){
+                $updateRun->where('Stamp_Date',$Stamp_date);
+            }    
+            $updateRun = $updateRun->where('EmpDriverCode',$dataEmp->EmpDriverCode);
+            $updateRun = $updateRun->where('Past','<>','C');
+            $updateRun = $updateRun->update(['Past'=>'Y']);
 
             if($CheckContain >= 1){
                 DB::table($tableLm)->where('Contain_Default',$container)->update($tranNow);
@@ -135,7 +153,7 @@ class changeTimeController extends Controller
 
                 DB::table($tableLm)->insert($tranNow);
             }
-           
+            
             $logStampTime['EmpID']          =   $dataEmp->EmpID;
             $logStampTime['EmpDriveName']   =   $dataEmp->EmpDriverName." ".$dataEmp->EmpDriverlastName;
             $logStampTime['EmpDriveCode']   =   $dataEmp->EmpDriverCode;

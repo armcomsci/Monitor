@@ -102,6 +102,8 @@ class scoreboardController extends Controller
                                 ->where('ContainerNO',$Container)
                                 ->first();
 
+        $Data['Comment']     = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain_rm')->where('ContainerNO',$Container)->whereNotNull('Remark')->count();
+
         $Data['AddBill']     = $selectAddBill_Ref;
 
         return response()->json($Data, 200);
@@ -131,6 +133,11 @@ class scoreboardController extends Controller
 
 
         return response()->json($Container, 200);
+    }
+
+    public function dataComment($Container){
+        $data = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain_rm')->where('ContainerNO',$Container)->whereNotNull('Remark')->get();
+        return response()->json($data, 200);
     }
 
     public function JobCloseAgo(){

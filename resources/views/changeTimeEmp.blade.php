@@ -228,7 +228,11 @@
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     data: $('#ConfirmEmp').serialize(),
                     // dataType: "dataType",
+                    beforeSend : function (){
+                        $('#saveChange').attr('disabled',false);
+                    },
                     success: function (response) {
+                        $('#saveChange').attr('disabled',true);
                         if(response == "success"){
                             swal({
                                 title: 'บันทึกสำเร็จ',

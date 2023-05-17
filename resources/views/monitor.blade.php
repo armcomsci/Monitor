@@ -82,6 +82,9 @@ thead{
 #closeJob,#AddBillTime,.footer-job-close{
     display: none;
 }
+#map{
+    height: 480px;
+}
 </style>
 @endsection
 
@@ -180,9 +183,19 @@ thead{
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex justify-content-between">
-                                                    <h4>ตำแหน่งรถ</h4>
-                                                    <button class="btn btn-success mb-2 mr-2"><i class="fa-sharp fa-solid fa-road"></i> อัพเดทแผนที่</button>
+                                                <div class="d-flex">
+                                                    <div class="mr-auto mt-3">
+                                                        <h4>ตำแหน่งรถ</h4>
+                                                    </div>
+                                                    <div class="p-2">
+                                                        <button type="button" class="btn btn-info position-relative comment_driver">
+                                                            <span><i class="fa-regular fa-comment fa-xl"></i></span>
+                                                            <span class="badge badge-danger counter">0</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="p-2">
+                                                        <button class="btn btn-success mb-2 mr-2"><i class="fa-sharp fa-solid fa-road"></i> อัพเดทแผนที่</button>
+                                                    </div>
                                                 </div>
                                                 
                                                 {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
@@ -193,7 +206,6 @@ thead{
                                                     <div class="mr-auto p-2">
                                                         <input type="text" class="form-control" id="findJob" style="width: 100%" placeholder="ค้นหางานทั้งหมด">
                                                     </div>
-                                                   
                                                     <div class="p-2">
                                                         <a href="javascript:void(0)" id="PrevContain">
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left-circle"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg>
@@ -639,6 +651,39 @@ thead{
     </div>
 </div>
 
+{{-- คอมเม้นจากคนรถ --}}
+<div class="modal fade " id="JobComment" tabindex="-1" role="dialog" aria-labelledby="Comment" aria-hidden="true">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="Comment">หมายเหตุของคนรถ</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 650px;">
+                <div class="table-responsive" style="height: 600px;">
+                    <table class="table mb-4" id="DataJobComment">
+                        <thead style="background: #ffc7c7;">
+                            <tr>
+                                {{-- <th>เลขตู้</th> --}}
+                                <th>ลำดับ</th>
+                                <th>หมายเหตุ</th>
+                                <th>ร้านค้า</th>
+                                {{-- <th>ที่อยู่ร้านค้า</th> --}}
+                                <th>เวลา</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- รายละเอียดปิดงาน --}}
 <div class="modal fade " id="ShowCloseJob" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
     <div class="modal-dialog  modal-lg" role="document">
@@ -855,7 +900,7 @@ thead{
         $('.event tbody tr').remove();
         $('#AddBillTime').empty();
         $('#closeJob,#AddBillTime').css('display','none');
-
+        $('.counter').text(response['Comment']);
         let html = '';
         let i = 1;
         let bg_class;
@@ -936,7 +981,7 @@ thead{
                     html += "</tr>"
                 });
                 $('#DataJobReceive tbody').append(html);  
-                $('#jobReceAll').html("งานทั้งหมด : "+$('#DataJobReceive tbody tr').length);
+
             }
         });
     }
@@ -1272,6 +1317,55 @@ thead{
             
         });
 
+        $('.comment_driver').click(function (e) { 
+            e.preventDefault();
+            let Contain         =   $('.dataContain.activeTr').data('contain');
+            let CountComment    =   parseInt($('.counter').text());
+            if(typeof Contain === 'undefined'){
+                swal({
+                    title: 'กรุณาระบุเลขตู้',
+                    text: '',
+                    type: 'error',
+                    padding: '2em',
+                    showConfirmButton: false
+                })
+               return false; 
+            }
+            if(CountComment == 0){
+                swal({
+                    title: 'ไม่พบข้อมูล',
+                    text: '',
+                    type: 'warning',
+                    padding: '2em',
+                    showConfirmButton: false
+                })
+                return false; 
+            }
+            $.ajax({
+                type: "get",
+                url: url+"/GetCommentJob/"+Contain,
+                // data: "data",
+                // dataType: "dataType",
+                success: function (response) {
+                    $('#DataJobComment tbody').empty();
+                    html = '';
+                    let i = 1;
+                    $.each(response, function (index, value) {  
+                        html += "<tr>"
+                        html += "<td>"+i+"</td>"
+                        html += "<td class=\"text-break\">"+value.Remark+"</td>"
+                        html += "<td class=\"text-break\">"+value.CustName+"</td>"
+                        // html += "<td class=\"text-break\">"+value.ShiptoAddr1+"</td>"
+                        html += "<td><span class=\"badge outline-badge-danger shadow-none\">"+moment(value.RemarkTime).format('LLL')+"</span></td>"
+                        html += "</tr>"
+                        i++
+                    });
+                    $('#DataJobComment tbody').append(html);  
+                    $('#JobComment').modal('show');
+                }
+            });
+        });
+
         $('.modal').on('show.bs.modal', function (e) {
             $('input:checkbox').prop('checked',false);
         });
@@ -1487,7 +1581,6 @@ thead{
                         }
                     }
                 });
-                
             }
         });
     });

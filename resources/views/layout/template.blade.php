@@ -29,6 +29,13 @@
     .snackbar-container{
         height: auto !important;
     }
+    .loaddingModal{
+        background-image: url("{{ asset('icon/truck.gif') }}");
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 100%;
+        display: none;
+    }
     .loadingWidget {
         position: relative;
         width: 100%;
