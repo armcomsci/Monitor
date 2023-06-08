@@ -113,6 +113,8 @@
     <script src="{{ asset('theme/plugins/notification/snackbar/snackbar.min.js') }}"></script>
     <!-- END PAGE LEVEL PLUGINS -->
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+
     <script type="text/javascript" src="https://api.nostramap.com/nostraapi/v2.0/?key=Guh))FJkjZARKECd46rfcoQI53dnBDfmR2AOQc0KiJqdhf1e1i28Gskpn7CGLqYCxmAxLz9TPk1eMTRxdGcEFs0=====2"></script>
     @php
         $Empcode = auth()->user()->EmpCode;
@@ -135,7 +137,7 @@
                     cancelButtonText: 'ยกเลิก',
                     padding: '2em'
                 }).then(function(result) {
-                    console.log($(this).find('a').attr('href'));
+                    // console.log($(this).find('a').attr('href'));
                     if(result.value){
                         window.location.href = url+"/Logout";
                     }
@@ -174,12 +176,47 @@
                 });
             });
 
+            $('#remarkDropdown').click(function (e) { 
+                e.preventDefault();
+                $.ajax({
+                    type: "get",
+                    url: url+"/GetRemarkEmpDriver",
+                    // data: "data",
+                    // dataType: "dataType",
+                    beforeSend : function (){
+                        $('.notification-scroll').empty();
+                    },
+                    success: function (response) {
+                        $('#remarkDropdown > .feather-mail').removeClass('blink_me');
+                        let html = '';
+                        $.each(response, function (index, value2) {  
+                            html += " <div class=\"dropdown-item\">"
+                            html +=  "<div class=\"media server-log\"><i class=\"fa-regular fa-bell pt-3\"></i>"
+                            html +=  "<div class=\"media-body\">"
+                            html +=  "<div class=\"data-info pl-3\">"
+                            html +=  "<h6> เลขตู้ : "+value2.ContainerNo+"</h6>"
+                            html +=  "<h6> คนรถ : "+value2.EmpName+"</h6>"
+                            html +=  "<h6> หมายเหตุ : "+value2.Remark+"</h6>"
+                            html +=  "<p>"+moment(value2.RemarkTime).fromNow()+"</p>"
+                            html +=  "</div>"
+                            html +=  "<div class=\"icon-status\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-x\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"></line><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"></line></svg>"
+                            html +=  "</div>"
+                            html +=  "</div>"
+                            html +=  "</div>"
+                            html +=  "</div>";
+                        });
+                        $('.notification-scroll').append(html);
+                    }
+                });
+            });
+
             App.init();
             socket.on('Send_To_Monitor', (data) =>  {
-          
-                var res             = data[0]['CheckIn']['recordset']['0']
+                // console.log(data,1);
+                moment.locale('th');
+                let res             = data[0]['CheckIn']['recordset']['0']
                 // console.log(res);
-                var html            = "คนรถ : คุณ"+res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode+"<br> เลขตู้ : "+res.ContainerNO;
+                let html            = "คนรถ : คุณ"+res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode+"<br> เลขตู้ : "+res.ContainerNO;
 
                 if(res.Fullname != null){
                     html += "<br> ผู้ดูแล : "+res.Fullname
@@ -196,41 +233,40 @@
                     duration: 5000,
                     actionText: 'X'
                 });
+                // console.log(res.created_at,moment(res.created_at).format('HH:mm'));
+                let html_check_in =  "<tr>";
+                    html_check_in += "<td class=\"text-success\">#"+res.ContainerNO+"<br>"+res.EmpDriverFullName+"</td>";
+                    html_check_in += "<td><span class=\"badge outline-badge-success shadow-none\">"+moment().format('LT')+"</span></td>";
+                    html_check_in += "</tr>"; 
+      
+                $("#tb-last-checkin tbody").prepend(html_check_in).fadeIn(1000);
+                $('#tb-last-checkin tr:last').remove();
 
-                // var html_check_in =  "<tr>";
-                //     html_check_in += "<td class=\"text-center text-success\">"+res.ContainerNO+"</td>";
-                //     html_check_in += "<td class=\"text-success\">"+res.EmpDriverFullName+"</td>";
-                //     html_check_in += "<td><span class=\"badge outline-badge-success shadow-none\">"+moment.utc(res.created_at).format('HH:mm')+"</span></td>";
-                //     html_check_in += "</tr>"; 
+                // $.each(data[1]['CountCheckIN']['recordset'], function (i, value) {
+                //     let alltran = parseInt($('#All-EmpDrive-'+value.CarType).text());
+                //     let transp  = parseInt(value.transp);
+                //     let PerCent = (transp/alltran)*100;
+                //     PerCent = Math.round(PerCent);
 
-                // $("#tb-last-checkin tbody").prepend(html_check_in).fadeIn(1000);
-                // $('#tb-last-checkin tr:last').remove();
-
-                $.each(data[1]['CountCheckIN']['recordset'], function (i, value) {
-                    let alltran = parseInt($('#All-EmpDrive-'+value.CarType).text());
-                    let transp  = parseInt(value.transp);
-                    let PerCent = (transp/alltran)*100;
-                    PerCent = Math.round(PerCent);
-
-                    if(PerCent < 80){
-                        let colorBar = "bg-gradient-warning";
-                    }else if(PerCent >= 80 && PerCent <= 100) {
-                        let colorBar = "bg-gradient-success";
-                    }
+                //     if(PerCent < 80){
+                //         let colorBar = "bg-gradient-warning";
+                //     }else if(PerCent >= 80 && PerCent <= 100) {
+                //         let colorBar = "bg-gradient-success";
+                //     }
                     
-                    $('#TranSp-'+value.CarType).text(value.transp);
+                //     $('#TranSp-'+value.CarType).text(value.transp);
 
-                    $('#bar_transp_'+value.CarType).css('width',PerCent+"%");
-                    $('#bar_transp_'+value.CarType).attr('aria-valuenow',PerCent);
-                    $('#bar_transp_'+value.CarType).text(PerCent+"%");
-                });
+                //     $('#bar_transp_'+value.CarType).css('width',PerCent+"%");
+                //     $('#bar_transp_'+value.CarType).attr('aria-valuenow',PerCent);
+                //     $('#bar_transp_'+value.CarType).text(PerCent+"%");
+                // });
             });
 
             socket.on('Send_To_Monitor_Checkout', (data) =>  {
-               
-                var res  = data[0]['CheckOut']['recordset']['0']
+                // console.log(data,2);
+                let res  = data[0]['CheckOut']['recordset']['0']
                 // console.log(res);
-                var html = "คนรถ : คุณ"+res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode+"<br> เลขตู้ : "+res.ContainerNO;;
+                let html = "คนรถ : คุณ"+res.EmpDriverFullName+" <br> ทะเบียนรถ : "+res.VehicleCode+"<br> เลขตู้ : "+res.ContainerNO;;
                 if(res.Fullname != null){
                     html += "<br> ผู้ดูแล : "+res.Fullname
                 }else{
@@ -246,15 +282,14 @@
                     actionText: 'X'
                 });
 
-                // var html_check_out =  "<tr>";
-                //     html_check_out += "<td class=\"text-center text-danger\">"+res.ContainerNO+"</td>";
-                //     html_check_out += "<td class=\"text-danger\">"+res.EmpDriverFullName+"</td>";
-                //     html_check_out += "<td><span class=\"badge outline-badge-danger shadow-none\">"+moment.utc(res.updated_at).format('HH:mm')+"</span></td>";
-                //     html_check_out += "</tr>"; 
+                let html_check_out =  "<tr>";
+                    html_check_out += "<td class=\"text-danger\">#"+res.ContainerNO+"<br>"+res.EmpDriverFullName+"</td>";
+                    html_check_out += "<td><span class=\"badge outline-badge-danger shadow-none\">"+moment(res.updated_at).format('HH:mm')+"</span></td>";
+                    html_check_out += "</tr>"; 
+                    // console.log(html_check_out,2);    
+                $("#tb-last-checkout tbody").prepend(html_check_out).fadeIn(1000);
+                $('#tb-last-checkout tr:last').remove();
 
-                // $("#tb-last-checkout tbody").prepend(html_check_out).fadeIn(1000);
-                // $('#tb-last-checkout tr:last').remove();
-                
                 $.each(data[1]['CountCheckOut']['recordset'], function (i, value) {
                     let alltran = parseInt($('#All-EmpDrive-'+value.CarType).text());
                     let transp  = parseInt(value.transp);
@@ -306,7 +341,6 @@
             socket.on('ShowUpdateScore',(data)=>{
                 // console.log(data);
                 if(socket.id != data.socket){
-                 
                     $.each(data['data']['Score'], function (index, value) { 
                         if(value.EmpCode == EmpCode){
                             let Score    = parseFloat(value.Score);
@@ -334,7 +368,41 @@
                         }
                     });
                 }
+                $.each(data['data']['Score'], function (index, value) { 
+                    let ScoreIndex  = numeral($('#text-score-'+value.EmpCode).text()).value();
+                    let Score       = parseFloat(value.Score);
+                    let SumScore    = ScoreIndex+Score;
+
+                    $('#text-score-'+value.EmpCode).text(numeral(SumScore).format('0,0.00')).fadeIn(5000);
+                });
+                
             });
+
+            socket.on('RemarkFromDriver',(data)=>{
+                // console.log(data);
+                if(data.portCode == EmpCode){
+                    $('#remarkDropdown > .feather-mail').addClass('blink_me');
+                }
+                let html = "เลขตู้ : "+data.ContainerNo+"<br>"
+                html += "หมายเหตุ : "+data.Remark+"<br>"
+                // html += "แจ้งโดย : "+data.EmpDriverCode+" : คุณ"+data.EmpName+"<br>"
+                if(data.portCode == null){
+                    textName = '-'
+                }else{
+                    textName = data.Fullname;
+                }
+                html += "ผู้ดูแล : "+textName;
+
+                Snackbar.show({
+                    text: "<div style=\"padding:10px\" >"+html+"</div><div style=\"padding:10px\" >แจ้งหมายเหตุโดย "+data.EmpDriverCode+" : คุณ"+data.EmpName+" !</div>",
+                    pos: 'top-right',
+                    maxWidth: '100%',
+                    actionTextColor: '#fff',
+                    backgroundColor: '#f5750c',
+                    duration: 10000,
+                    actionText: 'X'
+                });
+            })
         });
     </script>
     <script src="{{ asset('theme/assets/js/custom.js') }}"></script>

@@ -8,6 +8,25 @@
         return $date2;
     }
 
+    function MonthThai($month){
+        if($month == "00"){
+            $month = "12";
+        }
+        $strMonthCut = Array("01"=>"มกราคม"
+                                ,"02"=>"กุมภาพันธ์"
+                                ,"03"=>"มีนาคม"
+                                ,"04"=>"เมษายน"
+                                ,"05"=>"พฤษภาคม"
+                                ,"06"=>"มิถุนายน"
+                                ,"07"=>"กรกฎาคม"
+                                ,"08"=>"สิงหาคม"
+                                ,"09"=>"กันยายน"
+                                ,"10"=>"ตุลาคม"
+                                ,"11"=>"พฤจิกายน"
+                                ,"12"=>"ธันวาคม");
+        return $strMonthCut[$month];
+    }
+
     function DateThai($strDate,$ShowTime = true){
 		$strYear = date("Y",strtotime($strDate))+543;
 		$strMonth= date("n",strtotime($strDate));

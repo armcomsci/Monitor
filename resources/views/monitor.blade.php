@@ -76,7 +76,7 @@ thead{
     height: 100%;
     display: none;
 }
-.badge{
+.badge,.fa-triangle-exclamation{
     cursor: pointer;
 }
 #closeJob,#AddBillTime,.footer-job-close{
@@ -121,14 +121,22 @@ thead{
                             <div class="mail-overlay"></div>
                             <div id="mailbox-inbox" class="accordion mailbox-inbox">
                                 <div class="d-flex">
+                                    {{-- <div class="p-2">                                        
+                                        <button type="button" class="btn btn-secondary mt-1 mb-1 ml-2">
+                                            Score รวมทั้งหมด<span class="badge badge-light ml-1 ScoreJob">{{ round($Score,2) }} </span>
+                                        </button>
+                                    </div> --}}
+                                    @php
+                                        $Month     =   date('m',time());
+                                    @endphp
                                     <div class="p-2">                                        
                                         <button type="button" class="btn btn-secondary mt-1 mb-1 ml-2">
-                                            Score <span class="badge badge-light ScoreJob">{{ round($Score,2) }} </span>
+                                            Score เดือน{{ MonthThai($Month) }}<span class="badge badge-light ml-1 ScoreJob">{{ round($Score,2) }} </span>
                                         </button>
                                     </div>
                                     <div class="p-2">
                                         <button type="button" class="btn btn-info mt-1 mb-1 ml-2">
-                                            งานทั้งหมด : <span class="badge badge-light CountJobAll">{{ $AllJob }} </span>
+                                            งานทั้งหมด : <span class="badge badge-light  CountJobAll">{{ $AllJob }} </span>
                                         </button>
                                     </div>
                                     <div class="p-2">
@@ -698,7 +706,7 @@ thead{
                 <div class="loaddingModal"></div>
             </div>
             <div class="modal-footer save-close-job">
-                <button type="button" class="btn btn-primary" id="ConfirmCloseJob"><i class="fa-regular fa-floppy-disk"></i> ปิดงาน</button>
+                <button type="button" class="btn btn-primary" id="ConfirmCloseJob" ><i class="fa-regular fa-floppy-disk"></i> ปิดงาน</button>
                 <button class="btn btn-outline-danger" data-dismiss="modal"><i class="fa-solid fa-xmark"></i> ยกเลิก</button>
             </div>
         </div>
@@ -745,6 +753,33 @@ thead{
         </div>
     </div>
 </div>
+
+<div class="modal fade " id="ConfirmImgCust" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="">รูปภาพร้าน <span id="CustNameImg"></span>
+                    <a href="" id="LinkMap" target="_blank">
+                        <img src="{{ asset('icon/location.png') }}" alt="">
+                    </a>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 750px;" id="">
+                <div class="loaddingModal"></div>
+                <img src="" alt="" id="imgPath" style="width: 100%; height: 700px;">
+                <input type="hidden" id="CustId_Listno" data-custid="" data-listno="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary ConfirmCust" id="ConfirmCustImg" data-status="Y" ><i class="fa-regular fa-floppy-disk mr-2"></i>Confirm</button>
+                <button class="btn btn-outline-danger ConfirmCust" id="RejectImg" data-status="N" ><i class="fa-solid fa-xmark mr-2"></i>Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('script')
@@ -862,7 +897,7 @@ thead{
                         points.push([response['location'].lat, response['location'].lon]);
                     });
 
-                    console.log(Marker);
+                    // console.log(Marker);
                     let i = 1;
                     Marker.forEach(mark => {
                         
@@ -904,15 +939,20 @@ thead{
         let html = '';
         let i = 1;
         let bg_class;
+        let alertCustImg = '';
         $.each(response['Order'], function (index, value) { 
+            // console.log(value);
             if(value.Flag_st == 'Y'){
                 bg_class = "successFlag";
             }else if(value.Flag_st == 'N'){
                 bg_class = "alertFlag";
             }
+            if(value.Flag_gps == "N" || value.Flag_gps == null){
+                alertCustImg = "<i class=\"fa-solid fa-triangle-exclamation fa-beat-fade fa-2xl ml-3 ConfirmImg\" style=\"color: #ff7600;\" title=\"ร้านค้ายังไม่ได้ยืนยันพิกัด\" data-custid=\""+value.CustID+"\" data-shiplistno=\""+value.ShipListNo+"\"></i>"
+            }
             html += "<tr class=\""+bg_class+"\">"
             html += "<td>"+i+"</td>";
-            html += "<td>"+value.CustName+"</td>";
+            html += "<td>"+value.CustName+alertCustImg+"</td>";
             html += "<td>"+value.SumQty+"</td>";
             // html += "<td>"+value.Flag_st+"</td>";
             html += "</tr>"
@@ -936,7 +976,7 @@ thead{
         }
         $('#ConfirmCloseJob').attr('data-container','');
         // console.log(response['Drive'].statusTrans);
-        if(response['AddBill'].ContainerNO != "" && response['Drive'].statusTrans != "W"){
+        if(response['AddBill'].ContainerNO != null && response['Drive'].statusTrans != "W"){
             $('#ConfirmCloseJob').attr('data-container',response['AddBill'].ContainerNO);
             $('#closeJob,#AddBillTime').fadeIn(500);
             $('#AddBillTime').text('ส่งบิลเมื่อ : '+moment(response['AddBill'].Addbill_Time).format('D MMMM YYYY HH:mm'));
@@ -1307,6 +1347,7 @@ thead{
                         });
                     }
                 }else if(data[0].id != socket.id){
+                    // console.log(data);
                     $('#JobEpmTyPort tbody').empty();
                     let html = "<tr><td class=\"text-center\" colspan=\"4\">ขณะนี้มีผู้ใช้งานท่านอื่นกำลังอัพเดทงานอยู่ จำนวนคิวที่รอ : "+(data.length-1)+" </td></tr>";
                     $('#JobEpmTyPort tbody').append(html);
@@ -1840,12 +1881,13 @@ thead{
             data: {ContainerNo:ContainerNo},
             beforeSend:function(){
                 $('.loaddingModal').css('display','block');
-                
+                $('#ConfirmCloseJob').attr('disabled',true);
                 // $('.save-close-job').css('display','none')
                 // showLoading();
                 // $('#ShowDetailJob').empty();
             },
             success: function (response) {
+                $('#ConfirmCloseJob').attr('disabled',false);
                 // $('.save-close-job').css('display','block')
                 $('.loaddingModal').css('display','none');
                 $('#ShowDetailJob').html(response);
@@ -1923,13 +1965,113 @@ thead{
         });
     })
 
+    $(document).on('click','.ConfirmImg',function(e){
+        $('#ConfirmImgCust').modal('show');
+        let ShipListNo = $(this).data('shiplistno');
+        let CustID     = $(this).data('custid');
+
+        $.ajax({
+            type: "post",
+            url: url+"/ImgCust",
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            data: {ShipListNo:ShipListNo,CustID:CustID},
+            beforeSend:function(){
+                $('.loaddingModal').css('display','block');
+                $('#ConfirmCustImg,#RejectImg').attr('disabled',true);
+                $('#imgPath').attr('src','');
+                // $('.save-close-job').css('display','none')
+                // showLoading();
+                // $('#ShowDetailJob').empty();
+            },
+            success: function (response) {
+            
+                $('.loaddingModal').css('display','none');
+                $('#ConfirmCustImg,#RejectImg').css('display','block');
+                // console.log(response);
+                let imgPath 
+                if(typeof response.ImgPath !== 'undefined'){
+                    imgPath = "https://xm.jtpackconnect.com/transport/public/"+response.ImgPath;
+                    $('#CustNameImg').text(response.CustName);
+                    $('#ConfirmCustImg,#RejectImg').attr('disabled',false);
+                    $('#CustId_Listno').attr('data-custid',CustID)
+                    $('#CustId_Listno').attr('data-listno',ShipListNo)
+                    let LinkMap =  "https://www.google.com/maps/search/?api=1&query="+response.Latitude+","+response.Longitude+"";
+                    $('#LinkMap').attr('href',LinkMap)
+                }else{
+                    imgPath = url+"/image/not_img.jpg";
+                    $('#ConfirmCustImg,#RejectImg').css('display','none');
+                    $('#LinkMap').attr('href','#')
+                    $('#CustNameImg').text('');
+                }   
+                $('#imgPath').attr('src',imgPath);
+            }
+        });
+
+    });
+
+    $(document).on('click','.ConfirmCust',function(e){
+        let status = $(this).data('status');
+        let custid = $('#CustId_Listno').data('custid');
+        let shipno = $('#CustId_Listno').data('listno');
+
+        let textConfirm;
+        if(status == "Y"){
+            textConfirm = "ยืนยัน";
+        }else if(status == "N"){
+            textConfirm = "ปฏิเสธ";
+        }
+        swal({
+                title: 'ต้องการ'+textConfirm+'ตำแหน่งของร้านค้า',
+                text: '',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยกเลิก',
+                padding: '2em'
+            }).then(function(result) {
+                if (result.value) {
+                    $.ajax({
+                        type: "post",
+                        url: url+"/ConfirmImgCust",
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        data: {custid:custid,shipno:shipno,status:status},
+                        beforeSend:function(){
+                            // $('.loaddingModal').css('display','block');
+                            $('#ConfirmCustImg,#RejectImg').attr('disabled',true);
+                            
+                        },
+                        success: function (response) {
+                            $('#ConfirmCustImg,#RejectImg').attr('disabled',false);
+                            if(response == "success"){
+                                $('#ConfirmImgCust').modal('hide');
+                                swal({
+                                    title: 'บันทึกสำเร็จ',
+                                    text: '',
+                                    type: 'success',
+                                    padding: '2em'
+                                })
+                            }else{
+                                swal({
+                                    title: 'Error',
+                                    text: response,
+                                    type: 'error',
+                                    padding: '2em'
+                                })
+                            }
+                        
+                        }
+                    });
+                }
+            });
+    });
+
     socket.on('UpdateJobCount',(data)=>{
         // console.log(data);
         $('.NewJob').html(data.CountJob);
     });
 
     socket.on('CountJob',(data) => {
-        console.log(data);
+        // console.log(data);
         if(data != ""){
             if(data['res']['recordset']['0'].Job >= 1){
                 $('.NewJob').parent().addClass('blink_me');
@@ -1939,7 +2081,7 @@ thead{
     });
 
     socket.on('StatusJobReceive',(data)=>{
-            console.log(data);
+            // console.log(data);
             let display =  '';
             if(data.Status == "R"){
                 display = 'revert';

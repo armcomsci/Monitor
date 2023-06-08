@@ -12,6 +12,9 @@ class scoreboardController extends Controller
 {
     public function index() {
 
+        $firstM  =  Carbon::now()->format('Ym01');
+        $lastM   =  Carbon::now()->format('Ymt');
+
         $Port    = Auth::user()->EmpCode;
 
         $Container = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
@@ -40,18 +43,17 @@ class scoreboardController extends Controller
                         ->where('job.status','N')
                         ->count();
 
-        // $start = new Carbon('first day of last month');
-        // $start->startOfMonth();
-        // $end = new Carbon('last day of last month');
-        // $end->endOfMonth();
-
         $CountCloseJob = DB::table('LMSJob_Contain')
                         ->where('EmpCode',$Port)
+                        ->whereRaw("(CONVERT(varchar,DateTime, 112) BETWEEN '$firstM' AND '$lastM'  ) ")
                         // ->whereBetween('Datetime',[$start,$end])
                         ->where('status','Y')
                         ->count();
 
-        $Score    = DB::table('LMSScoreJob')->where('EmpCode',$Port)->sum('Score');
+        $Score    = DB::table('LMSScoreJob')
+                    ->where('EmpCode',$Port)
+                    ->whereRaw("(CONVERT(varchar,DateTime, 112) BETWEEN '$firstM' AND '$lastM'  ) ")
+                    ->sum('Score');
 
         $JobTransFer = $this->dataJobTransfer();
         $JobTransFer = count($JobTransFer);
@@ -81,11 +83,11 @@ class scoreboardController extends Controller
         $Data['location']     = DB::connection('sqlsrv')->table('LMSLogGps_temp')->where('vehicle_id',$VehicleCode)->first();
 
         $Data['Order']        =  DB::connection('sqlsrv_2')
-                                ->table('nlmMatchContain_dt')
-                                ->select('CustID','CustName','Flag_st')
-                                ->selectRaw('SUM(GoodQty) as SumQty')
-                                ->where('ContainerNO',$Container)
-                                ->groupBy('CustID','CustName','Flag_st')
+                                ->table('nlmMatchContain_dt as mContain')
+                                ->select('mContain.CustID','mContain.CustName','mContain.Flag_st','mContain.ShipListNo')
+                                ->selectRaw('SUM(GoodQty) as SumQty, (select Flag_st FROM nlmMatchConfirmGPS as gps where gps.CustID = mContain.CustID and gps.ShipListNo = mContain.ShipListNo ) as Flag_gps')
+                                ->where('mContain.ContainerNO',$Container)
+                                ->groupBy('mContain.CustID','mContain.CustName','mContain.Flag_st','mContain.ShipListNo')
                                 ->get();
 
         $Data['Remark']       = DB::table('LMSRemark')->where(['ContainerNo'=>$Container,'Status'=>'Y'])->orderby('Datetime','ASC')->get();
@@ -176,7 +178,8 @@ class scoreboardController extends Controller
                                     ->select('contain_dt.CustID','contain_dt.CustCode','contain_dt.CustName','contain_dt.ShiptoAddr1','contain_dt.Flag_st','contain_dt.Flag_st_date')
                                     ->where('contain_dt.ContainerNO',$Container)
                                     ->distinct()
-                                    ->orderBy('contain_dt.Flag_st_date','ASC')
+                                    // ->orderByRaw("ISNULL(Flag_st_date), Flag_st_date ASC")
+                                    ->orderByRaw('contain_dt.Flag_st_date ASC')
                                     ->get();
         // dd($Data);
         return response()->json($Data, 200);
@@ -213,6 +216,76 @@ class scoreboardController extends Controller
                     ->get();
 
         return response()->json($data, 200);
+    }
+
+    public function GetImgConfirm(Request $req){
+
+        $ShipListNo = $req->ShipListNo;
+        $CustID     = $req->CustID;
+
+        $Img =  DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchConfirmGPS')->where([
+            'CustID' => $CustID,
+            'ShipListNo' => $ShipListNo
+        ])->first();
+
+        return response()->json($Img,200);
+    }
+
+    public function ConfirmImgCust(Request $req){
+       
+        try {
+            $custid = $req->custid;
+            $shipno = $req->shipno;
+            $status = $req->status;
+            
+            
+            $CustName =  DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchConfirmGPS')->where([
+                'CustID' => $custid,
+                'ShipListNo' => $shipno
+            ])->first();
+            
+            $row =  DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchConfirmGPS')->where([
+                        'CustID' => $custid,
+                        'ShipListNo' => $shipno
+                    ]);
+            if($status == "N"){
+                $row =  $row->delete();
+            }elseif($status == "Y"){
+                $updated['Flag_st'] = "Y";
+                $updated['AppvDate'] = now();
+                $updated['AppvName'] = Auth::user()->Fullname;
+                $row =  $row->update($updated);
+            }
+
+            DB::beginTransaction();
+
+            $logSave['EmpCode']         = Auth::user()->EmpCode;
+            $logSave['StatusConfirm']   = $status;
+            $logSave['CustID']          = $custid;
+            $logSave['ShipListNo']      = $shipno;
+            $logSave['CustImg']         = $CustName->ImgPath;
+            $logSave['CustName']        = $CustName->CustName;
+            $logSave['lat']             = $CustName->Latitude;
+            $logSave['long']            = $CustName->Longitude;
+            $logSave['DatetimeConfirm'] = now();
+
+            DB::table('LMSLog_ConfirmImgCust')->insert($logSave);
+
+            if($status == "Y"){
+                $detail = "ยืนยันพิกัดร้าน $CustName->CustName พิกัด : $CustName->Latitude,$CustName->Longitude";
+            }elseif($status == "R"){
+                $detail = "ปฏิเสธพิกัดร้าน $CustName->CustName พิกัด : $CustName->Latitude,$CustName->Longitude";
+            }
+
+            $this->saveLogEvent($detail,10);
+            DB::commit();
+
+            return "success";
+            
+        } catch (\Throwable $th) {
+            DB::rollback();
+            return $th->getMessage();
+        }
     }
 
     public function getHistory(){
@@ -421,6 +494,7 @@ class scoreboardController extends Controller
         // 07 = ปิดงาน
         // 08 = เปลี่ยนคนรถ
         // 09 = แก้ไขเวลาเข้า/ออก คนรถ
+        // 10 = ยืนยันตำแหน่งร้านค้า
         
         DB::beginTransaction();
         try {

@@ -18,9 +18,21 @@
                     @if(count($EmpTran) != 0)
                         @foreach ($EmpTran as $emp)
                             @php
+                                $Carsize = '';
+                                switch ($emp->CarTypeCode) {
+                                    case 'CT001':
+                                        $Carsize = '(รถเล็ก)';
+                                        break;
+                                    case 'CT002':
+                                        $Carsize = '(รถกลาง)';
+                                        break;
+                                    case 'CT003':
+                                        $Carsize = '(รถใหญ่)';
+                                        break;
+                                }
                                 $Empcode                       = $emp->EmpDriverCode;
 
-                                $SumEmp[$Empcode]['EmpName']   = $emp->EmpDriverCode." : ".$emp->EmpDriverFullName;
+                                $SumEmp[$Empcode]['EmpName']   = $emp->EmpDriverCode." : ".$emp->EmpDriverFullName.$Carsize;
                               
                                 if(isset($SumEmp[$Empcode]['StampSum'])){
                                     $Count                          = $SumEmp[$Empcode]['StampSum'];
@@ -28,10 +40,12 @@
                                 }else{
                                     $SumEmp[$Empcode]['StampSum']   = $emp->EmpRun;
                                 }
+
+                               
                             @endphp
-                            <tr>
+                            <tr class="DetailRun" data-stampdate="{{ $emp->Stamp_date }}" data-empcode="{{ $Empcode }}">
                                 <td>{{ $emp->VehicleCode }}</td>
-                                <td>{{ $emp->EmpDriverCode." : ".$emp->EmpDriverFullName }}</td>
+                                <td>{{ $emp->EmpDriverCode." : ".$emp->EmpDriverFullName.$Carsize }}</td>
                                 <td>{{ $emp->EmpRun }}</td>
                                 <td>
                                     <span class="badge outline-badge-success shadow-none">{{ ShowDate($emp->Stamp_date,"d-m-Y") }}</span>

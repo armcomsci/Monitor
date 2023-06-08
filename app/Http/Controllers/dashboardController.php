@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class dashboardController extends Controller
 {
     public function index(){
         $dateNow =  date("Y-m-d");
+        $firstM  =  Carbon::now()->format('Ym01');
+        $lastM   =  Carbon::now()->format('Ymt');
        
         $data['Workdate']              = DB::table('DTDBM.dbo.vEMTransp as transp')
                                             ->join('LMDBM.dbo.lmCarType as cType','transp.CarType','cType.CarTypeCode')
@@ -26,13 +30,22 @@ class dashboardController extends Controller
         $data['SumCarDriv_CT001']             =   $this->SumCarDriv('CT001',$dateNow2);
 
         $data['SumCarDriv_CT002']             =   $this->SumCarDriv('CT002',$dateNow2);  
-        // dd($data);
+
         
         $data['SumCarDriv_CT003']             =   $this->SumCarDriv('CT003',$dateNow2);
 
-        $arraySelect                    =   array('empDrive.EmpDriverName','empDrive.EmpDriverLastName','Container.ContainerNO','Container.created_at');
+        $arraySelect                    =   array('empDrive.EmpDriverName','empDrive.EmpDriverLastName','Container.ContainerNO','Container.created_at','Container.updated_at');
 
-        $data['LastCheckIN']            =   DB::table('LMDBM.dbo.lmEmpContainers as Container')
+        $data['LastCheckOut']            =   DB::table('LMDBM.dbo.lmEmpContainers as Container')
+                                                ->join('LMDBM.dbo.lmEmpDriv as empDrive','Container.EmpCode','empDrive.EmpDriverCode')
+                                                ->select($arraySelect)
+                                                ->where('Container.flag','N')
+                                                ->whereRaw("(CONVERT(varchar, Container.created_at, 112) = '$dateNow2') ")
+                                                ->orderByDesc('Container.updated_at')
+                                                ->limit(10)
+                                                ->get();
+
+        $data['LastCheckIN']           =   DB::table('LMDBM.dbo.lmEmpContainers as Container')
                                                 ->join('LMDBM.dbo.lmEmpDriv as empDrive','Container.EmpCode','empDrive.EmpDriverCode')
                                                 ->select($arraySelect)
                                                 ->where('Container.flag','Y')
@@ -40,18 +53,16 @@ class dashboardController extends Controller
                                                 ->orderByDesc('Container.created_at')
                                                 ->limit(10)
                                                 ->get();
-
-        $data['LastCheckOut']           =   DB::table('LMDBM.dbo.lmEmpContainers as Container')
-                                                ->join('LMDBM.dbo.lmEmpDriv as empDrive','Container.EmpCode','empDrive.EmpDriverCode')
-                                                ->select($arraySelect)
-                                                ->where('Container.flag','N')
-                                                ->whereRaw("(CONVERT(varchar, Container.created_at, 112) = '$dateNow2') ")
-                                                ->orderByDesc('Container.created_at')
-                                                ->limit(10)
-                                                ->get();
         
-                                                
-        // dd($data);
+        $data['SumScore']              =  DB::table('LMSScoreJob as score')
+                                            ->join('LMSusers as LmsUser','score.Empcode','LmsUser.Empcode')
+                                            ->select('LmsUser.Fullname','LmsUser.EmpCode')
+                                            ->selectRaw('SUM(score.Score) as TotalScore')
+                                            ->whereRaw("(CONVERT(varchar, score.DateTime, 112) BETWEEN '$firstM' AND '$lastM'  ) ")
+                                            ->groupBy('LmsUser.EmpCode','LmsUser.Fullname')
+                                            ->orderBydesc('TotalScore')
+                                            ->get();
+
         return view('index',compact('data'));
     }
 
@@ -137,5 +148,26 @@ class dashboardController extends Controller
     public function getNotify(){
         $notify = GetNotification();
         return response()->json($notify, 200);
+    }
+
+    public function getRemarkDriver(){
+        $firstM  =  Carbon::now()->format('Ym01');
+        $lastM   =  Carbon::now()->format('Ymt');
+        $Port    = Auth::user()->EmpCode;
+
+        $Remark = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain_rm as contain_rm')
+                    ->join('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain','contain_rm.ContainerNo','m_contain.ContainerNo')
+                    ->join('LMSJob_Contain as job','contain_rm.ContainerNo','job.ContainerNo')
+                    ->select('contain_rm.Remark','contain_rm.ContainerNo','m_contain.EmpName','contain_rm.RemarkTime','contain_rm.CustID','contain_rm.ShipListNo')
+                    // ->distinct()
+                    ->whereRaw("(CONVERT(varchar, contain_rm.RemarkTime, 112) BETWEEN '$firstM' AND '$lastM'  ) ")
+                    ->where('job.EmpCode',$Port)
+                    ->whereNotNull('contain_rm.Remark')
+                    // ->groupBy('contain_rm.TextAlert','contain_rm.ContainerNo','m_contain.EmpName','contain_rm.Datetime','contain_rm.CustID','contain_rm.ShipListNo')
+                    ->orderBy('contain_rm.RemarkTime','DESC')
+                    ->limit(10)
+                    ->get();
+
+        return response()->json($Remark, 200);
     }
 }

@@ -9,6 +9,7 @@
 <link href="{{ asset('theme/plugins/apex/apexcharts.css') }}" rel="stylesheet" type="text/css">
 <link href="{{ asset('theme/assets/css/scrollspyNav.css') }}" rel="stylesheet" type="text/css" />
 <link href="{{ asset('theme/assets/css/tables/table-basic.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ asset('theme/assets/css/components/custom-counter.css') }}" rel="stylesheet" type="text/css">
 <!-- END PAGE LEVEL PLUGINS/CUSTOM STYLES -->
 
 <style>
@@ -41,9 +42,60 @@
 @endsection
 
 @section('content')
+@php
+    $Month     =   date('m',time());
+@endphp
 <div id="content" class="main-content">
     <div class="layout-px-spacing">
         <div class="row layout-top-spacing">
+            <div class="col-6  layout-spacing mt-1">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing mt-1">
+                        <div class="widget widget-three">
+                            <div class="widget-heading">
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing mt-1">
+                        <div class="widget widget-three">
+                            <div class="widget-heading">
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6  layout-spacing mt-1">
+                <div class="row">
+                    @foreach ($data['SumScore'] as $UserScore)
+                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 layout-spacing mt-1">
+                        <div class="widget widget-three">
+                            <div class="widget-heading" style="margin-bottom:10px;">
+                               <h5>{{ $UserScore->Fullname }}</h5>
+                            </div>
+                            <div class="widget-content">
+                                <div class="order-summary">
+                                    <div class="summary-list">
+                                        <div class="w-summary-details">
+                                            <div class="w-summary-info">
+                                                <p>
+                                                <i class="fa-solid fa-trophy"></i> เดือน{{ MonthThai($Month) }} : <span id="text-score-{{ $UserScore->EmpCode }}">{{ number_format($UserScore->TotalScore,2) }}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                   
+                </div>
+            </div>
+           
             @foreach ($data['Workdate'] as $item)
             @php
                 $CarType = $item->CarType;
@@ -123,16 +175,18 @@
                             <table class="table mb-4" id="tb-last-checkin">
                                 <thead>
                                     <tr>
-                                        <th>เลขตู้</th>
-                                        <th>คนรถ</th>
+                                        <th>เลขตู้/คนรถ</th>
                                         <th>เวลา</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($data['LastCheckIN'] as $lastCheckIN)
                                         <tr>
-                                            <td class="text-center text-success">{{ $lastCheckIN->ContainerNO }}</td>
-                                            <td class="text-success">{{ $lastCheckIN->EmpDriverName." ".$lastCheckIN->EmpDriverLastName }}</td>
+                                            <td class="text-success">
+                                                #{{ $lastCheckIN->ContainerNO }}
+                                                <br>
+                                                {{ $lastCheckIN->EmpDriverName." ".$lastCheckIN->EmpDriverLastName }}
+                                            </td>
                                             <td><span class="badge outline-badge-success shadow-none">{{ ShowDate($lastCheckIN->created_at,"H:i") }}</span></td>
                                         </tr>
                                     @endforeach
@@ -160,17 +214,19 @@
                             <table class="table mb-4" id="tb-last-checkout" >
                                 <thead>
                                     <tr>
-                                        <th>เลขตู้</th>
-                                        <th>คนรถ</th>
+                                        <th>เลขตู้/คนรถ</th>
                                         <th>เวลา</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($data['LastCheckOut'] as $LastCheckOut)
                                         <tr>
-                                            <td class="text-center text-danger">{{ $LastCheckOut->ContainerNO }}</td>
-                                            <td class="text-danger">{{ $LastCheckOut->EmpDriverName." ".$LastCheckOut->EmpDriverLastName }}</td>
-                                            <td><span class="badge outline-badge-danger shadow-none">{{ ShowDate($LastCheckOut->created_at,"H:i") }}</span></td>
+                                            <td class="text-danger">
+                                                #{{ $LastCheckOut->ContainerNO }}
+                                                <br>
+                                                {{ $LastCheckOut->EmpDriverName." ".$LastCheckOut->EmpDriverLastName }}
+                                            </td>
+                                            <td><span class="badge outline-badge-danger shadow-none">{{ ShowDate($LastCheckOut->updated_at,"H:i") }}</span></td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -198,8 +254,11 @@
     <script src="{{ asset('theme/assets/js/scrollspyNav.js') }}"></script>
     <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS -->
 
+    <script src="{{ asset('theme/plugins/counter/jquery.countTo.js') }}"></script>
    
     <script type="text/javascript">
+
+
         var initExtent, map, gLayer, route, routeLayer, layerMarker, chkRoutedResult;
         var points = [];
         nostra.onready = function () {

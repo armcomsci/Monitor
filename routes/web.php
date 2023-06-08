@@ -22,6 +22,7 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/createView','dashboardController@createView');
     Route::get('/GpsCarAll','dashboardController@gpsCarAll');
     Route::get('/GetNotify','dashboardController@getNotify');
+    Route::get('/GetRemarkEmpDriver','dashboardController@getRemarkDriver');
 
     Route::get('/Monitor','scoreboardController@index');
     Route::get('/DtMonitor/{Container}','scoreboardController@dataDt');
@@ -41,6 +42,8 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/DataCloseJob','scoreboardController@dataCloseJob');
     Route::post('ConfirmCloseJob','scoreboardController@CloseJob');
     Route::get('/GetDataJobClose','scoreboardController@JobCloseAgo');
+    Route::post('/ImgCust','scoreboardController@GetImgConfirm');
+    Route::post('/ConfirmImgCust','scoreboardController@ConfirmImgCust');
     
     Route::get('/ChangeEmpDriv','empDrivController@index');
     Route::post('/ChangeSaveEmp','empDrivController@save');
@@ -65,11 +68,15 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
 
     Route::get('/ReportEmpDriver','ReportController@EmpDriver');
     Route::post('/FindEmpRun','ReportController@find');
+    Route::post('/DetailStampDate','ReportController@detailRun');
     Route::get('/ReportJobClose','ReportController@reportJobClose');
     Route::post('/FindJobClose','ReportController@findCloseJob');
     Route::get('/JobCloseOrderItem/{Container}','ReportController@JobCloseOrderItem');
 
     Route::get('/CancelContain','cancelContainController@index');
     Route::post('/ReturnFlagContainer','cancelContainController@confirmReturn');
+
+    Route::any('/AdminConfirmImg','confirmImgCustController@index');
+    Route::post('/AdminConfirmImgCust','confirmImgCustController@confirm');
 });
 

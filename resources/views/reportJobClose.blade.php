@@ -21,6 +21,12 @@
     #Table-JobClose tr{
         cursor: pointer;
     }
+    .table > tbody > tr > td{
+        white-space: unset;
+    }
+    .activeTr{
+        background: #e4f852;
+    }
  </style>
  @endsection
 
@@ -184,7 +190,10 @@
 
     $(document).on('click','.showDetail',function(e){
         let ContainerNo = $(this).data('containerno');
-        // alert(ContainerNo);
+        
+        $('.showDetail').removeClass('activeTr');
+        $(this).addClass('activeTr');
+
         $.ajax({
             type: "get",
             url: url+"/JobCloseOrderItem/"+ContainerNo,
