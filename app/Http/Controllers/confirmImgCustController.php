@@ -25,6 +25,7 @@ class confirmImgCustController extends Controller
         if($Custname != ""){
             $imgCust  = $imgCust->where('CustName','LIKE',"%$Custname%");
         }
+        $imgCust  = $imgCust->whereNotNull('ImgPath');
         $imgCust  = $imgCust->get();
 
         return view('confirmImgCust',compact('imgCust','status','Custname'));
@@ -48,6 +49,7 @@ class confirmImgCustController extends Controller
             if($status == "N"){
                 $row =  $row->delete();
             }elseif($status == "Y"){
+                $updated['Flag_st_2'] = "Y";
                 $updated['Appv2Date'] = now();
                 $updated['Appv2Name'] = Auth::user()->Fullname;
                 $row =  $row->update($updated);

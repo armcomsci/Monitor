@@ -226,7 +226,8 @@ class scoreboardController extends Controller
         $Img =  DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchConfirmGPS')->where([
             'CustID' => $CustID,
             'ShipListNo' => $ShipListNo
-        ])->first();
+        ]);
+        $Img  = $Img->whereNotNull('ImgPath')->first();
 
         return response()->json($Img,200);
     }

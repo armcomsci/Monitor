@@ -941,14 +941,16 @@ thead{
         let bg_class;
         let alertCustImg = '';
         $.each(response['Order'], function (index, value) { 
-            // console.log(value);
+            console.log(value);
             if(value.Flag_st == 'Y'){
                 bg_class = "successFlag";
             }else if(value.Flag_st == 'N'){
                 bg_class = "alertFlag";
             }
             if(value.Flag_gps == "N" || value.Flag_gps == null){
-                alertCustImg = "<i class=\"fa-solid fa-triangle-exclamation fa-beat-fade fa-2xl ml-3 ConfirmImg\" style=\"color: #ff7600;\" title=\"ร้านค้ายังไม่ได้ยืนยันพิกัด\" data-custid=\""+value.CustID+"\" data-shiplistno=\""+value.ShipListNo+"\"></i>"
+                alertCustImg = "<i class=\"fa-solid fa-triangle-exclamation fa-beat-fade fa-2xl ml-3 ConfirmImg\" id=\"Cust_"+value.CustID+"_"+value.ShipListNo+"\" style=\"color: #ff7600;\" title=\"ร้านค้ายังไม่ได้ยืนยันพิกัด\" data-custid=\""+value.CustID+"\" data-shiplistno=\""+value.ShipListNo+"\"></i>"
+            }else{
+                alertCustImg = '';
             }
             html += "<tr class=\""+bg_class+"\">"
             html += "<td>"+i+"</td>";
@@ -2030,6 +2032,7 @@ thead{
                 padding: '2em'
             }).then(function(result) {
                 if (result.value) {
+                 
                     $.ajax({
                         type: "post",
                         url: url+"/ConfirmImgCust",
@@ -2042,6 +2045,10 @@ thead{
                         },
                         success: function (response) {
                             $('#ConfirmCustImg,#RejectImg').attr('disabled',false);
+
+                            let icon = $('#Cust_'+custid+"_"+shipno);
+                            icon.remove();
+
                             if(response == "success"){
                                 $('#ConfirmImgCust').modal('hide');
                                 swal({
