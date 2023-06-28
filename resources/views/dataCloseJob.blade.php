@@ -29,7 +29,10 @@ switch ($res['CarType']) {
                             <div class="col-xl-2 col-lg-12 col-md-4">
                                 <div class="upload mt-4 pr-md-4">
                                     <div class="avatar avatar-xl">
-                                        <img alt="avatar" src="{{ asset('theme/assets/img/90x90.jpg') }}" class="rounded" />
+                                        <img alt="avatar" src="https://images.jtpackconnect.com/empdrive/{{ $res['EmpDriverCode'].".jpg" }}"  class="rounded hiddentxt" onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';" />
+                                        <span class="hiddenimg">
+                                            <img   src="https://images.jtpackconnect.com/empdrive/{{ $res['EmpDriverCode'].".jpg" }}"  style="width: 250px; height: 250px;"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}"/>
+                                        </span>
                                     </div>
                                 </div>
                             </div>

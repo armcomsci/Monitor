@@ -33,7 +33,10 @@
                         </td>
                         <td class="text-break">
                             <div class="avatar">
-                                <img alt="avatar" src="{{ asset('theme/assets/img/90x90.jpg') }}" class="rounded-circle" />
+                                <img alt="avatar" src="https://images.jtpackconnect.com/empdrive/{{ $emp->EmpDriverCode.".jpg" }}"  class="rounded-circle hidden-list" onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';" />
+                                <span class="hiddenimg">
+                                    <img  src="https://images.jtpackconnect.com/empdrive/{{ $emp->EmpDriverCode.".jpg" }}"  style="width: 250px; height: 250px;"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';"/>
+                                </span>
                             </div>
                             <div>
                                 {{ $emp->EmpDriverName." ".$emp->EmpDriverlastName }}<br>{{ $emp->EmpDriverTel }}

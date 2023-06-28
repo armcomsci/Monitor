@@ -93,8 +93,8 @@
                                                         $selected3 =  "selected";
                                                     }
                                                 @endphp
-                                                <option value="N" {{ $selected }} >ยังไม่ยืนยัน</option>
-                                                <option value="Y" {{ $selected2 }} >ยืนยันแล้ว</option>
+                                                <option value="N" {{ $selected }} >ผู้อนุมัติคนแรก(ยืนยันแล้ว)</option>
+                                                <option value="Y" {{ $selected2 }} >ยืนยันทั้งหมด</option>
                                                 <option value="A" {{ $selected3 }} >ทั้งหมด</option>
                                             </select>
                                         </div>
@@ -114,6 +114,7 @@
                                                             <th>ที่อยู่</th>
                                                             <th>รูปภาพ</th>
                                                             <th>ผู้อนุมัติคนแรก</th>
+                                                            <th>ผู้อนุมัติคนสอง</th>
                                                             <th>แผนที่</th>
                                                             <th>ยืนยัน/ปฏิเศษ</th>
                                                         </tr>
@@ -121,21 +122,24 @@
                                                     <tbody>
                                                         @if(count($imgCust) != "0")
                                                             @foreach ($imgCust as $data)
-                                                                <tr>
+                                                                <tr id="Cust_{{ $data->CustID }}_{{ $data->ShipListNO }}">
                                                                     <td>{{ $data->CustName  }}</td>
                                                                     <td>{{ $data->ShiptoAddr1  }}</td>
                                                                     <td>
                                                                         <img src="https://xm.jtpackconnect.com/transport/public/{{ $data->ImgPath  }}" alt="" style="width: 250px;height:250px;" class="ShowImg">
                                                                     </td>
                                                                     <td>{{ $data->AppvName  }}</td>
+                                                                    <td>{{ $data->Appv2Name  }}</td>
                                                                     <td>
                                                                         <a href="https://www.google.com/maps/search/?api=1&query={{ $data->Latitude.",".$data->Longitude }}" target="_blank">
                                                                             <img src="{{ asset('icon/location.png') }}" alt="">
                                                                         </a>
                                                                     </td>
                                                                     <td>
-                                                                        <i class="fa-solid fa-check fa-2xl appvImg2"  style="color: #06e136;" data-status="Y" data-custid="{{ $data->CustID }}" data-listno="{{ $data->ShipListNO }}"></i>
-                                                                        <i class="fa-solid fa-x fa-2xl ml-3 appvImg2"  style="color: #ef2a4b;" data-status="N" data-custid="{{ $data->CustID }}" data-listno="{{ $data->ShipListNO }}"></i>
+                                                                        @if($data->Flag_st == 'N' || ($data->Flag_st_2 == '' || $data->Flag_st_2 == 'N' ))
+                                                                            <i class="fa-solid fa-check fa-2xl appvImg2"  style="color: #06e136;" data-status="Y" data-custid="{{ $data->CustID }}" data-listno="{{ $data->ShipListNO }}"></i>
+                                                                            <i class="fa-solid fa-x fa-2xl ml-3 appvImg2"  style="color: #ef2a4b;" data-status="N" data-custid="{{ $data->CustID }}" data-listno="{{ $data->ShipListNO }}"></i>
+                                                                        @endif
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -212,6 +216,7 @@
                 padding: '2em'
             }).then(function(result) {
                 if (result.value) {
+                
                     $.ajax({
                         type: "post",
                         url: url+"/AdminConfirmImgCust",
@@ -223,15 +228,17 @@
                             
                         },
                         success: function (response) {
+                            // $(this).parent().parent().remove();
                             // $('#ConfirmCustImg,#RejectImg').attr('disabled',false);
                             if(response == "success"){
-                                // $('#ConfirmImgCust').modal('hide');
                                 swal({
                                     title: 'บันทึกสำเร็จ',
                                     text: '',
                                     type: 'success',
                                     padding: '2em'
                                 })
+                                let icon = $('#Cust_'+custid+"_"+shipno);
+                                icon.fadeOut(500);
                             }else{
                                 swal({
                                     title: 'Error',

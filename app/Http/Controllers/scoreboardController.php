@@ -24,7 +24,7 @@ class scoreboardController extends Controller
                         ->join('DTDBM.dbo.vEMTransp as transp','Driv.TranspID','transp.TranspID')
                         ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
                         ->leftjoin('LMSJobLog_Contain as job_transfer','contain.ContainerNo','job_transfer.ContainerNo')
-                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','job_transfer.Status as status_transfer','m_contain.ConfirmFlag as flag_job','contain.flag as flag_exit')
+                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','Driv.EmpDriverCode','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','job_transfer.Status as status_transfer','m_contain.ConfirmFlag as flag_job','contain.flag as flag_exit')
                         ->distinct()
                         ->where([
                                 'CDriv.IsDefault'=>'Y',
@@ -67,7 +67,7 @@ class scoreboardController extends Controller
                         ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')
                         ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                         ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
-                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel')
+                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverCode','CDriv.VehicleCode','Driv.EmpDriverTel')
                         ->selectRaw("(select top(1) status from LMSJobLog_Contain where ContainerNo = '$Container' order by Datetime desc) as statusTrans ")
                         ->where('CDriv.IsDefault','Y')
                         // ->where('contain.flag','N')
@@ -274,7 +274,7 @@ class scoreboardController extends Controller
 
             if($status == "Y"){
                 $detail = "ยืนยันพิกัดร้าน $CustName->CustName พิกัด : $CustName->Latitude,$CustName->Longitude";
-            }elseif($status == "R"){
+            }elseif($status == "N"){
                 $detail = "ปฏิเสธพิกัดร้าน $CustName->CustName พิกัด : $CustName->Latitude,$CustName->Longitude";
             }
 
@@ -576,7 +576,7 @@ class scoreboardController extends Controller
                                     ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                                     ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
                                     ->join('DTDBM.dbo.vEMTransp as transp','Driv.TranspID','transp.TranspID')
-                                    ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','CDriv.VehicleCode','Driv.EmpDriverTel','contain.updated_at','contain.created_at','transp.CarType')
+                                    ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverCode','CDriv.VehicleCode','Driv.EmpDriverTel','contain.updated_at','contain.created_at','transp.CarType')
                                     ->where('m_contain.ContainerNo',$Container)
                                     ->where('job.EmpCode',$EmpCode)
                                     ->first();
@@ -653,6 +653,7 @@ class scoreboardController extends Controller
 
         $res['DriveName']   =  $data['EmpDrive']->EmpDriverName." ".$data['EmpDrive']->EmpDriverlastName;
         $res['DriveTel']    =  $data['EmpDrive']->EmpDriverTel;
+        $res['EmpDriverCode'] = $data['EmpDrive']->EmpDriverCode;
         $res['Container']   =  $data['EmpDrive']->ContainerNo;
         $res['VehicleCode'] =  $data['EmpDrive']->VehicleCode;
         $res['CarType']     =  $data['EmpDrive']->CarType;

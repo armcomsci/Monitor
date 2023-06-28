@@ -53,7 +53,56 @@ class dashboardController extends Controller
                                                 ->orderByDesc('Container.created_at')
                                                 ->limit(10)
                                                 ->get();
-        
+
+        $selectEmpNow   = DB::table('LMDBM.dbo.lmEmpTran_Now as sentNow')
+                             ->select('EmpDriverCode','EmpDriverFullName','Stamp_date','VehicleCode','CarTypeCode')
+                            ->selectRaw("(select top(1) EmpStamp_Times from  LMDBM.dbo.lmEmpTran_Now where  EmpDriverCode = sentNow.EmpDriverCode and  Stamp_Date = sentNow.Stamp_Date  ORDER BY EmpStamp_Times DESC) as EmpRun")
+                            ->where('sentNow.Stamp_date','>=',$firstM)
+                            ->where('sentNow.Stamp_date','<=',$lastM)
+                            ->where('sentNow.EmpDriverCode','not like','200%')
+                            ->distinct();
+                            // ->groupBy('EmpDriverCode','EmpDriverFullName','VehicleCode','CarTypeCode');
+
+        $EmpTran =  DB::table('LMDBM.dbo.lmEmpTran_Sent as tran_sent')
+                        ->union($selectEmpNow)
+                        ->select('EmpDriverCode','EmpDriverFullName','Stamp_date','VehicleCode','CarTypeCode')
+                        ->selectRaw("(select top(1) EmpStamp_Times from  LMDBM.dbo.lmEmpTran_Sent where  EmpDriverCode = tran_sent.EmpDriverCode  and Stamp_Date = tran_sent.Stamp_Date ORDER BY LMDBM.dbo.lmEmpTran_Sent.EmpStamp_Times DESC) as EmpRun")
+                        ->distinct()
+                        ->where('tran_sent.Stamp_date','>=',$firstM)
+                        ->where('tran_sent.Stamp_date','<=',$lastM)
+                        ->where('tran_sent.EmpDriverCode','not like','200%')
+                        // ->groupBy('EmpDriverCode','EmpDriverFullName','VehicleCode','CarTypeCode')
+                        // ->orderby('SumRun','DESC')
+                        ->get();
+   
+        $SumEmp     = [];
+        foreach ($EmpTran as $key => $emp) {
+            $Empcode                       = $emp->EmpDriverCode;
+         
+            if(isset($SumEmp[$Empcode]['StampSum'])){
+                $Count                          = $SumEmp[$Empcode]['StampSum'];
+                $SumEmp[$Empcode]['StampSum']   = $Count+$emp->EmpRun;
+            }else{
+                $SumEmp[$Empcode]['StampSum']   = $emp->EmpRun;
+            }
+            $SumEmp[$Empcode]['EmpName']   = $emp->EmpDriverCode." : ".$emp->EmpDriverFullName;
+
+            // $i++;
+        }
+        usort($SumEmp, function ($a, $b) {
+            return $b["StampSum"] - $a["StampSum"];
+        });
+
+        $data['SumRun'] = $SumEmp;
+
+        $data['Comment']                = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain_rm as contain_rm')
+                                            ->join('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as contain','contain_rm.ContainerNo','contain.ContainerNo')
+                                            ->select('contain_rm.Remark','contain_rm.RemarkTime','contain.EmpName','contain_rm.ContainerNo')
+                                            ->whereNotNull('contain_rm.Remark')
+                                            ->orderBy('contain_rm.RemarkTime','DESC')
+                                            ->limit(10)
+                                            ->get();
+
         $data['SumScore']              =  DB::table('LMSScoreJob as score')
                                             ->join('LMSusers as LmsUser','score.Empcode','LmsUser.Empcode')
                                             ->select('LmsUser.Fullname','LmsUser.EmpCode')
@@ -62,7 +111,7 @@ class dashboardController extends Controller
                                             ->groupBy('LmsUser.EmpCode','LmsUser.Fullname')
                                             ->orderBydesc('TotalScore')
                                             ->get();
-
+   
         return view('index',compact('data'));
     }
 

@@ -40,8 +40,25 @@
     .dataContain,.CustCode{
         cursor: pointer;
     }
+    .avatar{
+        width: 64px !important;
+        height: 64px !important;
+    }
+    .hiddenimg {
+        display: none;
+    }
+    .hidden-list:hover ~ .hiddenimg {
+        display: block;
+        position: absolute;
+        z-index: 2;
+        left: 100px;
+        top: 0px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 5px;
+    }
     #map{
-        height: 350px;
+        height: 300px;
     }
  </style>
 @endsection

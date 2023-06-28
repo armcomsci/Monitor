@@ -41,7 +41,6 @@
                                     $SumEmp[$Empcode]['StampSum']   = $emp->EmpRun;
                                 }
 
-                               
                             @endphp
                             <tr class="DetailRun" data-stampdate="{{ $emp->Stamp_date }}" data-empcode="{{ $Empcode }}">
                                 <td>{{ $emp->VehicleCode }}</td>

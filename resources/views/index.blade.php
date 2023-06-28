@@ -48,54 +48,6 @@
 <div id="content" class="main-content">
     <div class="layout-px-spacing">
         <div class="row layout-top-spacing">
-            <div class="col-6  layout-spacing mt-1">
-                <div class="row">
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing mt-1">
-                        <div class="widget widget-three">
-                            <div class="widget-heading">
-                            </div>
-                        </div>
-                        <div class="widget-content">
-                        </div>
-                    </div>
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing mt-1">
-                        <div class="widget widget-three">
-                            <div class="widget-heading">
-                            </div>
-                        </div>
-                        <div class="widget-content">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6  layout-spacing mt-1">
-                <div class="row">
-                    @foreach ($data['SumScore'] as $UserScore)
-                    <div class="col-xl-4 col-lg-4 col-md-4 col-sm-4 col-4 layout-spacing mt-1">
-                        <div class="widget widget-three">
-                            <div class="widget-heading" style="margin-bottom:10px;">
-                               <h5>{{ $UserScore->Fullname }}</h5>
-                            </div>
-                            <div class="widget-content">
-                                <div class="order-summary">
-                                    <div class="summary-list">
-                                        <div class="w-summary-details">
-                                            <div class="w-summary-info">
-                                                <p>
-                                                <i class="fa-solid fa-trophy"></i> เดือน{{ MonthThai($Month) }} : <span id="text-score-{{ $UserScore->EmpCode }}">{{ number_format($UserScore->TotalScore,2) }}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endforeach
-                   
-                </div>
-            </div>
-           
             @foreach ($data['Workdate'] as $item)
             @php
                 $CarType = $item->CarType;
@@ -143,7 +95,115 @@
                 </div>
             </div>            
             @endforeach
+            <div class="col-6  layout-spacing mt-1">
+                <div class="row">
+                    @foreach ($data['SumScore'] as $UserScore)
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing mt-1">
+                        <div class="widget widget-three">
+                            <div class="widget-heading" style="margin-bottom:10px;">
+                               <h4>{{ $UserScore->Fullname }}</h4>
+                            </div>
+                            <div class="widget-content">
+                                <div class="order-summary">
+                                    <div class="summary-list">
+                                        <div class="w-summary-details">
+                                            <div class="w-summary-info">
+                                                <h5>
+                                                <i class="fa-solid fa-trophy"></i> เดือน{{ MonthThai($Month) }} : <span id="text-score-{{ $UserScore->EmpCode }}">{{ number_format($UserScore->TotalScore,2) }}</span>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
 
+            <div class="col-6  layout-spacing mt-1">
+                <div class="row">
+                    {{-- Last Check IN --}}
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing" style="height: 350px;">
+                        <div class="statbox widget box box-shadow">
+                            <div class="widget-header">
+                                <div class="row">
+                                    <div class="col-xl-12 col-md-12 col-sm-12 col-12">
+                                        <h4>เข้างานล่าสุดของวันที่ {{ DateThai(date("Y-m-d"),false) }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="widget-content widget-content-area">
+                                <div class="table-responsive" style="height: 300px; overflow-x: hidden;">
+                                    <table class="table mb-4" id="tb-last-checkin">
+                                        <thead>
+                                            <tr>
+                                                <th>เลขตู้/คนรถ</th>
+                                                <th>เวลา</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($data['LastCheckIN'] as $lastCheckIN)
+                                                <tr>
+                                                    <td class="text-success">
+                                                        #{{ $lastCheckIN->ContainerNO }}
+                                                        <br>
+                                                        {{ $lastCheckIN->EmpDriverName." ".$lastCheckIN->EmpDriverLastName }}
+                                                    </td>
+                                                    <td><span class="badge outline-badge-success shadow-none">{{ ShowDate($lastCheckIN->created_at,"H:i") }}</span></td>
+                                                </tr>
+                                            @endforeach
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Last Check Out --}}
+                    <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing" style="height: 350px;">
+                        <div class="statbox widget box box-shadow">
+                            <div class="widget-header">
+                                <div class="row">
+                                    <div class="col-xl-12 col-md-12 col-sm-12 col-12">
+                                        <h4>ส่งสินค้าล่าสุดของวันที่ {{ DateThai(date("Y-m-d"),false) }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="widget-content widget-content-area">
+                                <div class="table-responsive" style="height: 300px; overflow-x: hidden;">
+                                    <table class="table mb-4" id="tb-last-checkout" >
+                                        <thead>
+                                            <tr>
+                                                <th>เลขตู้/คนรถ</th>
+                                                <th>เวลา</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($data['LastCheckOut'] as $LastCheckOut)
+                                                <tr>
+                                                    <td class="text-danger">
+                                                        #{{ $LastCheckOut->ContainerNO }}
+                                                        <br>
+                                                        {{ $LastCheckOut->EmpDriverName." ".$LastCheckOut->EmpDriverLastName }}
+                                                    </td>
+                                                    <td><span class="badge outline-badge-danger shadow-none">{{ ShowDate($LastCheckOut->updated_at,"H:i") }}</span></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+           
+           
             <div class="col-xl-6 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing" >
                 <div class="statbox widget box box-shadow">
                     <div class="widget-header">
@@ -160,82 +220,81 @@
                 </div>
             </div>
 
-            {{-- Last Check IN --}}
-            <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing" style="height: 560px;">
-                <div class="statbox widget box box-shadow">
-                    <div class="widget-header">
-                        <div class="row">
-                            <div class="col-xl-12 col-md-12 col-sm-12 col-12">
-                                <h4>เข้างานล่าสุดของวันที่ {{ DateThai(date("Y-m-d"),false) }}</h4>
-                            </div>
-                        </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing mt-1">
+                <div class="widget widget-three">
+                    <div class="widget-heading mb-3">
+                       <h5>10อันดับ เที่ยวรถสูงสุดประจำเดือน{{ MonthThai($Month) }}</h5>
                     </div>
-                    <div class="widget-content widget-content-area">
-                        <div class="table-responsive" style="height: 510px; overflow-x: hidden;">
-                            <table class="table mb-4" id="tb-last-checkin">
+                    <div class="widget-content">
+                        <div class="table-responsive" style="height: 550px; overflow-x: hidden;">
+                            <table class="table mb-4" style="font-size: 16px;">
                                 <thead>
                                     <tr>
-                                        <th>เลขตู้/คนรถ</th>
-                                        <th>เวลา</th>
+                                        <th>รหัส/คนรถ</th>
+                                        <th>จำนวน/เที่ยว</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($data['LastCheckIN'] as $lastCheckIN)
+                                    @php
+                                        $a = 1;
+                                    @endphp
+                                    @foreach ($data['SumRun'] as $EmpRun)
+                                        @php
+                                            if($a > 11){
+                                                break;
+                                            }
+                                        @endphp
                                         <tr>
-                                            <td class="text-success">
-                                                #{{ $lastCheckIN->ContainerNO }}
-                                                <br>
-                                                {{ $lastCheckIN->EmpDriverName." ".$lastCheckIN->EmpDriverLastName }}
-                                            </td>
-                                            <td><span class="badge outline-badge-success shadow-none">{{ ShowDate($lastCheckIN->created_at,"H:i") }}</span></td>
+                                            <td>{{ $EmpRun['EmpName'] }}</td>
+                                            <td>{{ $EmpRun['StampSum'] }}</td>
                                         </tr>
+                                        @php
+                                            $a++;
+                                        @endphp
                                     @endforeach
-                                    
+
                                 </tbody>
                             </table>
-                        </div>
-
+                        </div>   
                     </div>
                 </div>
             </div>
 
-            {{-- Last Check Out --}}
-            <div class="col-xl-3 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing" style="height: 560px;">
-                <div class="statbox widget box box-shadow">
-                    <div class="widget-header">
-                        <div class="row">
-                            <div class="col-xl-12 col-md-12 col-sm-12 col-12">
-                                <h4>ส่งสินค้าล่าสุดของวันที่ {{ DateThai(date("Y-m-d"),false) }}</h4>
-                            </div>
-                        </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 layout-spacing mt-1">
+                <div class="widget widget-three">
+                    <div class="widget-heading mb-3">
+                        <h5>10อันดับ หมายเหตุล่าสุด</h5>
                     </div>
-                    <div class="widget-content widget-content-area">
-                        <div class="table-responsive" style="height: 510px; overflow-x: hidden;">
-                            <table class="table mb-4" id="tb-last-checkout" >
+                    <div class="widget-content">
+                        <div class="table-responsive" style="height: 550px; overflow-x: hidden;">
+                            <table class="table mb-4">
                                 <thead>
                                     <tr>
                                         <th>เลขตู้/คนรถ</th>
-                                        <th>เวลา</th>
+                                        <th>หมายเหตุ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($data['LastCheckOut'] as $LastCheckOut)
-                                        <tr>
-                                            <td class="text-danger">
-                                                #{{ $LastCheckOut->ContainerNO }}
-                                                <br>
-                                                {{ $LastCheckOut->EmpDriverName." ".$LastCheckOut->EmpDriverLastName }}
-                                            </td>
-                                            <td><span class="badge outline-badge-danger shadow-none">{{ ShowDate($LastCheckOut->updated_at,"H:i") }}</span></td>
-                                        </tr>
+                                    @foreach ($data['Comment'] as $Comment)
+                                    <tr>
+                                        <td>
+                                            {{ $Comment->ContainerNo }}
+                                            <br>
+                                            {{ $Comment->EmpName }}
+                                        </td>
+                                        <td>
+                                            {{ $Comment->Remark }}
+                                            <br>
+                                            เวลา : {{ ShowDate($Comment->RemarkTime,"d-m-Y H:i") }}
+                                        </td>
+                                    </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
+                        </div>     
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

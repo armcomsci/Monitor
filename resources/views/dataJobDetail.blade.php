@@ -3,6 +3,12 @@
         <h4>ข้อมูลคนรถ/แผนที่</h4>
         <div class="d-flex justify-content-between mb-2">
             <div>
+                <div class="avatar">
+                    <img alt="avatar" src="https://images.jtpackconnect.com/empdrive/{{ $Data['Drive']->EmpDriverCode.".jpg" }}"  class="rounded-circle hidden-list" onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';" />
+                    <span class="hiddenimg">
+                        <img  src="https://images.jtpackconnect.com/empdrive/{{ $Data['Drive']->EmpDriverCode.".jpg" }}"  style="width: 250px; height: 250px;"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';"/>
+                    </span>
+                </div>
                 <h5>ชื่อ-นามสกุล : {{ $Data['Drive']->EmpDriverName." ".$Data['Drive']->EmpDriverlastName }} </h5>
                 <h5>เบอร์ติดต่อ : {{ $Data['Drive']->EmpDriverTel }}</h5>
             </div>

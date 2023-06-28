@@ -83,7 +83,34 @@ thead{
     display: none;
 }
 #map{
-    height: 480px;
+    height: 400px;
+}
+.mail-box-container .avatar{
+    width: 64px;
+    height: 64px;
+}
+.hiddenimg {
+  display: none;
+}
+.hidden-list:hover ~ .hiddenimg {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    left: 100px;
+    top: 0px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 5px;
+}
+.hiddentxt:hover ~ .hiddenimg {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    left: 100px;
+    bottom: 0px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 5px;
 }
 </style>
 @endsection
@@ -179,6 +206,12 @@ thead{
                                             <div class="col-4 pl-4">
                                                 <div class="d-flex justify-content-between mb-2">
                                                     <div>
+                                                        <div class="avatar avatar-xl" style="width: 100px; height: 100px;" > 
+                                                            <img alt="avatar" src=""  class="rounded ProfileDrive hiddentxt"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';" />
+                                                            <span class="hiddenimg">
+                                                                <img src=""  class="ProfileDrive"  style="width: 250px; height: 250px;"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';"/>
+                                                            </span>
+                                                        </div>
                                                         <h5>ชื่อ-นามสกุล : <span id="FullNameDrive"></span> </h5>
                                                         <h5>เบอร์ติดต่อ : <span id="TelDriv"></span></h5>
                                                     </div>
@@ -259,7 +292,10 @@ thead{
                                                                         </td>
                                                                         <td class="text-break">
                                                                             <div class="avatar">
-                                                                                <img alt="avatar" src="{{ asset('theme/assets/img/90x90.jpg') }}" class="rounded-circle" />
+                                                                                <img alt="avatar" src="https://images.jtpackconnect.com/empdrive/{{ $emp->EmpDriverCode.".jpg" }}" class="rounded-circle hidden-list"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';"  />
+                                                                                <span class="hiddenimg">
+                                                                                    <img  src="https://images.jtpackconnect.com/empdrive/{{ $emp->EmpDriverCode.".jpg" }}"  style="width: 250px; height: 250px;"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';"/>
+                                                                                </span>
                                                                             </div>
                                                                             <div>
                                                                                 {{ $emp->EmpDriverName." ".$emp->EmpDriverlastName }}<br>{{ $emp->EmpDriverTel }}
@@ -934,6 +970,7 @@ thead{
         $('.Cust tbody tr').remove();
         $('.event tbody tr').remove();
         $('#AddBillTime').empty();
+        $('.ProfileDrive').removeAttr('src');
         $('#closeJob,#AddBillTime').css('display','none');
         $('.counter').text(response['Comment']);
         let html = '';
@@ -941,7 +978,7 @@ thead{
         let bg_class;
         let alertCustImg = '';
         $.each(response['Order'], function (index, value) { 
-            console.log(value);
+            // console.log(value);
             if(value.Flag_st == 'Y'){
                 bg_class = "successFlag";
             }else if(value.Flag_st == 'N'){
@@ -978,6 +1015,8 @@ thead{
         }
         $('#ConfirmCloseJob').attr('data-container','');
         // console.log(response['Drive'].statusTrans);
+        let profilePath = 'https://images.jtpackconnect.com/empdrive/'+response['Drive'].EmpDriverCode+'.jpg';
+        $('.ProfileDrive').attr('src',profilePath);
         if(response['AddBill'].ContainerNO != null && response['Drive'].statusTrans != "W"){
             $('#ConfirmCloseJob').attr('data-container',response['AddBill'].ContainerNO);
             $('#closeJob,#AddBillTime').fadeIn(500);

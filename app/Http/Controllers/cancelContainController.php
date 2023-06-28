@@ -14,7 +14,7 @@ class cancelContainController extends Controller
         $Port    = Auth::user()->EmpCode;
 
         $Container = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')
-                        ->join('TMSDBM.dbo.nTMConTain_hd as nTMConTain_hd','m_contain.ContainerNo','nTMConTain_hd.ContainerNo')
+                        ->join('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain_Cancel as Contain_Cancel','m_contain.ContainerNo','Contain_Cancel.ContainerNo')
                         ->join('LMSJob_Contain as job','m_contain.ContainerNo','job.ContainerNo')
                         ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')
                         ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
@@ -24,7 +24,7 @@ class cancelContainController extends Controller
                         ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverTel','CDriv.VehicleCode','contain.created_at','contain.updated_at','transp.CarType','job_transfer.Status as status_transfer','m_contain.ConfirmFlag as flag_job','m_contain.ConfirmDate','contain.flag as flag_exit')
                         ->distinct()
                         ->where([
-                                'nTMConTain_hd.Flag_st'=>'J',
+                                'Contain_Cancel.Flag_st'=>'N',
                                 'm_contain.ConfirmFlag' => 'Y',
                                 'CDriv.IsDefault'=>'Y',
                                 'contain.flag'=>'N',

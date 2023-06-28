@@ -24,6 +24,23 @@
     i{
         cursor: pointer;
     }
+    .avatar{
+        width: 80px !important;
+        height: 80px !important;
+    }
+    .hiddenimg {
+        display: none;
+    }
+    .hidden-list:hover ~ .hiddenimg {
+        display: block;
+        position: absolute;
+        z-index: 2;
+        left: 100px;
+        top: 0px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 5px;
+    }
  </style>
 @endsection
 
@@ -93,7 +110,10 @@
                                                     </td>
                                                     <td class="text-break">
                                                         <div class="avatar">
-                                                            <img alt="avatar" src="{{ asset('theme/assets/img/90x90.jpg') }}" class="rounded-circle" />
+                                                            <img alt="avatar" src="https://images.jtpackconnect.com/empdrive/{{ $item->EmpDriverCode.".jpg" }}"  class="rounded-circle hidden-list" onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';" />
+                                                            <span class="hiddenimg">
+                                                                <img  src="https://images.jtpackconnect.com/empdrive/{{ $item->EmpDriverCode.".jpg" }}"  style="width: 250px; height: 250px;"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';"/>
+                                                            </span>
                                                         </div>
                                                         <div>
                                                             {{ $item->EmpDriverName." ".$item->EmpDriverlastName }}<br>{{ $item->EmpDriverTel }}
@@ -222,44 +242,56 @@
                 })
                 return false;
             }else{
-                $.ajax({
-                    type: "post",
-                    url: url+"/SaveTimeEmp",
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    data: $('#ConfirmEmp').serialize(),
-                    // dataType: "dataType",
-                    beforeSend : function (){
-                        $('#saveChange').attr('disabled',false);
-                    },
-                    success: function (response) {
-                        $('#saveChange').attr('disabled',true);
-                        if(response == "success"){
-                            swal({
-                                title: 'บันทึกสำเร็จ',
-                                text: '',
-                                type: 'success',
-                                padding: '2em'
-                            }).then((result) => {
-                                location.reload();
-                            })
-                        }else{
-                            swal({
-                                title: 'เกิดข้อผิดพลาด',
-                                text: response,
-                                type: 'error',
-                                padding: '2em'
-                            })
-                        }
-                    },  
-                    error: function (response) {
-                        swal({
-                            title: 'เกิดข้อผิดพลาด',
-                            text: response,
-                            type: 'error',
-                            padding: '2em'
-                        })
+                swal({
+                    title: "ต้องการแก้ไขเวลาของคนรถ ?",
+                    text: "คะแนนของคุณจะถูกลบ 0.5 หากมีการแก้ไขให้กับคนรถ",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'ยืนยัน',
+                    cancelButtonText: 'ยกเลิก',
+                    padding: '2em'
+                }).then(function(result) {
+                    if (result.value) {
+                        $.ajax({
+                            type: "post",
+                            url: url+"/SaveTimeEmp",
+                            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                            data: $('#ConfirmEmp').serialize(),
+                            // dataType: "dataType",
+                            beforeSend : function (){
+                                $('#saveChange').attr('disabled',false);
+                            },
+                            success: function (response) {
+                                $('#saveChange').attr('disabled',true);
+                                if(response == "success"){
+                                    swal({
+                                        title: 'บันทึกสำเร็จ',
+                                        text: '',
+                                        type: 'success',
+                                        padding: '2em'
+                                    }).then((result) => {
+                                        location.reload();
+                                    })
+                                }else{
+                                    swal({
+                                        title: 'เกิดข้อผิดพลาด',
+                                        text: response,
+                                        type: 'error',
+                                        padding: '2em'
+                                    })
+                                }
+                            },  
+                            error: function (response) {
+                                swal({
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: response,
+                                    type: 'error',
+                                    padding: '2em'
+                                })
+                            }
+                        });
                     }
-                });
+                })
             }
         });
 

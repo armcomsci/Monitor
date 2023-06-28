@@ -12,21 +12,28 @@ class confirmImgCustController extends Controller
     public function index(Request $req){
         $Custname = '';
         $status = 'N';
+        // $status2 = '';
 
         if(isset($req->CustName) || isset($req->status) ){
             $Custname = $req->CustName;
             $status   = $req->status;
+            $status2 =  $req->status;
         }
 
         $imgCust = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchConfirmGPS');
-        if($status != 'A'){
-            $imgCust  = $imgCust->where('Flag_st',$status);
+        if($status == "N"){
+            $imgCust  = $imgCust->where(['Flag_st'=>'Y','Flag_st_2'=>'N']);
+            $imgCust  = $imgCust->whereNotNull('AppvName');
+        }elseif($status == "Y"){
+            $imgCust  = $imgCust->where('Flag_st','Y');
+            $imgCust  = $imgCust->where('Flag_st_2','Y');
         }
         if($Custname != ""){
             $imgCust  = $imgCust->where('CustName','LIKE',"%$Custname%");
         }
         $imgCust  = $imgCust->whereNotNull('ImgPath');
         $imgCust  = $imgCust->get();
+        // dd($imgCust);
 
         return view('confirmImgCust',compact('imgCust','status','Custname'));
     }

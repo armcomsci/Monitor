@@ -21,6 +21,19 @@
         top: 0;
         z-index: 100;
     }
+    .hiddenimg {
+        display: none;
+    }
+    .hidden-list:hover ~ .hiddenimg {
+        display: block;
+        position: absolute;
+        z-index: 2;
+        left: 100px;
+        top: 0px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 5px;
+    }
  </style>
 @endsection
 
@@ -90,7 +103,10 @@
                                                     </td>
                                                     <td class="text-break">
                                                         <div class="avatar">
-                                                            <img alt="avatar" src="{{ asset('theme/assets/img/90x90.jpg') }}" class="rounded-circle" />
+                                                            <img alt="avatar" src="https://images.jtpackconnect.com/empdrive/{{ $item->EmpDriverCode.".jpg" }}"  class="rounded-circle hidden-list" onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';" />
+                                                            <span class="hiddenimg">
+                                                                <img  src="https://images.jtpackconnect.com/empdrive/{{ $item->EmpDriverCode.".jpg" }}"  style="width: 250px; height: 250px;"  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}"/>
+                                                            </span>
                                                         </div>
                                                         <div>
                                                             {{ $item->EmpDriverName." ".$item->EmpDriverlastName }}<br>{{ $item->EmpDriverTel }}
@@ -214,7 +230,13 @@
                     headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
                     data: $('#ConfirmEmp').serialize(),
                     // dataType: "dataType",
+                    beforeSend:function(){
+                        // $('.loaddingModal').css('display','block');
+                        $('#saveChange').attr('disabled',true);
+                        
+                    },
                     success: function (response) {
+                        $('#saveChange').attr('disabled',false);
                         if(response == "success"){
                             swal({
                                 title: 'บันทึกสำเร็จ',
