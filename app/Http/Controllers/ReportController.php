@@ -16,6 +16,7 @@ class ReportController extends Controller
                             ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode')
                             ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                             ->where('lmCarDriv.IsDefault','Y')
+                            ->where('lmEmpDriv.Active','Y')
                             ->orderBy('lmEmpDriv.EmpDriverCode')
                             ->get();
     
