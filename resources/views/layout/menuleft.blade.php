@@ -56,6 +56,7 @@
                         <li>
                             <a href="{{ url('/AddCar') }}">กำหนดเที่ยวรถ</a>
                         </li>
+                        
                     @endif
                 </ul>
             </li>
@@ -77,6 +78,9 @@
                     </li>
                     <li>
                         <a href="{{ url('/AdminConfirmImg') }}">ยืนยันตำแหน่งร้านค้า</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/ReportScore') }}">รายงานคะแนน</a>
                     </li>
                     @endif
                     <li>

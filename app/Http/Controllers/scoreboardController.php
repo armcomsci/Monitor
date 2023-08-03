@@ -193,6 +193,7 @@ class scoreboardController extends Controller
                         ->select('LMSLog_login.*','LMSusers.Fullname');
         // $userOnline  = $userOnline->where('LMSLog_login.Status_online','Y');
         $userOnline  = $userOnline->where('LMSLog_login.EmpCode','<>',Auth::user()->EmpCode);
+        $userOnline  = $userOnline->where('LMSusers.type','1');
         $userOnline  = $userOnline->whereRaw("CONVERT(varchar,LMSLog_login.Login_time,112) LIKE '%$Curent_date%' ");
         $userOnline  = $userOnline->get();
 

@@ -156,4 +156,41 @@ class ReportController extends Controller
         // dd($Data);
         return response()->json($Data, 200);
     }
+
+    public function reportScore(){
+        return view('reportScore');
+    }
+
+    public function findScore(Request $req){
+        $dateRange  = $req->dateRange;
+        $dateRange  = explode(' - ',$dateRange);
+
+        $date_start       = $dateRange[0];
+        $Stamp_date_start = Carbon::createFromFormat('d/m/Y', $date_start)->format('Ymd');
+
+        $date_end       = $dateRange[1];
+        $Stamp_date_end = Carbon::createFromFormat('d/m/Y', $date_end)->format('Ymd');
+
+        $ScoreSum =  DB::table('LMSScoreJob as score')
+                    ->join('LMSusers as LmsUser','score.Empcode','LmsUser.Empcode')
+                    ->select('LmsUser.Fullname','LmsUser.EmpCode')
+                    ->selectRaw('SUM(score.Score) as TotalScore , DATEPART(MONTH, score.DateTime) as ScoreMonth')
+                    ->whereRaw("(CONVERT(varchar, score.DateTime, 112) BETWEEN '$Stamp_date_start' AND '$Stamp_date_end'  ) ")
+                    ->groupBy('LmsUser.EmpCode','LmsUser.Fullname')
+                    ->groupByRaw('DATEPART(MONTH, score.DateTime)')
+                    ->orderByRaw('DATEPART(MONTH, score.DateTime) ASC , TotalScore DESC')
+                    ->get();
+
+        $ScoreAll =  DB::table('LMSScoreJob as score')
+                    ->join('LMSusers as LmsUser','score.Empcode','LmsUser.Empcode')
+                    ->select('LmsUser.Fullname','LmsUser.EmpCode')
+                    ->selectRaw('SUM(score.Score) as TotalScore')
+                    ->whereRaw("(CONVERT(varchar, score.DateTime, 112) BETWEEN '$Stamp_date_start' AND '$Stamp_date_end'  ) ")
+                    ->groupBy('LmsUser.EmpCode','LmsUser.Fullname')
+                    ->orderBydesc('TotalScore')
+                    ->get()
+                    ->toArray();
+        
+        return view('dataScoreEmp',compact('ScoreSum','ScoreAll'));
+    }
 }

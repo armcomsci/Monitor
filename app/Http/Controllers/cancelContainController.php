@@ -31,7 +31,7 @@ class cancelContainController extends Controller
                                 'job.EmpCode'=>$Port,
                                 'job.status'=>'N'
                             ])
-                        ->whereRaw('(contain.created_at is null OR contain.updated_at is null)')
+                        // ->whereRaw('(contain.created_at is null OR contain.updated_at is null)')
                         ->get();
         // dd($Container);
         return view('cancelContain',compact('Container'));

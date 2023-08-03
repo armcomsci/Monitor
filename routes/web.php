@@ -72,6 +72,8 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/ReportJobClose','ReportController@reportJobClose');
     Route::post('/FindJobClose','ReportController@findCloseJob');
     Route::get('/JobCloseOrderItem/{Container}','ReportController@JobCloseOrderItem');
+    Route::get('/ReportScore','ReportController@reportScore');
+    Route::post('/FindScore','ReportController@findScore');
 
     Route::get('/CancelContain','cancelContainController@index');
     Route::post('/ReturnFlagContainer','cancelContainController@confirmReturn');
