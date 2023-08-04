@@ -48,4 +48,37 @@
         $Notify = DB::table('LMSNottification')->orderByDesc('Datetime')->limit(15)->get();
         return $Notify;
     }
+
+    function CheckCancelContainer($Container){
+
+        $tmConTain_bk = DB::table('tmConTain_bk')
+                        ->select('Flag_st')
+                        ->where(['ContainerNO'=>$Container,
+                                'Flag_st'=>'R'])
+                        ->first();
+
+        $tmConTain_dl = DB::table('tmConTain_dl')
+                        ->select('Flag_st')
+                        ->where(['ContainerNO'=>$Container,
+                                'Flag_st'=>'R'])
+                        ->first();
+
+       $tmConTain   = DB::table('tmConTain')
+                        ->select('Flag_st')
+                        ->where(['ContainerNO'=>$Container,
+                                'Flag_st'=>'R'])
+                        ->first();
+
+        if(
+            ($tmConTain_bk != '' && $tmConTain_bk->Flag_st == "R") || 
+            ($tmConTain_dl != '' && $tmConTain_dl->Flag_st == "R") || 
+            ($tmConTain != '' && $tmConTain->Flag_st == "R")
+        ){
+            $Contain_Flag = 'Y';
+        }else{
+            $Contain_Flag = 'N';
+        }
+
+        return $Contain_Flag;
+    }
 ?>

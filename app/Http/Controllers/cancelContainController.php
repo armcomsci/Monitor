@@ -27,7 +27,7 @@ class cancelContainController extends Controller
                                 'Contain_Cancel.Flag_st'=>'N',
                                 'm_contain.ConfirmFlag' => 'Y',
                                 'CDriv.IsDefault'=>'Y',
-                                'contain.flag'=>'N',
+                                // 'contain.flag'=>'N',
                                 'job.EmpCode'=>$Port,
                                 'job.status'=>'N'
                             ])
@@ -38,15 +38,21 @@ class cancelContainController extends Controller
     }
 
     public function confirmReturn(Request $req){
-        DB::beginTransaction();
-        try {
-            $nlmContain  = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain')
+        $nlmContain  = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain')
                     ->where('ContainerNO',$req->container)
                     ->update(['ConfirmFlag'=>'N']);
 
+        DB::beginTransaction();
+        try {
             $ConTain_hd = DB::table('TMSDBM.dbo.nTMConTain_hd')
                     ->where('ContainerNO',$req->container)
                     ->update(['Flag_st'=>'X']);
+
+            $Port    = Auth::user()->EmpCode;
+
+            $Log['EmpCode'] = $Port;
+            $Log['containerNo'] = $req->container;
+            DB::table('LMSLogConfirm_cancel_container')->insert($Log);
 
             DB::commit();
             return "success";

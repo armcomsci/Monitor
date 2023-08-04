@@ -81,6 +81,10 @@
                                                                 $Carsize = 'รถใหญ่';
                                                                 break;
                                                         }
+                                                        $statusContain = CheckCancelContainer($item->ContainerNo);
+                                                        if($statusContain == "N"){
+                                                            continue;
+                                                        }
                                                     @endphp
                                                     <tr class="dataContain" data-contain="{{ $item->ContainerNo }}" >
                                                         <td>#{{ $item->ContainerNo }}</td>
@@ -140,10 +144,10 @@
         });
         $('.returnContainer').click(function (e) { 
             e.preventDefault();
-            let container =  $(this).parent().parent().data('contain');
+            var container1 =  $(this).parent().parent().data('contain');
             swal({
                 title: 'ต้องการคืนตู้ ?',
-                text: 'เลขตู้ :'+container,
+                text: 'เลขตู้ :'+container1,
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'ยืนยัน',
@@ -155,7 +159,7 @@
                         type: "post",
                         url: url+"/ReturnFlagContainer",
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        data: {container:ContainerNo},
+                        data: {container:container1},
                         // dataType: "dataType",
                         success: function (response) {
                             if(response == "success"){
