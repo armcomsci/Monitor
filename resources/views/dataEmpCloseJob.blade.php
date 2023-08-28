@@ -11,9 +11,10 @@
                         <th>แสกนออก</th>
                         <th>จำนวนที่ส่ง/สินค้าทั้งหมด</th>
                         <th>ร้านค้าที่ส่ง/ร้านทั้งหมด</th>
-                        <th>เวลาวางบิล</th>
+                        <th>วันที่ส่งของเสร็จ</th>
+                        <th>คืนบิล</th>
                         <th>ระยะเวลาเดินทางทั้งหมด</th>
-                        <th>วันที่ปิดงาน</th>
+                        <th>วันที่ผู้ดูแลปิดงาน</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -25,6 +26,7 @@
                             <td>{{ $job->ExitTime }}</td>
                             <td>{{ $job->SumItemSend."/".$job->SumItemAll }}</td>
                             <td>{{ $job->CustSendSuccess."/".$job->CustSendAll }}</td>
+                            <td>{{ $job->TimeSend }}</td>
                             <td>{{ $job->AddBillTime }}</td>
                             <td>{{ $job->TimeSendAll }}</td>
                             <td>{{ ShowDate($job->Created_time,"d-m-Y H:i") }}</td>

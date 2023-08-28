@@ -21,6 +21,9 @@
         top: 0;
         z-index: 100;
     }
+    .Send_Success{
+        background-color: #2fa932 !important;
+    }
     .activeTr{
         background-color: yellow;
     }
@@ -152,6 +155,28 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="DataTimeline" tabindex="-1" role="dialog"  aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="Header-Timeline"></h5>
+            </div>
+            <div class="modal-body">
+                <div class="loaddingModal"></div>
+                <div id="tracking-pre"></div>
+                <div id="tracking" style="height: 630px; overflow-x: auto;">
+                    <div class="text-center tracking-status-intransit">
+                        <p class="tracking-status text-tight">Time Line</p>
+                    </div>
+                    <div class="tracking-list" style="overflow-x:auto">
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('script')
@@ -208,6 +233,54 @@
                 $('#JobDetail').html(response);
             }
         });
+    });
+
+    $(document).on('click','.timeline',function(e){
+        $('#DataTimeline').modal('show');
+        let Container   = $('.activeTr').data('contain');
+        if(Container != ""){
+            $.ajax({
+                type: "get",
+                url: url+"/DtOrderItem/"+Container,
+                // data: "data",
+                dataType: "json",
+                beforeSend:function(){
+                    $('.tracking-list').empty();
+                    $('.loaddingModal').css('display','block');
+                    // $('.loaddingModal').next().css('display','none');
+                },
+                success: function (response) {
+                    $('.loaddingModal').css('display','block');
+                    if(response['CustList'] != ""){
+                        $('#Header-Timeline').text('Timeline เลขตู้ : '+Container)
+                        let html_cust = '';
+                        $.each(response['CustList'], function (index, value) { 
+                                // console.log(value.Flag_st_date);
+                                let statusSend = '';
+                                if(value.Flag_st == 'Y'){
+                                    statusSend = 'Send_Success';
+                                }else{
+                                    statusSend = 'Send_not';
+                                }
+                                html_cust += "<div class=\"tracking-item\">";
+                                html_cust += "<div class=\"tracking-icon status-intransit "+statusSend+"\">";
+                                // html_cust += "<i class=\"fa fa-circle\"></i>"
+                                html_cust += "</div>";
+                                if(value.Flag_st_date != null){
+                                    html_cust += "<div class=\"tracking-date\">"+moment(value.Flag_st_date).format('D MMMM YYYY')+"<span>"+moment(value.Flag_st_date).format('HH:mm')+"</span></div>";
+                                }else{
+                                    html_cust += "<div class=\"tracking-date\"></div>";
+                                }
+                            
+                                html_cust += "<div class=\"tracking-content\">"+value.CustName+"<span>"+value.ShiptoAddr1+"</span></div>"
+                                html_cust += "</div>";
+                        });
+                        $('.tracking-list').append(html_cust);
+                    }
+                            
+                }
+            });
+        }
     });
 
     $(document).on('click','.CustCode',function(e){

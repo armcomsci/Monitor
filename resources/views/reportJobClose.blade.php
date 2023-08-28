@@ -12,6 +12,7 @@
  <link href="{{ asset('theme/plugins/sweetalerts/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/plugins/sweetalerts/sweetalert.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/plugins/notification/snackbar/snackbar.min.css') }}" rel="stylesheet" type="text/css" />
+ <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/select2/select2.min.css') }}">
  <link href="{{ asset('theme/assets/css/elements/avatar.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/assets/css/users/user-profile.css') }}" rel="stylesheet" type="text/css" />
  <link rel="stylesheet" href="{{ asset('theme/assets/css/daterangepicker.css') }}">
@@ -26,6 +27,12 @@
     }
     .activeTr{
         background: #e4f852;
+    }
+    .select2-container--default .select2-selection--multiple{
+        padding: 4px 13px;
+    }
+    .select2-container--default .select2-selection--multiple{
+        background: #ffffff;
     }
  </style>
  @endsection
@@ -66,11 +73,19 @@
                                             <input type="text" class="form-control" name="dateRange" id="Time" placeholder="ช่วงเวลา">
                                         </div>
                                         <div class="col-2">
-                                            <select class="form-control " name="port" >
-                                                <option></option>
+                                            <select class="form-control port" name="port" >
+                                                <option value=""></option>
                                                     @foreach ($Users as $user)
                                                         <option value="{{ $user->EmpCode }}">{{ $user->Fullname }}</option>
                                                     @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-2">
+                                            <select class="form-control cargroup" name="cargroup[]" multiple>
+                                                <option value=""></option>
+                                                @foreach ($CarGroup as $car)
+                                                    <option value="{{ $car->EmpGroupCode }}">{{ $car->EmpGroupName }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
                                         <div class="col-1 mt-1">
@@ -122,8 +137,17 @@
 @section('script')
 <script src="{{ asset('theme/assets/js/daterangepicker.js') }}"></script>
 <script src="{{ asset('theme/plugins/table/datatable/datatables.js') }}"></script>
+<script src="{{ asset('theme/plugins/select2/select2.min.js') }}"></script>
 <script>
-    
+     $('.cargroup').select2({
+        // tags: true,
+        placeholder: "กลุ่มรถ",
+    });
+    $('.port').select2({
+        // tags: true,
+        placeholder: "ผู้ดูแล",
+    });
+
     const minDate = new Date();
     minDate.setMonth(minDate.getMonth() - 3);
     minDate.setDate(1)
@@ -181,7 +205,7 @@
                     "stripeClasses": [],
                     // "lengthMenu": [7, 10, 20, 50],
                     "pageLength": 7 ,
-                    "ordering": false
+                    "ordering": true
                 });
                 $("#SumJobClose").text();
             }

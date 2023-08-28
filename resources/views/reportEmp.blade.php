@@ -26,6 +26,9 @@
         z-index: 100;
     }
     .select2-container--default .select2-selection--multiple{
+        padding: 4px 13px;
+    }
+    .select2-container--default .select2-selection--multiple{
         background: #ffffff;
     }
     tr{
@@ -98,6 +101,14 @@
                                             </select>
                                         </div>
                                         <div class="col-2">
+                                            <select class="form-control cargroup" name="cargroup[]" multiple>
+                                                <option></option>
+                                                @foreach ($CarGroup as $car)
+                                                    <option value="{{ $car->EmpGroupCode }}">{{ $car->EmpGroupName }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-2">
                                             <select class="form-control carSize" name="carSize[]" multiple>
                                                 <option></option>
                                                 <option value="CT001">รถเล็ก</option>
@@ -165,12 +176,14 @@
     $(".empcode").select2({
         // tags: true,
         placeholder: "ค้นหาพนักงาน",
-        // dropdownParent: $("#ChangeEmpDriv")
     });
     $(".carSize").select2({
         // tags: true,
         placeholder: "ขนาดรถ",
-        // dropdownParent: $("#ChangeEmpDriv")
+    });
+    $('.cargroup').select2({
+        // tags: true,
+        placeholder: "กลุ่มรถ",
     });
 
 

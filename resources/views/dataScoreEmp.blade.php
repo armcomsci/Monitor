@@ -16,7 +16,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-8">
+        <div class="col-5">
             <div class="table-responsive" style="height: 650px;">
                 <table class="table table-bordered mb-4">
                     <tr style="background-color: #009688">
@@ -33,13 +33,25 @@
                     <tbody>
                         @foreach ($ScoreSum as $score)
                         @php
+                            $StrMonth = str_pad($score->ScoreMonth,2,'0',STR_PAD_LEFT);
                             if($Month != $score->ScoreMonth && $Month != ''){
                                 $Color_i++;
                             }
+
+                            if(!isset($SumTotal[$StrMonth])){
+                                $SumTotal[$StrMonth] = $score->TotalScore;
+                            }else{
+                                $SumTotal[$StrMonth] += $score->TotalScore;
+                            }
+                           
+                            if($Color_i%3 == 0){
+                                $Color_i  = 0;
+                            }
+                           
                         @endphp
                         <tr style="background-color: {{ $color[$Color_i] }}">
                             <td>{{ $score->Fullname }}</td>
-                            <td>{{ MonthThai(str_pad($score->ScoreMonth,2,'0',STR_PAD_LEFT)) }}</td>
+                            <td>{{ MonthThai($StrMonth) }}</td>
                             <td>{{ number_format($score->TotalScore,2) }}</td>
                         </tr>
                         @php
@@ -47,6 +59,51 @@
                         @endphp
                         @endforeach
                     </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-3">
+            <div class="table-responsive" style="height: 650px;">
+                @php
+                      $strMonthCut = Array("01"=>"มกราคม"
+                                ,"02"=>"กุมภาพันธ์"
+                                ,"03"=>"มีนาคม"
+                                ,"04"=>"เมษายน"
+                                ,"05"=>"พฤษภาคม"
+                                ,"06"=>"มิถุนายน"
+                                ,"07"=>"กรกฎาคม"
+                                ,"08"=>"สิงหาคม"
+                                ,"09"=>"กันยายน"
+                                ,"10"=>"ตุลาคม"
+                                ,"11"=>"พฤจิกายน"
+                                ,"12"=>"ธันวาคม");
+                @endphp
+                <table class="table table-bordered mb-4">
+                    <tr style="background-color: #f5b500">
+                        <th>เดือน</th>
+                        <th class="text-center">คะแนนรวม</th>
+                    </tr>
+
+                    @foreach ($strMonthCut as $key => $Month)
+                        <tr>
+                            <td>{{ $Month }}</td>
+                            <td>
+                                @if(!isset($SumTotal[$key]))
+                                    0
+                                @else
+                                    {{ number_format($SumTotal[$key],2) }}
+                                    @php
+                                        $SumScore[] = $SumTotal[$key];
+                                    @endphp
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                    <tr>
+                        <td><h5>รวม</h5></td>
+                        <td><h5>{{ number_format(array_sum($SumScore),2) }}</h5></td>
+                    </tr>
                 </table>
             </div>
         </div>

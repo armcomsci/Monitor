@@ -36,7 +36,7 @@ class scoreboardController extends Controller
      
         $Login    =  new LoginController();
         $CountJob =  $Login->CheckPort(1);
-
+                            // dd($CountJob);
         $AllJob   =  DB::table('LMSJob_Contain as job')
                         ->join('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain','job.ContainerNo','m_contain.ContainerNo')
                         ->where('job.EmpCode',$Port)
@@ -188,13 +188,14 @@ class scoreboardController extends Controller
     public function getUserLogin(){
         $Curent_date = date('Ymd');
 
-        $userOnline  = DB::table('LMSLog_login')
-                        ->join('LMSusers','LMSLog_login.EmpCode','LMSusers.EmpCode')
-                        ->select('LMSLog_login.*','LMSusers.Fullname');
+        $userOnline  = DB::table('LMSusers')
+                        // ->leftjoin('LMSLog_login','LMSLog_login.EmpCode','LMSusers.EmpCode')
+                        ->select('LMSusers.*')
+                        ->selectRaw("(select Status_online FROM LMSLog_login where CONVERT(varchar,LMSLog_login.Login_time,112) LIKE '%$Curent_date%' and LMSusers.EmpCode = LMSLog_login.EmpCode ) as Status_online");
         // $userOnline  = $userOnline->where('LMSLog_login.Status_online','Y');
-        $userOnline  = $userOnline->where('LMSLog_login.EmpCode','<>',Auth::user()->EmpCode);
+        $userOnline  = $userOnline->where('LMSusers.EmpCode','<>',Auth::user()->EmpCode);
         $userOnline  = $userOnline->where('LMSusers.type','1');
-        $userOnline  = $userOnline->whereRaw("CONVERT(varchar,LMSLog_login.Login_time,112) LIKE '%$Curent_date%' ");
+        // $userOnline  = $userOnline->whereRaw("CONVERT(varchar,LMSLog_login.Login_time,112) LIKE '%$Curent_date%' ");
         $userOnline  = $userOnline->get();
 
         return response()->json($userOnline, 200);
@@ -696,6 +697,7 @@ class scoreboardController extends Controller
         try {
             $data = session()->get('dataClose');
             // dd($data);
+            $dataInsert['DriverCode']       = $data['EmpDriverCode'];
             $dataInsert['DriveName']        = $data['DriveName'];
             $dataInsert['DriveTel']         = $data['DriveTel'];
             $dataInsert['ContainerNo']      = $data['Container'];

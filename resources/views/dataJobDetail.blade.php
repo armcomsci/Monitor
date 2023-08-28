@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-7" style="height: 520px;">
-        <h4>ข้อมูลคนรถ/แผนที่</h4>
+        <h4>ข้อมูลคนรถ/แผนที่ <span style="float: right"><img src="{{ asset('/icon/timeline.png') }}" style="width: 56px; height: 56px;" title="TimeLine" class="timeline"></span></h4>
         <div class="d-flex justify-content-between mb-2">
             <div>
                 <div class="avatar">
@@ -13,9 +13,9 @@
                 <h5>เบอร์ติดต่อ : {{ $Data['Drive']->EmpDriverTel }}</h5>
             </div>
             <div>
-                <div>
+                <div style="padding-top: 65px;">
                     @if(isset($Data['AddBill']) && $Data['AddBill']->Addbill_Time != "")
-                        <span class="badge outline-badge-warning " id="AddBillTime"> ส่งบิลเมื่อ : {{ $Data['AddBill']->Addbill_Time }} </span>
+                        <span class="badge outline-badge-warning " id="AddBillTime"> วางบิลเมื่อ : {{ $Data['AddBill']->Addbill_Time }} </span>
                     @endif
                 </div>
                 {{-- <div class="mt-2">

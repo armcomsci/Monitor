@@ -82,6 +82,12 @@
                     <li>
                         <a href="{{ url('/ReportScore') }}">รายงานคะแนน</a>
                     </li>
+                    <li>
+                        <a href="{{ url('/ReportRemark') }}">รายงานหมายเหตุ</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('/ReportCustConfirm') }}">รายงานรูปภาพร้านค้า</a>
+                    </li>
                     @endif
                     <li>
                         <a href="{{ url('/ReportEmpDriver') }}">จำนวนเที่ยวของคนรถ</a>

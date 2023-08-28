@@ -14,21 +14,18 @@
  <link href="{{ asset('theme/plugins/notification/snackbar/snackbar.min.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/assets/css/elements/avatar.css') }}" rel="stylesheet" type="text/css" />
  <link href="{{ asset('theme/assets/css/users/user-profile.css') }}" rel="stylesheet" type="text/css" />
- <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/select2/select2.min.css') }}">
  <link rel="stylesheet" href="{{ asset('theme/assets/css/daterangepicker.css') }}">
  <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/table/datatable/datatables.css') }}">
- <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/table/datatable/custom_dt_html5.css') }}">
  <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/table/datatable/dt-global_style.css') }}">
+ <link rel="stylesheet" type="text/css" href="{{ asset('theme/plugins/select2/select2.min.css') }}">
  <style>
-    thead{
-        position: sticky;
-        top: 0;
-        z-index: 100;
-    }
-    .select2-container--default .select2-selection--multiple{
+     .select2-container--default .select2-selection--multiple{
         background: #ffffff;
     }
-    tr{
+    .select2-container--default .select2-selection--multiple{
+        padding: 4px 13px;
+    }
+    #Table-JobClose tr{
         cursor: pointer;
     }
     .table > tbody > tr > td{
@@ -38,31 +35,31 @@
         background: #e4f852;
     }
  </style>
-@endsection
+ @endsection
 
-@section('sub-header')
-<div class="sub-header-container">
-    <header class="header navbar navbar-expand-sm">
-        <a href="{{ url('/') }}" class="sidebarCollapse" data-placement="bottom"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></a>
+ @section('sub-header')
+ <div class="sub-header-container">
+     <header class="header navbar navbar-expand-sm">
+         <a href="{{ url('/') }}" class="sidebarCollapse" data-placement="bottom"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></a>
+ 
+         <ul class="navbar-nav flex-row">
+             <li>
+                 <div class="page-header">
+                     <nav class="breadcrumb-one" aria-label="breadcrumb">
+                         <ol class="breadcrumb">
+                             <li class="breadcrumb-item"><a href="{{ url('/') }}">หน้าหลัก</a></li>
+                             <li class="breadcrumb-item active" aria-current="page"><span>รายงานร้านที่ยังไม่มีการอนุมัติ</span></li>
+                         </ol>
+                     </nav>
+                 </div>
+             </li>
+         </ul>
+     </header>
+ </div>   
+ @endsection
 
-        <ul class="navbar-nav flex-row">
-            <li>
-                <div class="page-header">
-                    <nav class="breadcrumb-one" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ url('/') }}">หน้าหลัก</a></li>
-                            <li class="breadcrumb-item active" aria-current="page"><span>ยืนยันตำแหน่งร้านค้า</span></li>
-                        </ol>
-                    </nav>
-                </div>
-            </li>
-        </ul>
-    </header>
-</div>   
-@endsection
-
-@section('content')
-<div id="content" class="main-content">
+ @section('content')
+ <div id="content" class="main-content">
     <div class="layout-px-spacing">
         <div class="row layout-top-spacing">
             <div class="col-xl-12 col-lg-12 col-md-12">
@@ -70,40 +67,22 @@
                     <div class="col-xl-12  col-md-12">
                         <div class="mail-box-container">
                             <div id="mailbox-inbox" class="accordion mailbox-inbox p-3">
-                                <form id="FindCust" action="{{ url('/AdminConfirmImg') }}" method="post">
-                                    @csrf
+                                {{-- <form id="FindCustImg" onSubmit="return false">
                                     <div class="form-group row mt-4">
                                         <div class="col-3">
-                                            <input type="text" class="form-control" name="CustName" placeholder="ชื่อร้าน" value="{{ $Custname }}">
-                                        </div>
-                                        <div class="col-2">
                                             <select class="form-control " name="status" >
-                                                @php
-                                                    if($status == 'N'){
-                                                        $selected =  "selected";
-                                                        $selected2 =  "";
-                                                        $selected3 =  "";
-                                                    }elseif($status == 'Y'){
-                                                        $selected =  "";
-                                                        $selected2 =  "selected";
-                                                        $selected3 =  "";
-                                                    }elseif($status == 'A'){
-                                                        $selected =  "";
-                                                        $selected2 =  "";
-                                                        $selected3 =  "selected";
-                                                    }
-                                                @endphp
-                                                <option value="N" {{ $selected }} >ผู้อนุมัติคนแรก(ยืนยันแล้ว)</option>
-                                                <option value="Y" {{ $selected2 }} >ยืนยันทั้งหมด</option>
-                                                <option value="A" {{ $selected3 }} >ทั้งหมด</option>
+                                                <option value="N">ยังไม่มีการดำเนินการ</option>
+                                                <option value="Y">ยืนยันแล้ว</option>
                                             </select>
                                         </div>
                                         <div class="col-1 mt-1">
-                                            <button type="submit" class="btn btn-outline-primary" id="Find"><i class="fa-solid fa-magnifying-glass"></i></button>
+                                            <button type="button" class="btn btn-outline-primary" id="Find"><i class="fa-solid fa-magnifying-glass"></i></button>
                                         </div>
                                     </div>
-                                </form>
+                                </form> --}}
+                                <div class="loaddingModal" style="height: 500px;"></div>
                                 <div id="dataImgCust">
+                                    <h4>รายงานร้านที่ยังไม่มีการอนุมัติ</h4>
                                     <div class="row">
                                         <div class="col-12">
                                             <div class="table-responsive" style="height: 650px;">
@@ -116,12 +95,12 @@
                                                             <th>ผู้อนุมัติคนแรก</th>
                                                             <th>ผู้อนุมัติคนสอง</th>
                                                             <th>แผนที่</th>
-                                                            <th>ยืนยัน/ปฏิเศษ</th>
+                                                            <th>ปฏิเศษ</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @if(count($imgCust) != "0")
-                                                            @foreach ($imgCust as $data)
+                                                        @if(count($Img) != "0")
+                                                            @foreach ($Img as $data)
                                                                 <tr id="Cust_{{ $data->CustID }}_{{ $data->ShipListNO }}">
                                                                     <td>{{ $data->CustName  }}</td>
                                                                     <td>{{ $data->ShiptoAddr1  }}</td>
@@ -136,10 +115,7 @@
                                                                         </a>
                                                                     </td>
                                                                     <td>
-                                                                        @if($data->Flag_st == 'N' || ($data->Flag_st_2 == '' || $data->Flag_st_2 == 'N' ))
-                                                                            <i class="fa-solid fa-check fa-2xl appvImg2"  style="color: #06e136;" data-status="Y" data-custid="{{ $data->CustID }}" data-listno="{{ $data->ShipListNO }}"></i>
-                                                                            <i class="fa-solid fa-x fa-2xl ml-3 appvImg2"  style="color: #ef2a4b;" data-status="N" data-custid="{{ $data->CustID }}" data-listno="{{ $data->ShipListNO }}"></i>
-                                                                        @endif
+                                                                        <i class="fa-solid fa-x fa-2xl ml-3 appvImg2"  style="color: #ef2a4b;" data-status="N" data-custid="{{ $data->CustID }}" data-listno="{{ $data->ShipListNO }}"></i>
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -162,56 +138,52 @@
         </div>
     </div>
 </div>
-<div class="modal fade " id="ConfirmImgCust" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="">รูปภาพร้าน</h3>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-            <div class="modal-body" style="height: 750px;" id="">
-                <img src="" alt="" id="imgPath" style="width: 100%; height: 700px;">
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
+ @endsection
 
-@section('script')
-<script src="{{ asset('theme/plugins/select2/select2.min.js') }}"></script>
+ @section('script')
 <script src="{{ asset('theme/assets/js/daterangepicker.js') }}"></script>
 <script src="{{ asset('theme/plugins/table/datatable/datatables.js') }}"></script>
-<script src="{{ asset('theme/plugins/table/datatable/button-ext/dataTables.buttons.min.js') }}"></script>
-<script src="{{ asset('theme/plugins/table/datatable/button-ext/jszip.min.js') }}"></script>    
-<script src="{{ asset('theme/plugins/table/datatable/button-ext/buttons.html5.min.js') }}"></script>
-<script src="{{ asset('theme/plugins/table/datatable/button-ext/buttons.print.min.js') }}"></script>
+<script src="{{ asset('theme/plugins/apex/apexcharts.min.js') }}"></script>
+<script src="{{ asset('theme/plugins/select2/select2.min.js') }}"></script>
 <script>
-    $(document).ready(function () {
-        $('#Table-Img').dataTable({
-            "dom": "<'dt--top-section'<'row'<'col-12 col-sm-6 d-flex justify-content-sm-start justify-content-center'l><'col-12 col-sm-6 d-flex justify-content-sm-end justify-content-center mt-sm-0 mt-3'f>>>" +
-            "<'table-responsive'tr>" +
-            "<'dt--bottom-section d-sm-flex justify-content-sm-between text-center'<'dt--pages-count  mb-sm-0 mb-3'i><'dt--pagination'p>>",
-            "oLanguage": {
-                "oPaginate": { "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>', "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>' },
-                "sInfo": "Showing page _PAGE_ of _PAGES_",
-                "sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
-                "sSearchPlaceholder": "Search...",
-            "sLengthMenu": "Results :  _MENU_",
-            },
-            "stripeClasses": [],
-            // "lengthMenu": [7, 10, 20, 50],
-            "pageLength": 7 ,
-            "ordering": true
-        });
-        $('.ShowImg').click(function (e) { 
-            e.preventDefault();
-            let imgPath = $(this).attr('src');
-            $('#imgPath').attr('src',imgPath);
-            $('#ConfirmImgCust').modal('show');
-        });
-        $('.appvImg2').click(function(e){
+   
+
+    const minDate = new Date();
+    minDate.setMonth(minDate.getMonth() - 3);
+    minDate.setDate(1)
+
+    $('#Time').daterangepicker({
+        startDate: minDate, // set the initial start date
+        // minDate: minDate, // set the initial end date to today
+        maxDate : moment(),
+        // timePicker: true, // enable time picker
+        timePicker24Hour: true, // use 24-hour time format
+        // timePickerIncrement: 15, // increment time by 15 minutes
+        opens: 'left', // position the picker to the left of the input
+        // singleDatePicker: true,
+        locale: {
+            format: 'DD/MM/YYYY', // set the format of the selected date range
+        }
+    });
+
+    $('#Table-Img').dataTable({
+        "dom": "<'dt--top-section'<'row'<'col-12 col-sm-6 d-flex justify-content-sm-start justify-content-center'l><'col-12 col-sm-6 d-flex justify-content-sm-end justify-content-center mt-sm-0 mt-3'f>>>" +
+        "<'table-responsive'tr>" +
+        "<'dt--bottom-section d-sm-flex justify-content-sm-between text-center'<'dt--pages-count  mb-sm-0 mb-3'i><'dt--pagination'p>>",
+        "oLanguage": {
+            "oPaginate": { "sPrevious": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>', "sNext": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>' },
+            "sInfo": "Showing page _PAGE_ of _PAGES_",
+            "sSearch": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+            "sSearchPlaceholder": "Search...",
+        "sLengthMenu": "Results :  _MENU_",
+        },
+        "stripeClasses": [],
+        // "lengthMenu": [7, 10, 20, 50],
+        "pageLength": 7 ,
+        "ordering": true
+    });
+    
+    $('.appvImg2').click(function(e){
             let status = $(this).data('status');
             let custid = $(this).data('custid');
             let shipno = $(this).data('listno');
@@ -269,6 +241,5 @@
                 }
             });
         })
-    });
 </script>
 @endsection

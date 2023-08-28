@@ -96,7 +96,7 @@
 
     $('#Time').daterangepicker({
         startDate: minDate, // set the initial start date
-        minDate: minDate, // set the initial end date to today
+        // minDate: minDate, // set the initial end date to today
         maxDate : moment(),
         // timePicker: true, // enable time picker
         timePicker24Hour: true, // use 24-hour time format
