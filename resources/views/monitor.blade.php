@@ -83,7 +83,7 @@ thead{
     display: none;
 }
 #map{
-    height: 400px;
+    height: 350px;
 }
 .mail-box-container .avatar{
     width: 64px;
@@ -228,6 +228,7 @@ thead{
                                                     <div class="mr-auto mt-3">
                                                         <h4>ตำแหน่งรถ</h4>
                                                     </div>
+                                                    
                                                     <div class="p-2">
                                                         <button type="button" class="btn btn-info position-relative comment_driver">
                                                             <span><i class="fa-regular fa-comment fa-xl"></i></span>
@@ -238,6 +239,8 @@ thead{
                                                         <button class="btn btn-success mb-2 mr-2"><i class="fa-sharp fa-solid fa-road"></i> อัพเดทแผนที่</button>
                                                     </div>
                                                 </div>
+                                                <p id="TimeGps"></p>
+                                                
                                                 
                                                 {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
                                                 <div id="map"></div>
@@ -828,7 +831,8 @@ thead{
         $('#map').addClass('border-map');
         if(response['location'] != null){
             var points = [];
-           
+            // console.log(moment(response['location'].trx_date).format('D MMMM YYYY HH:mm'));
+            $('#TimeGps').text("แผนที่อัพเดทเมื่อเวลา : "+moment(response['location'].trx_date).format('D MMMM YYYY HH:mm'))
 
             map = new nostra.maps.Map("map", {
                 id: "mapTest",
@@ -998,6 +1002,7 @@ thead{
             i++;
         });
         $('.Cust tbody').append(html);
+        
         
         if(response['Remark'] != ""){
             let html_remark = '';

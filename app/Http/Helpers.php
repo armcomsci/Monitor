@@ -2,7 +2,7 @@
     use Illuminate\Support\Facades\DB;
     use Illuminate\Support\Facades\Auth;
 
-    function ShowDate($date,$format = "d/m/Y H:m"){
+    function ShowDate($date,$format = "d/m/Y H:i"){
         $date1      = date_create($date);
         $date2      = date_format($date1,$format);
         return $date2;

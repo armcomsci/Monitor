@@ -27,6 +27,7 @@
             <h4>ตำแหน่งรถ</h4>
             <button class="btn btn-success mb-2 mr-2"><i class="fa-sharp fa-solid fa-road"></i> อัพเดทแผนที่</button>
         </div>
+        <p>แผนที่อัพเดทเมื่อเวลา : {{ ShowDate($Data['location']->trx_date) }}</p>
         
         {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
         <div id="map"></div>

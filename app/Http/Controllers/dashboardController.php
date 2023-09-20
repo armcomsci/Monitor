@@ -108,6 +108,7 @@ class dashboardController extends Controller
                                             ->select('LmsUser.Fullname','LmsUser.EmpCode')
                                             ->selectRaw('SUM(score.Score) as TotalScore')
                                             ->whereRaw("(CONVERT(varchar, score.DateTime, 112) BETWEEN '$firstM' AND '$lastM'  ) ")
+                                            // ->where('LmsUser.')
                                             ->groupBy('LmsUser.EmpCode','LmsUser.Fullname')
                                             ->orderBydesc('TotalScore')
                                             ->get();
