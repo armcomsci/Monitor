@@ -204,7 +204,7 @@ class ReportController extends Controller
         $ScoreSum =  DB::table('LMSScoreJob as score')
                     ->join('LMSusers as LmsUser','score.Empcode','LmsUser.Empcode')
                     ->select('LmsUser.Fullname','LmsUser.EmpCode')
-                    ->selectRaw('SUM(score.Score) as TotalScore , DATEPART(MONTH, score.DateTime) as ScoreMonth')
+                    ->selectRaw('SUM(score.Score) as TotalScore , DATEPART(MONTH, score.DateTime) as ScoreMonth ,  SUM(CASE WHEN score.Score <= 0.5 THEN score.Score ELSE 0 END) AS sum_transfer ,  SUM(CASE WHEN score.Score = 1 THEN score.Score ELSE 0 END) AS SumCloseOne')
                     ->whereRaw("(CONVERT(varchar, score.DateTime, 112) BETWEEN '$Stamp_date_start' AND '$Stamp_date_end'  ) ")
                     ->groupBy('LmsUser.EmpCode','LmsUser.Fullname')
                     ->groupByRaw('DATEPART(MONTH, score.DateTime)')
@@ -261,6 +261,21 @@ class ReportController extends Controller
         $Img    = $Img->get();
 
         return view('reportCustImg',compact('Img'));
+    }
+
+    public function reportEditCarDriv(){
+        return view('reportEditCar');
+    }
+
+    public function findLogEditCar(){
+        $LogEdit = DB::table('LMSTemp_EditlmCarDriv')
+                    ->join('LMSusers','LMSTemp_EditlmCarDriv.created_by','LMSusers.EmpCode')
+                    ->leftjoin('LMSusers as userConfirm','LMSTemp_EditlmCarDriv.confirm_by','userConfirm.EmpCode')
+                    ->select('LMSTemp_EditlmCarDriv.*','LMSusers.Fullname','userConfirm.Fullname as ConfirmFullname','LMSTemp_EditlmCarDriv.confirm_time as ConfirmTime')
+                    // ->whereNull('confirm_by')
+                    ->get();
+
+        return view('dataLogEditCar',compact('LogEdit'));
     }
 
     private function GetEmpName(){

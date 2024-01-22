@@ -8,6 +8,50 @@
         return $date2;
     }
 
+    function MenuAll(){
+        $menu = DB::table('LMSmenu')
+                ->where('menuChildren',0)
+                ->orderBy('listNo','ASC')
+                ->get();
+        return $menu;
+    }
+
+    function CheckSubMenu($id){
+        $menu = DB::table('LMSmenu')
+                ->join('LMSmenu_Permission','LMSmenu_Permission.Menu_id','LMSmenu.id')
+                ->join('LMSusers','LMSmenu_Permission.EmpCode','LMSusers.EmpCode')
+                ->where('menuChildren',$id)
+                ->where('LMSmenu_Permission.EmpCode',Auth::user()->EmpCode)
+                ->orderBy('listNo','ASC')
+                ->get();
+        return $menu;
+    }
+
+    function SubMenu($id){
+        $menu = DB::table('LMSmenu')
+                ->where('menuChildren',$id)
+                ->orderBy('listNo','ASC')
+                ->get();
+        return $menu;
+    }
+
+    function GetPerUserName($MenuID){
+        $PerUser = DB::table('LMSmenu_Permission')
+                    ->select('LMSusers.Fullname')
+                    ->join('LMSusers','LMSmenu_Permission.EmpCode','LMSusers.EmpCode')
+                    ->where('LMSmenu_Permission.Menu_id',$MenuID)
+                    ->get();
+
+        $Fullname = '';
+        foreach ($PerUser as $key => $value) {
+            $Fullname .=  $value->Fullname.",";
+        }
+
+
+        return $Fullname;
+
+    }
+
     function MonthThai($month){
         if($month == "00"){
             $month = "12";
@@ -80,5 +124,77 @@
         }
 
         return $Contain_Flag;
+    }
+
+    function sumToPercent($cal,$sum){
+        return round(($cal/$sum)*100,2);
+    }
+
+    function GetFinComp(){
+        $FinComp = DB::table('LMDBM.dbo.lmFinComp')->get();
+        return $FinComp;
+    }
+
+    function GetEmpDriv(){
+        $EmpDriv = DB::table('LMDBM.dbo.lmEmpDriv')->where('Active','Y')->get();
+        return $EmpDriv;
+    }
+
+    function GetInsurance(){
+        $Insurance = DB::table('LMDBM.dbo.lmInsComp')->get();
+        return $Insurance;
+    }
+
+    function GetInsuranceType(){
+        $InsuranceType = DB::table('LMDBM.dbo.lmInsType')->get();
+        return $InsuranceType;
+    }
+
+    function GetOilType(){
+        $Olis = DB::table('LMDBM.dbo.lmOilType')->get();
+
+        return $Olis;
+    }
+
+    function GetCarType(){
+        $CarType = DB::table('LMDBM.dbo.lmCarType')->get();
+
+        return $CarType;
+    }
+
+    function GetProvince(){
+        $lmProThai_tm = DB::table('LMDBM.dbo.lmProThai_tm')->get();
+
+        return $lmProThai_tm;
+    }
+
+    function GetCarBrand(){
+        $CarBand = DB::table('LMDBM.dbo.lmCarBand')->get();
+
+        return $CarBand;
+    }
+
+    function GetFormula(){
+        $Formula = DB::table('LMDBM.dbo.lmSetFormula')->get();
+
+        return $Formula;
+    }
+
+    function GetFormula_co(){
+        $Formula = DB::table('LMDBM.dbo.lmSetFormula_co')->get();
+
+        return $Formula;
+    }
+
+    function GetOilComp(){
+        $lmOilComp = DB::table('LMDBM.dbo.lmOilComp')->get();
+
+        return $lmOilComp;
+    }
+
+    function GetGroupEmp(){
+        $lmGroupEmp = DB::table('LMDBM.dbo.lmEmpGrop')->get();
+
+        return $lmGroupEmp;
     }
 ?>

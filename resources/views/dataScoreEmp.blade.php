@@ -22,18 +22,32 @@
                     <tr style="background-color: #009688">
                         <th>ผู้ดูแล</th>
                         <th>เดือน</th>
-                        <th class="text-center">คะแนน</th>
+                        <th class="text-center">คะแนนที่ปิดงานคนเดียว</th>
+                        <th class="text-center">คะแนนปิดงานที่มีผู้ดูแลมากกว่า 1 ท่าน</th>
+                        <th class="text-center">คะแนนรวม</th>
                     </tr>
                     @php
                         $color = array('#eaf1ff','#ddf5f0','#fff5f5','#f3effc');
                         $Month = '';
                         $Color_i = 0;
                         $SumTotal = [];
+                        $SumCloseOneAll = [];
+                        $SumtransferAll = [];
+                        $TotalScoreAll  = [];
                     @endphp
                     <tbody>
                         @foreach ($ScoreSum as $score)
                         @php
                             $StrMonth = str_pad($score->ScoreMonth,2,'0',STR_PAD_LEFT);
+
+                            array_push($SumCloseOneAll,$score->sum_transfer);
+                            array_push($SumtransferAll,$score->SumCloseOne);
+                            array_push($TotalScoreAll,$score->TotalScore);
+
+                            // $SumCloseOneAll[] = $score->sum_transfer;
+                            // $SumtransferAll[] = $score->SumCloseOne;
+                            // $TotalScoreAll[]  = $score->TotalScore;
+
                             if($Month != $score->ScoreMonth && $Month != ''){
                                 $Color_i++;
                             }
@@ -52,13 +66,29 @@
                         <tr style="background-color: {{ $color[$Color_i] }}">
                             <td>{{ $score->Fullname }}</td>
                             <td>{{ MonthThai($StrMonth) }}</td>
-                            <td>{{ number_format($score->TotalScore,2) }}</td>
+                            <td class="text-center">{{ number_format($score->sum_transfer,2) }}<br>คิดเป็น {{ sumToPercent($score->sum_transfer,$score->TotalScore) }}%</td>
+                            <td class="text-center">{{ number_format($score->SumCloseOne,2) }}<br>คิดเป็น {{ sumToPercent($score->SumCloseOne,$score->TotalScore) }}%</td>
+                            <td class="text-center">{{ number_format($score->TotalScore,2) }}</td>
                         </tr>
                         @php
                             $Month =  $score->ScoreMonth;
                         @endphp
                         @endforeach
                     </tbody>
+
+                    <tfoot>
+                        @php
+                            $SumCloseOneAll =  array_sum($SumCloseOneAll);
+                            $SumtransferAll =  array_sum($SumtransferAll);
+                            $TotalScoreAll =  array_sum($TotalScoreAll);
+                        @endphp
+                        <tr>
+                            <td colspan="2" class="text-right">รวม</td>
+                            <td class="text-center">{{  number_format($SumCloseOneAll,2) }}<br>คิดเป็น {{ sumToPercent($SumCloseOneAll,$TotalScoreAll) }}%</td>
+                            <td class="text-center">{{  number_format($SumtransferAll,2) }}<br>คิดเป็น {{ sumToPercent($SumtransferAll,$TotalScoreAll) }}%</td>
+                            <td class="text-center">{{  number_format($TotalScoreAll,2) }}<br></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>

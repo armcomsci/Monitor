@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CheckRememberToken
 {
@@ -22,6 +23,22 @@ class CheckRememberToken
             // $request->session()->invalidate();
             // $request->session()->regenerateToken();
             return redirect('Login');
+        }else{
+            $curentUrl    = str_replace(url('/'), '', url()->previous());
+            $EmpCode      = Auth::user()->EmpCode;
+
+            if($curentUrl != "/Login"){
+                $CheckPerMiss = DB::table('LMSmenu')
+                                ->join('LMSmenu_Permission','LMSmenu.id','LMSmenu_Permission.Menu_id')
+                                ->where('LMSmenu.menuUrl',$curentUrl)
+                                ->where('LMSmenu_Permission.EmpCode',$EmpCode)
+                                ->count();
+
+                if($CheckPerMiss == 0){
+                    abort(403,'รหัสของคุณไม่มีสิทธิ์ในเข้าถึงหน้าดังกล่าว');
+                }
+            }
+            
         }
         return $next($request);
     }

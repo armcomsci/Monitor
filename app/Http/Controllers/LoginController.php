@@ -46,7 +46,7 @@ class LoginController extends Controller
         }
 
         $emp = str_replace('-','',$req->username);
-        $checkuser = DB::table('LMSusers')->where('EmpCode','LIKE',$emp)->first();
+        $checkuser = DB::table('LMSusers')->where('EmpCode','LIKE',$emp)->where('status','Y')->first();
 
         if($checkuser != ""){
             if(Hash::check($req->password,$checkuser->password)){

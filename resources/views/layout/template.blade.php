@@ -26,6 +26,9 @@
     body{
         font-family: 'Noto Sans Thai', sans-serif !important;
     }
+    #sidebar ul.menu-categories ul.submenu > li a{
+        text-wrap: wrap;
+    }
     .snackbar-container{
         height: auto !important;
     }

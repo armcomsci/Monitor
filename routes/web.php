@@ -24,6 +24,105 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/GetNotify','dashboardController@getNotify');
     Route::get('/GetRemarkEmpDriver','dashboardController@getRemarkDriver');
 
+    Route::get('/ProfileEmp','generalController@profileEmp');
+    Route::post('/ProfileEmpSave','generalController@profileEmpSave');
+    Route::post('/ProfileEmpGet','generalController@profileEmpGet');
+    Route::post('/ProfileEmpDelete','generalController@profileEmpDel');
+
+    Route::get('/ProfileCar','generalController@profileCar');
+
+    Route::get('/ProfileCarType','generalController@ProfileCarType');
+    Route::post('/ProfileCarTypeSave','generalController@ProfileCarTypeSave');
+    Route::post('/ProfileCarTypeGet','generalController@profileCarTypeGet');
+    Route::post('/ProfileCarTypeDelete','generalController@profileCarDel');
+
+    Route::get('/ProfileCarGroup','generalController@ProfileCarGroup');
+    Route::post('/ProfileCarGroupSave','generalController@profileCarGroupSave');
+    Route::post('/ProfileCarGroupGet','generalController@profileCarGroupGet');
+    Route::post('/ProfileCarGroupDelete','generalController@profileCarGroupDel');
+
+    Route::get('/ProfileRateCar','generalController@ProfileRateCar');
+
+    Route::get('/ProfileFinance','generalController@ProfileFinance');
+    Route::post('/ProfileFinanceSave','generalController@profileFinanceSave');
+    Route::post('/ProfileFinanceGet','generalController@profileFinanceGet');
+    Route::post('/ProfileFinanceDelete','generalController@profileFinanceDel');
+
+    Route::get('/ProfileInsurance','generalController@ProfileInsurance');
+    Route::post('/ProfileInsurerGet','generalController@profileInsuranceGet');
+    Route::post('/ProfileInsuranceSave','generalController@profileInsuranceSave');
+    Route::post('/ProfileInsuranceDelete','generalController@profileInsuranceDel');
+
+    Route::get('/ProfileInsuranceType','generalController@ProfileInsuranceType');
+    Route::post('/ProfileInsuranceTypeGet','generalController@profileInsuranceTypeGet');
+    Route::post('/ProfileInsuranceTypeSave','generalController@profileInsuranceTypeSave');
+    Route::post('/ProfileInsuranceTypeDelete','generalController@profileInsuranceTypeDel');
+
+    Route::get('/ProfileRouteProductCode','generalController@ProfileRouteProductCode');
+    Route::get('/ProfileRouteProduct','generalController@ProfileRouteProduct');
+    Route::post('/ProfileRouteProductData','generalController@ProfileRouteProductData');
+    Route::post('/ProfileRouteProductSave','generalController@ProfileRouteProductSave');
+
+    Route::get('/ProfileSetCalTrans','generalController@ProfileSetCalTrans');
+    Route::post('/profileSetCalTransGet','generalController@ProfileSetCalTransGet');
+    Route::post('/ProfileSetCalTransSave','generalController@ProfileSetCalTransSave');
+
+    Route::get('/ProfileCalTrans','generalController@ProfileCalTrans');
+    Route::post('/profileCalTransGet','generalController@ProfileCalTransGet');
+    Route::post('/ProfileCalTransSave','generalController@ProfileCalTransSave');
+
+
+    Route::get('/ProfileTransport','generalController@ProfileTransport');
+
+    Route::get('/ProfilePay','generalController@ProfilePay');
+    Route::post('/ProfilePayGet','generalController@profilePayGet');
+    Route::post('/ProfilePaySave','generalController@profilePaySave');
+    Route::post('/ProfilePayDel','generalController@profilePayDel');
+    Route::post('/ProfilePayChangeVat','generalController@profilePayChangeVat');
+    Route::post('/ProfilePayChangeSt','generalController@profilePayChangeST');
+
+    Route::get('/ProfileFund','generalController@ProfileFund');
+    Route::post('/ProfileFundGet','generalController@profileFundGet');
+    Route::post('/ProfileFundSave','generalController@profileFundSave');
+    Route::post('/ProfileFundDel','generalController@profileFundDel');
+    Route::post('/ProfileFundChangeVat','generalController@profileFundChangeVat');
+    Route::post('/ProfileFundChangeSt','generalController@profileFundChangeST');
+
+    Route::get('/ProfileTypeWithDraw','generalController@ProfileTypeWithDraw');
+
+    Route::get('/ProfileTypeOil','generalController@ProfileTypeOil');
+    Route::post('/ProfileOilTypeGet','generalController@profileOilGet');
+    Route::post('/profileOilSave','generalController@profileOilSave');
+    Route::post('/ProfileOilTypeDelete','generalController@profileOilDel');
+
+    Route::get('/settingUser','UserSettingController@settingUser');
+    Route::post('/settingUserGet','UserSettingController@settingGet');
+    Route::post('/settingUserSave','UserSettingController@settingSave');
+    Route::post('/settingUserFlag','UserSettingController@settingChange');
+
+    Route::get('/DataEmpDriv','CarSettingController@dataEmpDriv');
+    Route::get('/EmpDrivGetData/{VehicleCode}','CarSettingController@GetData');
+    Route::post('/GetSerieFromBrand','CarSettingController@GetSerie');
+    Route::post('/DataEmpDrivSave','CarSettingController@save');
+
+    Route::get('/RouteProvince','settingRouteController@RouteProvince');
+    Route::get('/GetProvince','settingRouteController@GetProvince');
+    Route::get('/GetAmpthaiTm','settingRouteController@GetAmpthaiTm');
+
+    Route::get('/RouteBangkok','settingRouteController@RouteBangkok');
+    Route::get('/GetSubZone','settingRouteController@SubZone');
+    Route::get('/GetMarZone','settingRouteController@MarZone');
+    Route::get('/GetMarToSubZone','settingRouteController@MarToSubZone');
+    // Route::get('/GetSubZoneMart','settingRouteController@SubZoneToMart');
+
+    Route::get('/RouteTranspot','settingRouteController@RouteTranspot');
+    Route::get('/GetDataGrpTran','settingRouteController@GetDataGrpTran');
+    Route::get('/GetDataCenTran','settingRouteController@GetDataCenTran');
+
+    Route::get('/configOil','OilConfigController@configOil');
+    Route::post('/configOilGetComp','OilConfigController@configOilGetComp');
+    Route::post('/configOilSave','OilConfigController@configOilSave');
+
     Route::get('/Monitor','scoreboardController@index');
     Route::get('/DtMonitor/{Container}','scoreboardController@dataDt');
     Route::get('/DtOrderItem/{Container}','scoreboardController@dataOrderItem');
@@ -77,11 +176,24 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/ReportRemark','ReportController@reportRemark');
     Route::post('/FindRemark','ReportController@dataRemark');
     Route::get('/ReportCustConfirm','ReportController@CustConfirm');
+    Route::get('/ReportEditCarDriv','ReportController@reportEditCarDriv');
+    Route::post('/FindLogEditCarDriv','ReportController@findLogEditCar');
 
     Route::get('/CancelContain','cancelContainController@index');
     Route::post('/ReturnFlagContainer','cancelContainController@confirmReturn');
 
     Route::any('/AdminConfirmImg','confirmImgCustController@index');
     Route::post('/AdminConfirmImgCust','confirmImgCustController@confirm');
+
+    Route::get('/PermissionUser','userPermissionController@index');
+    Route::get('/GetPerMission/{menu_id}','userPermissionController@getPerMission');
+    Route::post('/PermissionUserSave','userPermissionController@save');
+    Route::get('/CreateUser','userPermissionController@createUser');
+    Route::post('/userSave','userPermissionController@saveUser');
+    Route::post('/userGet','userPermissionController@userGet');
+    Route::post('/userChangeStatus','userPermissionController@changeStatusUser');
+
+    Route::get('ApproveCarDriv','ApproveController@AppCarDriv');
+    Route::post('AdminApporveEditCar','ApproveController@ConfirmEditCar');
 });
 
