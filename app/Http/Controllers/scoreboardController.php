@@ -85,7 +85,7 @@ class scoreboardController extends Controller
         $Data['Order']        =  DB::connection('sqlsrv_2')
                                 ->table('nlmMatchContain_dt as mContain')
                                 ->select('mContain.CustID','mContain.CustName','mContain.Flag_st','mContain.ShipListNo')
-                                // ->selectRaw('SUM(GoodQty) as SumQty, (select Flag_st FROM nlmMatchConfirmGPS as gps where gps.CustID = mContain.CustID and gps.ShipListNo = mContain.ShipListNo ) as Flag_gps')
+                                ->selectRaw('SUM(GoodQty) as SumQty, (select TOP(1) Flag_st FROM nlmMatchConfirmGPS as gps where gps.CustID = mContain.CustID and gps.ShipListNo = mContain.ShipListNo ORDER BY SaveDate DESC ) as Flag_gps')
                                 ->where('mContain.ContainerNO',$Container)
                                 ->groupBy('mContain.CustID','mContain.CustName','mContain.Flag_st','mContain.ShipListNo')
                                 ->get();

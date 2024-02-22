@@ -282,6 +282,8 @@
         }); 
 
         if(required_status){
+            
+
             $.ajax({
                 type: "post",
                 url: url+"/ProfileCarGroupSave",

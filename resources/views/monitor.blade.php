@@ -228,8 +228,15 @@ thead{
                                                     <div class="mr-auto mt-3">
                                                         <h4>ตำแหน่งรถ</h4>
                                                     </div>
-                                                    
                                                     <div class="p-2">
+                                                        <a  id="performance"><img src="{{ asset('/icon/performance.png') }}" 
+                                                            style="width: 40px;
+                                                            height: 40px;
+                                                            position: relative;
+                                                            bottom: 3px;" ></a>
+                                                    </div>
+                                                    <div class="p-2">
+                                                        
                                                         <button type="button" class="btn btn-info position-relative comment_driver">
                                                             <span><i class="fa-regular fa-comment fa-xl"></i></span>
                                                             <span class="badge badge-danger counter">0</span>
@@ -827,6 +834,7 @@ thead{
    
     moment.locale('th');
     var initExtent, map, gLayer, route, routeLayer, layerMarker, chkRoutedResult,carLayer,Sendto;
+
     function initialize(response) {
         $('#map').addClass('border-map');
         if(response['location'] != null){
@@ -967,7 +975,8 @@ thead{
             $('#map').html('<h2>ไม่พบตำแหน่ง GPS</h2>')
         }
     }
-    var fullname = '{{ auth()->user()->Fullname }}';
+    var EmpCodeDriv1 = '{{ auth()->user()->EmpCode }}';
+    var fullname    = '{{ auth()->user()->Fullname }}';
 
     function dataCust(response){
         // console.log(response);
@@ -977,6 +986,18 @@ thead{
         $('.ProfileDrive').removeAttr('src');
         $('#closeJob,#AddBillTime').css('display','none');
         $('.counter').text(response['Comment']);
+
+        let EmpDrivLink = {
+                        'EmpCode' : EmpCodeDriv1,
+                        'EmpDrivCode' : response['Drive'].EmpDriverCode
+                    };
+
+        let jsonData = JSON.stringify(EmpDrivLink);
+        
+        EmpDrivLink = encodeURIComponent(window.btoa(jsonData));
+        let LinkRateEmp = "MyWindow=window.open('https://jtxm.jtpackconnect.com:4316/webreport/lms/RateEmp/"+EmpDrivLink+"','MyWindow','width=1200,height=680'); return false;";
+        $('#performance').attr('onClick',LinkRateEmp);
+
         let html = '';
         let i = 1;
         let bg_class;

@@ -10,6 +10,7 @@ use Carbon\Carbon;
 class monitorAdminController extends Controller
 {
     public function index(){
+
         $Users = DB::table('LMSusers')->select('EmpCode','Fullname')->where('type',1)->get();
 
         return view('indexAdmin',compact('Users'));

@@ -28,6 +28,7 @@
     }
     #sidebar ul.menu-categories ul.submenu > li a{
         text-wrap: wrap;
+        margin-left: 14px !important; 
     }
     .snackbar-container{
         height: auto !important;

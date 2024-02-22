@@ -26,8 +26,10 @@ class CheckRememberToken
         }else{
             $curentUrl    = str_replace(url('/'), '', url()->previous());
             $EmpCode      = Auth::user()->EmpCode;
+            $urlEx        = array('/GpsCarAll','/Login','/Logout','/');
 
-            if($curentUrl != "/Login"){
+            if(!in_array($curentUrl,$urlEx)){
+
                 $CheckPerMiss = DB::table('LMSmenu')
                                 ->join('LMSmenu_Permission','LMSmenu.id','LMSmenu_Permission.Menu_id')
                                 ->where('LMSmenu.menuUrl',$curentUrl)
@@ -35,7 +37,7 @@ class CheckRememberToken
                                 ->count();
 
                 if($CheckPerMiss == 0){
-                    abort(403,'รหัสของคุณไม่มีสิทธิ์ในเข้าถึงหน้าดังกล่าว');
+                    abort(403,'รหัสของคุณไม่มีสิทธิ์ในเข้าถึงหน้าดังกล่าว'.$curentUrl);
                 }
             }
             

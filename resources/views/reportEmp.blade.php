@@ -242,7 +242,7 @@
             "stripeClasses": [],
             "lengthMenu": [7, 10, 20, 50],
             "pageLength": 7 ,
-            "ordering": false
+            "ordering": true
         });
                     $("#RangeDateSum").text($('#Time').val());
                 }

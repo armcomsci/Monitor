@@ -1,6 +1,18 @@
+
 <div class="row">
     <div class="col-7" style="height: 520px;">
-        <h4>ข้อมูลคนรถ/แผนที่ <span style="float: right"><img src="{{ asset('/icon/timeline.png') }}" style="width: 56px; height: 56px;" title="TimeLine" class="timeline"></span></h4>
+        <h4>ข้อมูลคนรถ/แผนที่ 
+            <span style="float: right"><img src="{{ asset('/icon/timeline.png') }}" style="width: 56px; height: 56px;" title="TimeLine" class="timeline"></span> 
+            @php
+                $link['EmpCode']     = auth()->user()->EmpCode;
+                $link['EmpDrivCode'] = $Data['Drive']->EmpDriverCode;
+                $json = json_encode($link,true);
+                $json = base64_encode($json);
+            @endphp
+            <span style="float: right; margin-right: 25px; cursor: pointer;">
+                <a onClick="MyWindow=window.open('https://jtxm.jtpackconnect.com:4316/webreport/lms/RateEmp/{{ $json }}','MyWindow','width=1200,height=680'); return false;"><img src="{{ asset('/icon/performance.png') }}" style="width: 56px; height: 56px;" ></a>
+            </span>
+        </h4>
         <div class="d-flex justify-content-between mb-2">
             <div>
                 <div class="avatar">
@@ -27,8 +39,10 @@
             <h4>ตำแหน่งรถ</h4>
             <button class="btn btn-success mb-2 mr-2"><i class="fa-sharp fa-solid fa-road"></i> อัพเดทแผนที่</button>
         </div>
-        <p>แผนที่อัพเดทเมื่อเวลา : {{ ShowDate($Data['location']->trx_date) }}</p>
-        
+        @if(isset($Data['location']->trx_date))
+            <p>แผนที่อัพเดทเมื่อเวลา : {{ ShowDate($Data['location']->trx_date) }}</p>
+        @endif
+       
         {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
         <div id="map"></div>
     </div>

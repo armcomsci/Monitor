@@ -143,6 +143,18 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/GetDataJobClose','scoreboardController@JobCloseAgo');
     Route::post('/ImgCust','scoreboardController@GetImgConfirm');
     Route::post('/ConfirmImgCust','scoreboardController@ConfirmImgCust');
+
+    Route::any('/RateEmpDriv','RateEmpDrivController@setFrom');
+    Route::post('/saveRateCarDriv','RateEmpDrivController@saveTitle');
+    Route::post('/RateEmpDrivGetTitle','RateEmpDrivController@getTitle');
+    Route::post('/RateEmpDrivGetSubTitle','RateEmpDrivController@getSubTitle');
+    Route::post('/RateEmpDrivDeleteTitle','RateEmpDrivController@deleteTitle');
+    Route::post('/saveRateSubTitleCarDriv','RateEmpDrivController@saveSubTitle');
+    Route::get('/RateEmpDrivScore','RateEmpDrivController@rateEmp');
+    Route::post('/RateProfileEmpDriv','RateEmpDrivController@proFileEmpDriv');
+    Route::post('/RateGetSubTitle','RateEmpDrivController@proFileGetSubTitleRate');
+    Route::post('/SaveRateEmpDriv','RateEmpDrivController@saveRateEmp');
+    
     
     Route::get('/ChangeEmpDriv','empDrivController@index');
     Route::post('/ChangeSaveEmp','empDrivController@save');
@@ -178,6 +190,10 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/ReportCustConfirm','ReportController@CustConfirm');
     Route::get('/ReportEditCarDriv','ReportController@reportEditCarDriv');
     Route::post('/FindLogEditCarDriv','ReportController@findLogEditCar');
+    Route::get('/ReportRateEmpDriv','ReportController@reportRate');
+    Route::post('/FindRateEmpDriv','ReportController@dataRateEmpDriv');
+    Route::post('/DetailRateEmpDriv','ReportController@detailRateEmp');
+    Route::get('/ExportRateEmpDriv','ReportController@exportExcelRate');
 
     Route::get('/CancelContain','cancelContainController@index');
     Route::post('/ReturnFlagContainer','cancelContainController@confirmReturn');

@@ -46,10 +46,32 @@
         foreach ($PerUser as $key => $value) {
             $Fullname .=  $value->Fullname.",";
         }
-
-
         return $Fullname;
 
+    }
+
+    function getMonth($m){
+        $strMonthCut = Array("","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค.");
+        return $strMonthCut[$m];
+    }
+
+    function GetScoreRateEmpDriv($empCode,$subId){
+        $Score = DB::table('LMSRateEmpScore')
+                    ->select('scoreRate','remark')
+                    ->where('subTitleId',$subId)
+                    ->where('empDrivCode',$empCode)
+                    ->first();
+
+        $drivScore = [];
+
+        if($Score != ""){
+            $drivScore['score']  = $Score->scoreRate;
+       
+            $drivScore['remark'] = $Score->remark;
+                       
+        }
+        
+        return $drivScore;
     }
 
     function MonthThai($month){

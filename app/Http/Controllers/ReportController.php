@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\FromView;
+use Illuminate\Contracts\View\View;
 
 class ReportController extends Controller
 {
@@ -278,6 +283,85 @@ class ReportController extends Controller
         return view('dataLogEditCar',compact('LogEdit'));
     }
 
+    public function reportRate(){
+        
+        return view('reportRateEmpDriv');
+    }
+
+    public function dataRateEmpDriv(Request $req){
+        // dd($req);
+        $firstM  =  Carbon::now()->format('Ym01');
+        $lastM   =  Carbon::now()->format('Ymt');
+
+        $Month       = $req->Month;
+        $Year        = $req->Year;
+        $CarTypeCode = $req->CarTypeCode;
+
+        $Export = $req->all();
+
+        $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
+                        ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
+                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel')
+                        ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
+                        ->selectRaw("(SELECT        SUM(res.scoreRate) AS Expr1
+                        FROM            LMSRateEmpScore AS res
+                        WHERE       ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
+                        GROUP BY res.empDrivCode) AS SumScoreRate")
+                        ->where('lmCarDriv.IsDefault','Y')
+                        ->where('lmEmpDriv.Active','Y');
+                        if($CarTypeCode != ''){
+                            $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarTypeCode);
+                        }
+                        $EmpName    = $EmpName->orderByRaw("CASE WHEN (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) IS NULL THEN 1 ELSE 0 END, (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) ASC")
+                        ->get();
+
+        return view('dataRateEmpDriv',compact('EmpName','Export'));
+    }
+
+    public function detailRateEmp(Request $req){
+        $empCode     = $req->empCode;
+        $Month       = $req->Month;
+        $Year        = $req->Year;
+        $CarTypeCode = $req->CarTypeCode;
+
+
+        $RateEmp = DB::table('LMSRateEmpScore')
+                    ->where('empDrivCode',$empCode)
+                    ->whereRaw("MONTH(created_time) = $Month AND YEAR(created_time) = $Year")
+                    ->get();
+
+        return view('dataRateEmpDrivDetail',compact('RateEmp','empCode'));
+    }
+
+    public function exportExcelRate(){
+        $Month  = date('n');
+        $m      = getMonth($Month);
+
+        if(isset($_GET['ExMonth'])){
+            $data['ExMonth'] = $_GET['ExMonth'];
+        }
+        if(isset($_GET['ExYear'])){
+            $data['ExYear'] = $_GET['ExYear'];
+        }
+        if(isset($_GET['ExCarTypeCode'])){
+            $data['ExCarTypeCode'] = $_GET['ExCarTypeCode'];
+        }
+
+        switch ($data['ExCarTypeCode']) {
+            case 'CT001':
+                $Carsize = 'รถเล็ก';
+                break;
+            case 'CT002':
+                $Carsize = 'รถกลาง';
+                break;
+            case 'CT003':
+                $Carsize = 'รถใหญ่';
+                break;
+        }
+
+        return Excel::download( new RateEmpDrivExport($data) , "คะแนนพนักงานประเภท_$Carsize"."_ประจำเดือน_$m.xlsx");
+    }
+
     private function GetEmpName(){
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
@@ -301,4 +385,77 @@ class ReportController extends Controller
 
         return $Car;
     }
+}
+
+class RateEmpDrivExport implements  FromView, ShouldAutoSize
+{    
+    private $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+
+    }
+    public function view(): View
+    {
+        $Month      = $this->data['ExMonth'];
+        $Year       = $this->data['ExYear'];
+        $CarType    = $this->data['ExCarTypeCode'];
+
+        $Year = date('Y');
+      
+        $TitleRate = DB::table('LMSRateEmpDriv_Title')
+                    ->where('Parent',0)
+                    ->where('CarType',$CarType)
+                    ->where('UseYear',$Year)
+                    ->get();
+
+        $HeaderExcel = [];
+        foreach ($TitleRate as $key => $value) {
+            $HeadId = $value->id;
+
+            $subTitle = DB::table('LMSRateEmpDriv_Title')->where('Parent',$HeadId)->get();
+
+            $HeaderExcel[$HeadId]['Title'] = $value->Title;
+            $HeaderExcel[$HeadId]['Score'] = $value->Score;
+
+            $a = 0;
+            foreach ($subTitle as $key2 => $value2) {
+                $subId = $value2->id;
+
+                $HeaderExcel[$HeadId]['SubHead'][$a]['SubId']    = $subId;
+                $HeaderExcel[$HeadId]['SubHead'][$a]['SubTitle'] = $value2->Title; 
+                $HeaderExcel[$HeadId]['SubHead'][$a]['SubScore'] = $value2->Score; 
+                $a++;
+            }
+            
+        }
+
+        $firstM  =  Carbon::now()->format('Ym01');
+        $lastM   =  Carbon::now()->format('Ymt');
+
+        $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
+                        ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
+                        ->leftjoin('LMSRateEmpScore as LMSRateEmpScore','lmEmpDriv.EmpDriverCode','LMSRateEmpScore.empDrivCode')
+                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','LMSRateEmpScore.scoreRate','LMSRateEmpScore.subTitleId')
+                        ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
+                        ->selectRaw("(SELECT        SUM(res.scoreRate) AS Expr1
+                        FROM            LMSRateEmpScore AS res
+                        WHERE        ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
+                        GROUP BY res.empDrivCode) AS SumScoreRate, (SELECT        COUNT(res.scoreRate) AS Expr1
+                        FROM            LMSRateEmpScore AS res
+                        WHERE        ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
+                        GROUP BY res.empDrivCode) AS CountScoreRate")
+                        ->where('lmCarDriv.IsDefault','Y')
+                        ->where('lmEmpDriv.Active','Y');
+                        if($CarType != ''){
+                            $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarType);
+                        }
+                        $EmpName    = $EmpName->orderByRaw("CASE WHEN (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) IS NULL THEN 1 ELSE 0 END, (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) ASC")
+                        ->get();
+  
+        return view('exportExcel.rateEmpDriv',compact('HeaderExcel','EmpName'));
+    }
+
+   
 }
