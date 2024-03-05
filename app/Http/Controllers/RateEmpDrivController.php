@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use File;
+use Illuminate\Support\Facades\Storage;
 
 class RateEmpDrivController extends Controller
 {
@@ -17,34 +19,54 @@ class RateEmpDrivController extends Controller
 
         $carSize   = '';
 
+        $groupCode = '';
+
         $yearSelect = '';
         
         if(isset($req->carSize)){
             $carSize        = $req->carSize;
             $yearSelect     = $req->year;
+            $groupCode      = $req->groupCode;
 
             $RateTitle  = DB::table('LMSRateEmpDriv_Title')
                             ->where('parent',0)
                             ->where('CarType',$carSize)
-                            ->where('UseYear',$yearSelect)
-                            ->get();
+                            ->where('UseYear',$yearSelect);
+            if($groupCode != "A"){
+                $RateTitle  = $RateTitle->where('CarGroupCode',$groupCode);
+            }elseif($groupCode == "A") {
+                $RateTitle  = $RateTitle->whereNull('CarGroupCode');
+            }
+            $RateTitle  = $RateTitle->get();
 
             $SumScore   = DB::table('LMSRateEmpDriv_Title')
                             ->where('parent',0)
                             ->where('CarType',$carSize)
-                            ->where('UseYear',$yearSelect)
-                            ->Sum('Score');
+                            ->where('UseYear',$yearSelect);
+                            if($groupCode != "A"){
+                                $SumScore  = $SumScore->where('CarGroupCode',$groupCode);
+                            }elseif($groupCode == "A") {
+                                $SumScore  = $SumScore->whereNull('CarGroupCode');
+                            }
+                            $SumScore  = $SumScore->Sum('Score');
         }
 
-       
-
-        return view('rateEmpCar.setFromScore',compact('RateTitle','SumScore','carSize','yearSelect'));
+        return view('rateEmpCar.setFromScore',compact('RateTitle','SumScore','carSize','yearSelect','groupCode'));
     }
 
-    public function rateEmp(){
+    public function rateEmp(Request $req){
+        $Month_rate = '';
+        if($req->Month_rate != ""){
+            $Month_rate     = $req->Month_rate;
 
-        $firstM  =  Carbon::now()->format('Ym01');
-        $lastM   =  Carbon::now()->format('Ymt');
+            $firstM  =  Carbon::now()->format("Y".$Month_rate."01");
+            $lastM   =  Carbon::now()->format("Y".$Month_rate."t");
+
+        }else{
+            $firstM  =  Carbon::now()->format('Ym01');
+            $lastM   =  Carbon::now()->format('Ymt');
+        }
+        
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
@@ -54,12 +76,14 @@ class RateEmpDrivController extends Controller
                         FROM            LMSRateEmpScore AS res
                         WHERE        (CONVERT(varchar, res.created_time, 112) BETWEEN '$firstM' AND '$lastM') AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
                         GROUP BY res.empDrivCode) AS SumScoreRate")
+                        ->selectRaw("(SELECT TOP(1) SubTitleName FROM LMSRateEmpScore as res2 WHERE (res2.empDrivCode = lmEmpDriv.EmpDriverCode) ORDER BY res2.created_time DESC ) as SubTitleName")
+                        ->selectRaw("(SELECT TOP(1) Fullname FROM LMSRateEmpScore as res3 INNER JOIN LMSusers as LMSusers ON res3.created_by = LMSusers.EmpCode WHERE (res3.empDrivCode = lmEmpDriv.EmpDriverCode) ORDER BY res3.created_time DESC ) as RateFullname")
                         ->where('lmCarDriv.IsDefault','Y')
                         ->where('lmEmpDriv.Active','Y')
-                        ->orderByRaw("CASE WHEN (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE (CONVERT(varchar, res.created_time, 112) BETWEEN '20240201' AND '20240229') AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) IS NULL THEN 1 ELSE 0 END, (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE (CONVERT(varchar, res.created_time, 112) BETWEEN '$firstM' AND '$lastM') AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) ASC")
+                        ->orderByRaw("SumScoreRate DESC")
                         ->get();
 
-        return view('rateEmpCar.empRate',compact('EmpName'));
+        return view('rateEmpCar.empRate',compact('EmpName','Month_rate'));
     }
 
     public function proFileEmpDriv(Request $req){
@@ -104,6 +128,7 @@ class RateEmpDrivController extends Controller
         $idRateSubTitle = $req->RateSubTitle;
         $RateRemark     = $req->RateRemark;
         $EmpCode        = $req->EmpCode;
+        $photo          = $req->file('imgRate');
 
         try {
             DB::beginTransaction();
@@ -116,12 +141,26 @@ class RateEmpDrivController extends Controller
                             ->where('id',$idRateSubTitle)
                             ->first();
 
+            $filename = '';
+
+            if($photo != ""){
+                $filename       = date("d-m-Y_h-i-s")."_$EmpCode.".$photo->getClientOriginalExtension();
+
+                $fileContents   = file_get_contents($photo->getPathname());
+
+                Storage::disk('ftp_local')->put('empDrivRate/'.$filename, $fileContents);
+            }
+                    
+
             $EmpScore['scoreRate']      = $SubRateTitle->Score;
             $EmpScore['mainTitleId']    = $idRateTitle;
             $EmpScore['mainTitleName']  = $RateTitle->Title;
             $EmpScore['subTitleId']     = $idRateSubTitle;
             $EmpScore['subTitleName']   = $SubRateTitle->Title;
-            $EmpScore['RateRemark']     = $RateRemark;
+            $EmpScore['remark']         = $RateRemark;
+            if($filename != ""){
+                $EmpScore['imgUrl']     = "https://images.jtpackconnect.com/ImageAllProducts/empDrivRate/".$filename;
+            }
             $EmpScore['empDrivCode']    = $EmpCode;
             $EmpScore['created_by']     = Auth::user()->EmpCode;
             $EmpScore['created_time']   = now();
@@ -145,12 +184,18 @@ class RateEmpDrivController extends Controller
         $Port       = Auth::user()->EmpCode;
         $CarType    = $req->CarType;
         $Year       = $req->Year;
+        $groupCode  = $req->groupCode;
 
         try {
             DB::beginTransaction();
 
             if($type == 0){    
-                $SumScore = DB::table('LMSRateEmpDriv_Title')->where('parent',0)->where('CarType',$CarType)->where('UseYear',$Year)->Sum('Score');
+                $SumScore = DB::table('LMSRateEmpDriv_Title')
+                            ->where('parent',0)
+                            ->where('CarType',$CarType)
+                            ->where('UseYear',$Year)
+                            ->where('CarGroupCode',$groupCode)
+                            ->Sum('Score');
                 // dd($SumScore,$score);
                 if($SumScore+$score > 100){
                     return "scoreError";
@@ -163,6 +208,9 @@ class RateEmpDrivController extends Controller
                 $RateEmpTitle['Created_time']   = now();
                 $RateEmpTitle['CarType']        = $CarType;
                 $RateEmpTitle['UseYear']        = $Year;
+                if($groupCode != "A"){
+                    $RateEmpTitle['CarGroupCode'] =  $groupCode;
+                }
 
                 DB::table('LMSRateEmpDriv_Title')->insert($RateEmpTitle);
                 DB::commit();
@@ -176,6 +224,7 @@ class RateEmpDrivController extends Controller
                             ->where('parent',0)
                             ->where('id','<>',$id)
                             ->where('CarType',$CarType)
+                            ->where('CarGroupCode',$groupCode)
                             ->Sum('Score');
 
                 if($SumScore+$score > 100){
@@ -244,15 +293,24 @@ class RateEmpDrivController extends Controller
         $CarType    = $req->CarType;
         $MainID     = $req->MainID;
         $Year       = $req->Year;
+        $groupCode  = $req->groupCode;
 
         try {
             DB::beginTransaction();
 
-            $SumScoreMain   = DB::table('LMSRateEmpDriv_Title')->where('id',$MainID)->where('UseYear',$Year)->Sum('Score');    
+            $SumScoreMain   = DB::table('LMSRateEmpDriv_Title')
+                                ->where('id',$MainID)
+                                ->where('UseYear',$Year)
+                                ->where('CarGroupCode',$groupCode)
+                                ->Sum('Score');    
 
             if($type == 0){    
             
-                $SumScore       = DB::table('LMSRateEmpDriv_Title')->where('Parent',$MainID)->where('UseYear',$Year)->Sum('Score');
+                $SumScore       = DB::table('LMSRateEmpDriv_Title')
+                                    ->where('Parent',$MainID)
+                                    ->where('UseYear',$Year)
+                                    ->where('CarGroupCode',$groupCode)
+                                    ->Sum('Score');
 
                 if($SumScore+$score > $SumScoreMain){
                     return "scoreError";
@@ -265,7 +323,9 @@ class RateEmpDrivController extends Controller
                 $RateEmpTitle['Created_time']   = now();
                 $RateEmpTitle['CarType']        = $CarType;
                 $RateEmpTitle['UseYear']        = $Year;
-
+                if($groupCode != "A"){
+                    $RateEmpTitle['CarGroupCode'] =  $groupCode;
+                }
                 DB::table('LMSRateEmpDriv_Title')->insert($RateEmpTitle);
                 DB::commit();
                 
@@ -274,7 +334,12 @@ class RateEmpDrivController extends Controller
             }elseif($type == 1){
                 $idSubEdit     = $req->idSubEdit;
                 
-                $SumScore       = DB::table('LMSRateEmpDriv_Title')->where('Parent',$MainID)->where('id','<>',$idSubEdit)->where('UseYear',$Year)->Sum('Score');
+                $SumScore       = DB::table('LMSRateEmpDriv_Title')
+                                    ->where('Parent',$MainID)
+                                    ->where('id','<>',$idSubEdit)
+                                    ->where('UseYear',$Year)
+                                    ->where('CarGroupCode',$groupCode)
+                                    ->Sum('Score');
 
                 if($SumScore+$score > $SumScoreMain){
                     return "scoreError";

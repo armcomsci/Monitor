@@ -102,10 +102,31 @@
                                                 break;
                                         }
                                     }
+
+                                    $selectedGroup1 = '';
+                                    $selectedGroup2 = '';
+
+                                    if($groupCode != ''){
+                                        switch ($groupCode) {
+                                            case 'A':
+                                                $selectedGroup1 = "selected";
+                                                break;
+                                            case 'EG-0003':
+                                                $selectedGroup2 = "selected";
+                                                break;
+                                            
+                                        }
+                                    }
                                 @endphp
                                 <div class="col-12 ">
                                     <form id="FormAddGroup" class="row" onSubmit="return false" method="post" action="{{ url()->current() }}">
                                         @csrf
+                                        <div class="form-group col-2 mt-4">
+                                            <select class="form-control" id="groupCode" name="groupCode" onchange="this.form.submit()" >
+                                                <option value="A"  {{ $selectedGroup1 }}>พนักงานในบริษัท</option>
+                                                <option value="EG-0003" {{ $selectedGroup2 }} >พนักงานนอกบริษัท</option>
+                                            </select>
+                                        </div>
                                         <div class="form-group col-2 mt-4">
                                             <select class="form-control" id="carSize" name="carSize" onchange="this.form.submit()" >
                                                 <option>---เลือกประเภทรถ---</option>
@@ -345,6 +366,7 @@
             let required_status = true;
             let type            = $('#type').val();
             let CarType         = $('#carSize').val();
+            let groupCode       = $('#groupCode').val();
             let year            = $('#year').val();
 
             $.each(required, function(key,val) {             
@@ -366,7 +388,7 @@
 
             if(required_status){
                 let FormSave = $(this).serializeArray();
-                FormSave.push({ name : 'CarType', value : CarType },{ name : 'Year', value : year});
+                FormSave.push({ name : 'CarType', value : CarType },{ name : 'Year', value : year},{ name : 'groupCode', value : groupCode});
 
                 if(type == 1){
                     FormSave = $(this).serializeArray();
@@ -530,6 +552,7 @@
         let required_status = true;
         let type            = $('#typeSub').val();
         let CarType         = $('#carSize').val();
+        let groupCode       = $('#groupCode').val();
         let year            = $('#year').val();
         let MainID          = $('.subTitle').children(".activeItem");
         MainID              = MainID.parent().data('id');
@@ -553,7 +576,7 @@
 
         if(required_status){
             let FormSave = $(this).serializeArray();
-            FormSave.push({ name : 'CarType', value : CarType },{ name : 'MainID', value : MainID },{ name : 'Year', value : year});
+            FormSave.push({ name : 'CarType', value : CarType },{ name : 'MainID', value : MainID },{ name : 'Year', value : year},{ name : 'groupCode', value : groupCode});
             // FormSave.push({ name : 'MainID', value : MainID });
 
             if(type == 1){

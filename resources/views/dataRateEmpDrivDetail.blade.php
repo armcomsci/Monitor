@@ -8,9 +8,11 @@
                 <thead>
                     <tr>
                         <th>หัวข้อ</th>
-                        <th>หัก/คะแนน</th>
+                        <th>รูปภาพ</th>
                         <th>หมายเหตุ</th>
+                        <th>ผู้ดำเนินการ</th>
                         <th>วันที่</th>
+                        <th>หัก/คะแนน</th>
                     </tr>
                 </thead>
                 @php
@@ -24,20 +26,29 @@
                             @endphp
                             <tr>
                                 <td>{{ $item->subTitleName }}</td>
-                                <td class="text-center">{{ $item->scoreRate }}</td>
+                               
+                                <td>
+                                    @if ($item->imgUrl != "")
+                                    <a href="{{ $item->imgUrl }}" target="_blank">
+                                        <img src="{{ $item->imgUrl }}" alt="" style="width: 150px; height: 150px;">
+                                    </a>
+                                    @endif
+                                </td>
                                 <td>{{ $item->remark }}</td>
+                                <td>{{ $item->Fullname }}</td>
                                 <td>{{ ShowDate($item->created_time,"d-m-Y H:i") }}</td>
+                                <td class="text-center">{{ $item->scoreRate }}</td>
                             </tr>
                         @endforeach
                     @else 
                     <tr>
-                        <td class="text-center" colspan="4"> <h5>ไม่พบรายการ</h5></td>
+                        <td class="text-center" colspan="6"> <h5>ไม่พบรายการ</h5></td>
                     </tr>
                     @endif
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" class="text-right">คงเหลือ</td>
+                        <td colspan="5" class="text-right">คงเหลือ</td>
                         <td class="text-center">
                             {{ 100-array_sum($SumScore)  }}
                         </td>

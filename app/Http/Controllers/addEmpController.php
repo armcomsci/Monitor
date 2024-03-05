@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class addEmpController extends Controller
 {
@@ -20,7 +21,9 @@ class addEmpController extends Controller
                     ->selectRaw("REPLACE(EMTransp.TranspName, 'ขนส่งโดย', '') AS TranspName")
                     ->get();
 
-        return view('addEmp',compact('Cardriv'));
+        $leave = DB::table('LMSLeaveWork')->get();
+
+        return view('addEmp',compact('Cardriv','leave'));
     }
 
     public function filter_emp(Request $req){
@@ -65,7 +68,7 @@ class addEmpController extends Controller
 
     public function save(Request $req){
         DB::beginTransaction();
-
+       
         $Empcode    = $req->Empcode;
 
         $DateWork   = $req->DateWork; 
@@ -111,26 +114,123 @@ class addEmpController extends Controller
     }
 
     public function change_status(Request $req){
- 
+        // dd($req);
         DB::beginTransaction();
-        $EmpCode = $req->Empcode;
-        $Status  = $req->Status;
-
-        $DateWork   = $req->DateWork;
-        $WorkDate   = date_create($DateWork);
-        $WorkDate   = date_format($WorkDate,"Ymd");
-
         try{
-            $count = DB::table('LMSDBM.dbo.LMSwork_date')
+            $DateWork   = $req->DateWork;
+            $EmpCode    = $req->Empcode;
+            $Status     = $req->Status;
+
+            $SqlDate   = date_create($DateWork);
+            $SqlDate   = date_format($SqlDate,"Ymd");
+
+
+            if($Status == "N"){
+
+                $type_id    = $req->type;
+                $amount     = $req->amount;
+                $day        = $req->day;
+                $remark     = $req->remark;
+        
+                if($day == "D"){
+
+                    $dateStart       =   Carbon::parse($DateWork);
+
+                    $daysOff = [];
+                    for ($i = 0; $i < $amount; $i++) {
+
+                        $sqlHoliday =  $dateStart->addDays($i);
+                        $sqlHoliday =  $sqlHoliday->format('Y-m-d');
+                        
+                        $CheckHoliday = DB::table('TMDBM.dbo.tmTrnHoliday')
+                                        ->whereRaw("HolidayDate = '".$sqlHoliday."'")
+                                        ->count();
+
+                        if (!$dateStart->isSunday() && $CheckHoliday == 0) {
+                            $daysOff[] = $dateStart->copy();
+                        } else {
+                            $i--;
+                        }
+                    }
+
+                   
+                    $indexDay       =   $amount-1;
+                    $numOfDaysOff   =   count($daysOff)+1;
+    
+                    $dateEnd        =   $daysOff[$indexDay]->format('Y-m-d');
+                    $dayStart       =   Carbon::parse($DateWork);
+                  
+                    $Log['leave_id']            = $type_id;
+                    $Log['leave_amount']        = $amount;
+                    $Log['empDrivCode']         = $EmpCode;
+                    $Log['leave_date_start']    = $dayStart->format('Y-m-d');
+                    $Log['leave_date_end']      = $dateEnd;
+                    $Log['leave_type']          = $day;
+                    $Log['Leave_remark']        = $remark;
+                    $Log['created_by']          = Auth::user()->EmpCode;
+                    $Log['created_time']        = now();
+
+                    DB::table('LMSLogEmpDriv_Leave')->insert($Log);
+
+
+                    foreach ($daysOff as $key => $value) {
+                        $SqlDate = $value->format('Ymd');
+
+                        $UpdateWork['Status'] = $Status;
+
+                        DB::table('LMSwork_date')
                             ->where('EmpDriverCode',$EmpCode)
-                            ->whereRaw("CONVERT(varchar,SentDate,112) = '".$WorkDate."'")->update(['Status'=>$Status]);
-            if($count > 1){
-                DB::rollBack();
-                return "fail";
+                            ->whereRaw("CONVERT(varchar,SentDate,112) = '".$SqlDate."'")
+                            ->update($UpdateWork);
+                    }
+
+                }elseif($day == "H"){
+
+                    $WorkDate   = date_create($DateWork);
+                    $WorkDate   = date_format($WorkDate,"Y-m-d");
+
+                    $Log['leave_id']            = $type_id;
+                    $Log['leave_amount']        = $amount;
+                    $Log['empDrivCode']         = $EmpCode;
+                    $Log['leave_date_start']    = $WorkDate;
+                    $Log['leave_date_end']      = $WorkDate;
+                    $Log['leave_type']          = $day;
+                    $Log['Leave_remark']        = $remark;
+                    $Log['created_by']          = Auth::user()->EmpCode;
+                    $Log['created_time']        = now();
+
+                    DB::table('LMSLogEmpDriv_Leave')->insert($Log);
+
+                    $UpdateWork['Status'] = $Status;
+
+
+                    $count = DB::table('LMSwork_date')
+                                ->where('EmpDriverCode',$EmpCode)
+                                ->whereRaw("CONVERT(varchar,SentDate,112) = '".$SqlDate."'")
+                                ->update($UpdateWork);
+
+                    if($count > 1){
+                        DB::rollBack();
+                        return "fail";
+                    }
+                }
+
+            }else{
+                $UpdateWork['Status'] = $Status;
+                $count = DB::table('LMSwork_date')
+                            ->where('EmpDriverCode',$EmpCode)
+                            ->whereRaw("CONVERT(varchar,SentDate,112) = '".$SqlDate."'")
+                            ->update($UpdateWork);
+                // dd($count,$EmpCode,$WorkDate);
+                if($count > 1){
+                    DB::rollBack();
+                    return "fail";
+                }
             }
+
         }catch (\Throwable $th) {
             DB::rollBack();
-            return "fail";
+            return $th->getMessage();
         }    
 
         DB::commit();

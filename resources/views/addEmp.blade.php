@@ -180,10 +180,32 @@
 @section('script')
 <script src="{{ asset('theme/assets/js/daterangepicker.js') }}"></script>
 <script>
+
+    function InputAlert(){
+        let leave = {!! $leave !!}
+
+        let html  = ' <div class="form-row"> <div class="col-md-6 mb-4"><select  class="form-control" name="leave_type">';
+        $.each( leave, function( key, value ) {
+            html += '<option value="'+value['id']+'">'+value['leave_name']+'</option>';
+        });
+        html += '</select></div><div class="col-md-3 mb-4"><input type="number" class="form-control" placeholder="จำนวน" name="leave_amount" min="1" required /></div> <div class="col-md-3 mb-4"><select class="form-control" name="leave_day"><option value="H">ชั่วโมง</option><option value="D" >วัน</option></select></div><div class="col-md-12 mb-4"><input type="text" class="form-control" name="leave_remark" placeholder="หมายเหตุ" required /></div> </div>';
+        return html;
+    }
+
+    function getLastWeeksDate() {
+        const now = new Date();
+
+        return new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate() - 7,
+        );
+    }
+
     $('#Work_date').daterangepicker({
         "singleDatePicker": true,
         "showDropdowns": true,
-        "minDate": new Date(),
+        "minDate": getLastWeeksDate(),
         // "autoUpdateInput": false,
         "autoApply":true,
         locale: {
@@ -242,7 +264,7 @@
                         $('.list_emp tbody').empty();
                         $('.list_emp tbody').append(html_emp);
 
-                        console.log(response);
+                        // console.log(response);
                         let html_selectd = "";
                         let checked;
                         if(response.Send != ""){
@@ -318,49 +340,109 @@
             })
         });
     });
+
     $(document).on('change','.Status_used',function(){
         let Empcode     = $(this).val();
         let WorkDate    = $('#Work_date').val();
+        let checkBoxes = $(this);
         let status;
         if($(this).is(':checked')){
             status = "Y";
+            Swal.fire({
+                title: 'ต้องการเปลี่ยนสถานะ ?',
+                icon: 'info',
+                showCancelButton: true,
+                // confirmButtonColor: '#3085d6',
+                // cancelButtonColor: '#d33',
+                confirmButtonText: 'ตกลง',
+                cancelButtonText: 'ไม่ต้องการ',
+            }).then(function(result) {
+                if (result.value) {
+                   
+                    $.ajax({
+                        type: "post",
+                        url: url+"/ChangeStatusEmp",
+                        data: { 'Empcode':Empcode,
+                                'Status':status,
+                                'DateWork':WorkDate
+                            },
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        // dataType: "dataType",
+                        success: function (response) {
+                            if(response == "success"){
+                                Swal.fire("แก้ไข้ข้อมูลสำเร็จ", "", "success");
+                            }else{
+                                Swal.fire("เกิดข้อผิดพลาดในการบันทึก", "กรุณาแก้ไขอีกครั้ง", "error");
+                            }
+                            
+                        }
+                    });
+                }else{
+                    checkBoxes.prop("checked", !checkBoxes.prop("checked"));
+                }
+            });
         }else{
             status = "N";
-        }
-        swal({
-            title: 'ต้องการเปลี่ยนยกเลิกคนขับ ?',
-            text: "",
-            icon: 'warning',
-            showCancelButton: true,
-            // confirmButtonColor: '#3085d6',
-            // cancelButtonColor: '#d33',
-            confirmButtonText: 'ตกลง',
-            cancelButtonText: 'ไม่ต้องการ'
-        }).then(function(result) {
-            if (result.value) {
-                $.ajax({
-                    type: "post",
-                    url: url+"/ChangeStatusEmp",
-                    data: {'Empcode':Empcode,'Status':status,'DateWork':WorkDate},
-                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                    // dataType: "dataType",
-                    success: function (response) {
-                        if(response == "success"){
-                            Swal.fire("แก้ไข้ข้อมูลสำเร็จ", "", "success");
-                        }else{
-                            Swal.fire("เกิดข้อผิดพลาดในการบันทึก", "กรุณาแก้ไขอีกครั้ง", "error");
-                        }
-                        
+
+            Swal.fire({
+                title: 'ต้องการเปลี่ยนยกเลิกคนขับ ?',
+                html: InputAlert(),
+                icon: 'info',
+                showCancelButton: true,
+                // confirmButtonColor: '#3085d6',
+                // cancelButtonColor: '#d33',
+                confirmButtonText: 'ตกลง',
+                cancelButtonText: 'ไม่ต้องการ',
+                preConfirm: () => {
+                    // Get input and select values
+                    const leave_type        = Swal.getPopup().querySelector("select[name='leave_type']").value;
+                    const leave_amount      = Swal.getPopup().querySelector("input[name='leave_amount']").value;
+                    const leave_day         = Swal.getPopup().querySelector("select[name='leave_day']").value;
+                    const leave_remark      = Swal.getPopup().querySelector("input[name='leave_remark']").value;
+                    
+                    if(!leave_amount){
+                        alert('ระบุจำนวนวันลา')
+                        return false;
                     }
-                });
-            }else{
-                if($(this).is(':checked')){
-                    $(this).prop('checked',false);
-                }else{
-                    $(this).prop('checked',true);
+                    if(!leave_remark){
+                        alert('ระบุหมายเหตุการลา')
+                        return false;
+                    }
+                
+                    return { type: leave_type, amount: leave_amount, day: leave_day, remark: leave_remark };
+                    
                 }
-            }
-        });
+            }).then(function(result) {
+                if (result.value) {
+                    const { type, amount,day,remark } = result.value;
+
+                    $.ajax({
+                        type: "post",
+                        url: url+"/ChangeStatusEmp",
+                        data: { 'Empcode':Empcode,
+                                'Status':status,
+                                'DateWork':WorkDate,
+                                'type':type,
+                                'amount':amount,
+                                'day':day,
+                                'remark':remark,
+                            },
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        // dataType: "dataType",
+                        success: function (response) {
+                            if(response == "success"){
+                                Swal.fire("แก้ไข้ข้อมูลสำเร็จ", "", "success");
+                            }else{
+                                Swal.fire("เกิดข้อผิดพลาดในการบันทึก", "กรุณาแก้ไขอีกครั้ง", "error");
+                            }
+                            
+                        }
+                    });
+                }else{
+                    checkBoxes.prop("checked", !checkBoxes.prop("checked"));
+                }
+            });
+        }
     });
     $(document).on('click','#Check_all',function(){
         $( ".Select_emp" ).each(function( index ) {

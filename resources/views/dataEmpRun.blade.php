@@ -6,7 +6,8 @@
                 <thead style="background: #76cedd">
                     <tr>
                         <th>ทะเบียนรถ</th>
-                        <th>รหัส/คนรถ</th>
+                        <th>รหัส</th>
+                        <th>ชื่อพนักงาน</th>
                         <th>จำนวนเที่ยวรถ</th>
                         <th>วันที่</th>
                     </tr>
@@ -32,7 +33,8 @@
                                 }
                                 $Empcode                       = $emp->EmpDriverCode;
 
-                                $SumEmp[$Empcode]['EmpName']   = $emp->EmpDriverCode." : ".$emp->EmpDriverFullName.$Carsize;
+                                $SumEmp[$Empcode]['EmpDriverCode']   = $emp->EmpDriverCode;
+                                $SumEmp[$Empcode]['EmpName']   = $emp->EmpDriverFullName.$Carsize;
                               
                                 if(isset($SumEmp[$Empcode]['StampSum'])){
                                     $Count                          = $SumEmp[$Empcode]['StampSum'];
@@ -44,7 +46,8 @@
                             @endphp
                             <tr class="DetailRun" data-stampdate="{{ $emp->Stamp_date }}" data-empcode="{{ $Empcode }}">
                                 <td>{{ $emp->VehicleCode }}</td>
-                                <td>{{ $emp->EmpDriverCode." : ".$emp->EmpDriverFullName.$Carsize }}</td>
+                                <td>{{ $emp->EmpDriverCode }}</td>
+                                <td>{{ $emp->EmpDriverFullName.$Carsize }}</td>
                                 <td>{{ $emp->EmpRun }}</td>
                                 <td>
                                     <span class="badge outline-badge-success shadow-none">{{ ShowDate($emp->Stamp_date,"d-m-Y") }}</span>
@@ -66,16 +69,18 @@
     <div class="col-4">
         <h5>รวมทั้งหมดตั้งแต่วันที่ : <span id="RangeDateSum"></span></h5>
         <div class="table-responsive" style="height: 550px;">
-            <table class="table table-bordered mb-4" >
+            <table class="table table-bordered mb-4" id="SumRunEmp">
                 <thead style="background: #76cedd">
                     <tr>
-                        <th>รหัส/คนรถ</th>
+                        <th>รหัส</th>
+                        <th>ชื่อพนักงาน</th>
                         <th>รวม/เที่ยว</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($SumEmp as $sum)
                         <tr>
+                            <td>{{ $sum['EmpDriverCode'] }}</td>
                             <td>{{ $sum['EmpName'] }}</td>
                             <td>{{ $sum['StampSum'] }}</td>
                         </tr>

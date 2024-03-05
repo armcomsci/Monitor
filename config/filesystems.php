@@ -63,6 +63,18 @@ return [
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
         ],
+        
+        'ftp_local' => [
+            'driver' => 'ftp',
+						
+            'host' => '203.150.199.79',
+						
+            'username' => 'administrator',
+						
+            'password' => 'Jtpack@2022',
+
+            // 'port' => '22',
+        ],
 
     ],
 

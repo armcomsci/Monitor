@@ -12,17 +12,17 @@
     }
 @endphp
 <div class="d-flex ">
-    <div class="mr-auto p-2" style="width: 400px;">
+    {{-- <div class="mr-auto p-2" style="width: 400px;">
         <input type="text" class="form-control" id="findEmpDriv" style="width: 100%" placeholder="ค้นหาพนักงาน">
-    </div>
+    </div> --}}
     <div class="p-2">
         <a href="{{ $url }}">
             <button class="btn btn-success mb-3"><i class="fa-solid fa-file-arrow-down"></i> Export Excel</button>
         </a>
     </div>
 </div>
-<div class="table-responsive" style="height: 650px;" id="TableRateEmp">
-    <table class="table table-bordered mb-4">
+<div class="table-responsive" style="height: 580px;" >
+    <table class="table table-bordered mb-4" id="TableRateEmp">
         <thead style="background: #76cedd">
             <tr>
                 <th>รูปภาพ</th>

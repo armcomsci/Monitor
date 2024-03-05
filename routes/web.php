@@ -71,7 +71,6 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/profileCalTransGet','generalController@ProfileCalTransGet');
     Route::post('/ProfileCalTransSave','generalController@ProfileCalTransSave');
 
-
     Route::get('/ProfileTransport','generalController@ProfileTransport');
 
     Route::get('/ProfilePay','generalController@ProfilePay');
@@ -94,6 +93,11 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/ProfileOilTypeGet','generalController@profileOilGet');
     Route::post('/profileOilSave','generalController@profileOilSave');
     Route::post('/ProfileOilTypeDelete','generalController@profileOilDel');
+
+    Route::get('/LeaveWork','leaveWorkController@leaveWork');
+    Route::post('/LeaveWorkSave','leaveWorkController@save');
+    Route::post('/LeaveWorkGet','leaveWorkController@getData');
+    Route::post('/LeaveWorkDelete','leaveWorkController@del');
 
     Route::get('/settingUser','UserSettingController@settingUser');
     Route::post('/settingUserGet','UserSettingController@settingGet');
@@ -150,7 +154,7 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/RateEmpDrivGetSubTitle','RateEmpDrivController@getSubTitle');
     Route::post('/RateEmpDrivDeleteTitle','RateEmpDrivController@deleteTitle');
     Route::post('/saveRateSubTitleCarDriv','RateEmpDrivController@saveSubTitle');
-    Route::get('/RateEmpDrivScore','RateEmpDrivController@rateEmp');
+    Route::any('/RateEmpDrivScore','RateEmpDrivController@rateEmp');
     Route::post('/RateProfileEmpDriv','RateEmpDrivController@proFileEmpDriv');
     Route::post('/RateGetSubTitle','RateEmpDrivController@proFileGetSubTitleRate');
     Route::post('/SaveRateEmpDriv','RateEmpDrivController@saveRateEmp');

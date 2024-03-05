@@ -34,6 +34,10 @@
     .select2-container--default .select2-selection--multiple{
         background: #ffffff;
     }
+    .select2-container--default.select2-container--focus .select2-selection--multiple{
+        overflow: auto;
+        max-height: 70px;
+    }
  </style>
  @endsection
 

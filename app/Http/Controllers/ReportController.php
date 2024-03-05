@@ -312,7 +312,7 @@ class ReportController extends Controller
                         if($CarTypeCode != ''){
                             $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarTypeCode);
                         }
-                        $EmpName    = $EmpName->orderByRaw("CASE WHEN (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) IS NULL THEN 1 ELSE 0 END, (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) ASC")
+                        $EmpName    = $EmpName->orderByRaw("SumScoreRate DESC")
                         ->get();
 
         return view('dataRateEmpDriv',compact('EmpName','Export'));
@@ -326,16 +326,16 @@ class ReportController extends Controller
 
 
         $RateEmp = DB::table('LMSRateEmpScore')
-                    ->where('empDrivCode',$empCode)
-                    ->whereRaw("MONTH(created_time) = $Month AND YEAR(created_time) = $Year")
+                    ->join('LMSusers as LMSusers','LMSRateEmpScore.created_by','LMSusers.EmpCode')
+                    ->select('LMSRateEmpScore.*','LMSusers.Fullname')
+                    ->where('LMSRateEmpScore.empDrivCode',$empCode)
+                    ->whereRaw("MONTH(LMSRateEmpScore.created_time) = $Month AND YEAR(LMSRateEmpScore.created_time) = $Year")
                     ->get();
 
         return view('dataRateEmpDrivDetail',compact('RateEmp','empCode'));
     }
 
     public function exportExcelRate(){
-        $Month  = date('n');
-        $m      = getMonth($Month);
 
         if(isset($_GET['ExMonth'])){
             $data['ExMonth'] = $_GET['ExMonth'];
@@ -346,6 +346,8 @@ class ReportController extends Controller
         if(isset($_GET['ExCarTypeCode'])){
             $data['ExCarTypeCode'] = $_GET['ExCarTypeCode'];
         }
+
+        $m      = getMonth($data['ExMonth']);
 
         switch ($data['ExCarTypeCode']) {
             case 'CT001':
@@ -408,9 +410,11 @@ class RateEmpDrivExport implements  FromView, ShouldAutoSize
                     ->where('Parent',0)
                     ->where('CarType',$CarType)
                     ->where('UseYear',$Year)
+                    ->whereNull('CarGroupCode')
                     ->get();
 
         $HeaderExcel = [];
+        
         foreach ($TitleRate as $key => $value) {
             $HeadId = $value->id;
 
@@ -431,14 +435,15 @@ class RateEmpDrivExport implements  FromView, ShouldAutoSize
             
         }
 
+
         $firstM  =  Carbon::now()->format('Ym01');
         $lastM   =  Carbon::now()->format('Ymt');
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
-                        ->leftjoin('LMSRateEmpScore as LMSRateEmpScore','lmEmpDriv.EmpDriverCode','LMSRateEmpScore.empDrivCode')
-                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','LMSRateEmpScore.scoreRate','LMSRateEmpScore.subTitleId')
-                        ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
+                        // ->leftjoin('LMSRateEmpScore as LMSRateEmpScore','lmEmpDriv.EmpDriverCode','LMSRateEmpScore.empDrivCode')
+                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel')
+                        ->selectRaw("lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                         ->selectRaw("(SELECT        SUM(res.scoreRate) AS Expr1
                         FROM            LMSRateEmpScore AS res
                         WHERE        ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
@@ -454,7 +459,7 @@ class RateEmpDrivExport implements  FromView, ShouldAutoSize
                         $EmpName    = $EmpName->orderByRaw("CASE WHEN (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) IS NULL THEN 1 ELSE 0 END, (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) ASC")
                         ->get();
   
-        return view('exportExcel.rateEmpDriv',compact('HeaderExcel','EmpName'));
+        return view('exportExcel.rateEmpDriv',compact('HeaderExcel','EmpName','Month','Year'));
     }
 
    

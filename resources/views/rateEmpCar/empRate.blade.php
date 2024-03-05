@@ -104,14 +104,38 @@
                 <div class="row">
                     <div class="col-xl-12  col-md-12">
                         <div class="mail-box-container">
-                            <div id="mailbox-inbox" class="accordion mailbox-inbox p-3">
-                                <div class="col-xl-4 col-lg-5 col-md-5 col-sm-7 filtered-list-search layout-spacing align-self-center">
-                                    <form class="form-inline my-2 my-lg-0">
-                                        <div class="">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <div id="mailbox-inbox" class="accordion mailbox-inbox p-3 ">
+                                <div class="filtered-list-search layout-spacing align-self-center">
+                                    <form class="row" onSubmit="return false" method="post" action="{{ url()->current() }}">
+                                        @csrf
+                                        <div class="col-xl-2 col-lg-2 col-md-2">
+                                            <select class="form-control" name="Month_rate" onchange="this.form.submit()">
+                                                @php
+                                                    $M_ago  = strtotime("-1 Months");
+                                                    $M_ago  = date('m',$M_ago);
+    
+                                                    $M_current = date('m');
+
+                                                    $selected  = '';
+                                                    $selected2 = '';
+
+                                                    if($Month_rate != "" && $Month_rate == $M_ago){
+                                                        $selected2 = "selected";
+                                                    }else if($Month_rate == $M_current || $Month_rate == ''){
+                                                        $selected = "selected";
+                                                    }
+                                                @endphp
+                                                <option value="{{ $M_ago }}" {{ $selected2 }} >{{ getMonth($M_ago)  }}</option>
+                                                <option value="{{ $M_current }}"  {{ $selected }} >{{ getMonth($M_current)  }}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-3 col-lg-3 col-md-3">  
                                             <input type="text" class="form-control product-search" id="input-search" placeholder="ค้นหาด้วย ทะเบียนรถ/รหัส/ชื่อพนักงาน">
                                         </div>
                                     </form>
+                                </div>
+                                <div class="col-xl-4 col-lg-5 col-md-5 col-sm-7 filtered-list-search layout-spacing align-self-center">
+                                        
                                 </div>
                                 <div class="layout-spacing layout-top-spacing pl-3" id="cancel-row">
                                     <div class="widget-content searchable-container list">
@@ -125,7 +149,7 @@
                                                     <div style="width: 120px;">
                                                         <h4>ทะเบียนรถ</h4>
                                                     </div>
-                                                    <div style="width: 350px;">
+                                                    <div style="width: 200px;">
                                                         <h4>รหัส/ชื่อ-นามสกุล</h4>
                                                     </div>
                                                     <div style="width: 150px;">
@@ -133,6 +157,12 @@
                                                     </div>
                                                     <div  style="width: 100px;">
                                                         <h4>คะแนน</h4>
+                                                    </div>
+                                                    <div  style="width: 100px;">
+                                                        <h4>หัวข้อประเมินล่าสุด</h4>
+                                                    </div>
+                                                    <div  style="width: 100px;">
+                                                        <h4>ผู้ประเมิน</h4>
                                                     </div>
                                                     <div class="">
                                                         <h4>ประเมิน</h4>
@@ -157,7 +187,7 @@
                                                         <div style="width: 100px;">
                                                             <p>{{ $item->VehicleCode }}</p>
                                                         </div>
-                                                        <div style="width: 350px;">
+                                                        <div style="width: 200px;">
                                                             <p>{{ $item->EmpDriverName }}</p>
                                                         </div>
                                                         <div style="width: 150px;">
@@ -165,6 +195,12 @@
                                                         </div>
                                                         <div style="width: 100px;">
                                                             <p>{{ 100-$item->SumScoreRate }}</p>
+                                                        </div>
+                                                        <div style="width: 100px;">
+                                                            <p>{{ $item->SubTitleName }}</p>
+                                                        </div>
+                                                        <div style="width: 100px;">
+                                                            <p>{{ $item->RateFullname }}</p>
                                                         </div>
                                                         <div class="action-btn">       
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-3 edit RateEmp" data-id="{{ $item->EmpDriverCode }}"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
@@ -193,7 +229,7 @@
                   <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
-            <div class="modal-body" style="height: 630px;" id="ProfileRate"> 
+            <div class="modal-body" style="height: 660px;" id="ProfileRate"> 
 
             </div>
         </div>
@@ -294,16 +330,29 @@
         }); 
 
         if(required_status){
-            let FormSave = $(this).serializeArray();
-            FormSave.push({ name : 'EmpCode', value : EmpDrivCode });
+            let FormSave = new FormData($('#SaveRateEmpDriv')[0]);
+            FormSave.append('EmpCode', EmpDrivCode);
             $.ajax({
                 type: "post",
                 url: url+"/SaveRateEmpDriv",
                 data: FormSave,
+                cache: false,
+                contentType: false,
+                processData: false,
                 beforeSend:function(){
-
+                    swal({
+                        title: 'loadding....',
+                        text: '',
+                        timer: 2000,
+                        button: false,
+                        closeModal: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                        // timerProgressBar: true
+                    })
                 },
                 success: function (response) {
+                    swal.close();
                     if(response == 'success'){
                         swal({
                             title: 'บันทึกสำเร็จ',

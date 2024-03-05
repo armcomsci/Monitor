@@ -56,7 +56,7 @@
         </div>
     </div>
 </div>
-<form id="SaveRateEmpDriv" action="javascript:void(0);" >
+<form id="SaveRateEmpDriv" action="javascript:void(0);" enctype="multipart/form-data">
     <div class="row mt-3">
         <div class="col-md-6 mb-4">
             <label>หัวข้อ</label>
@@ -75,6 +75,9 @@
         <div class="col-md-12 mb-4">
             <label>หมายเหตุ</label>
             <input type="text" class="form-control " name="RateRemark" placeholder="หมายเหตุ" >
+        </div>
+        <div class="col-md-12 mt-2 mb-2">
+            <input type="file" name="imgRate" accept="image/*" >
         </div>
         <button class="btn btn-primary mt-3 ml-3" id="SaveTitle" type="submit">บันทึกข้อมูล</button>
     </div>

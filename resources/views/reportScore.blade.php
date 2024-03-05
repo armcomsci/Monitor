@@ -122,7 +122,7 @@
             success: function (response) {
                 $('.loaddingModal').css('display','none');
                 $('#dataScoreJob').html(response);
-               
+                
             }
         });
     });
