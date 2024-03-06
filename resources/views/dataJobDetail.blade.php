@@ -6,6 +6,8 @@
             @php
                 $link['EmpCode']     = auth()->user()->EmpCode;
                 $link['EmpDrivCode'] = $Data['Drive']->EmpDriverCode;
+                $link['EmpGroupCode']= $Data['Drive']->EmpGroupCode;
+
                 $json = json_encode($link,true);
                 $json = base64_encode($json);
             @endphp

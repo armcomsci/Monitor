@@ -296,12 +296,13 @@ class ReportController extends Controller
         $Month       = $req->Month;
         $Year        = $req->Year;
         $CarTypeCode = $req->CarTypeCode;
+        $groupCode   = $req->groupCode;
 
         $Export = $req->all();
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
-                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel')
+                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','lmEmpDriv.EmpGroupCode')
                         ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                         ->selectRaw("(SELECT        SUM(res.scoreRate) AS Expr1
                         FROM            LMSRateEmpScore AS res
@@ -312,9 +313,15 @@ class ReportController extends Controller
                         if($CarTypeCode != ''){
                             $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarTypeCode);
                         }
+                        if($groupCode != 'A'){
+                            $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
+                        }
+                        elseif($groupCode == 'A'){
+                            $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode','<>',$groupCode);
+                        }
                         $EmpName    = $EmpName->orderByRaw("SumScoreRate DESC")
                         ->get();
-
+      
         return view('dataRateEmpDriv',compact('EmpName','Export'));
     }
 
@@ -346,6 +353,9 @@ class ReportController extends Controller
         if(isset($_GET['ExCarTypeCode'])){
             $data['ExCarTypeCode'] = $_GET['ExCarTypeCode'];
         }
+        if(isset($_GET['groupCode'])){
+            $data['groupCode'] = $_GET['groupCode'];
+        }
 
         $m      = getMonth($data['ExMonth']);
 
@@ -362,6 +372,10 @@ class ReportController extends Controller
         }
 
         return Excel::download( new RateEmpDrivExport($data) , "คะแนนพนักงานประเภท_$Carsize"."_ประจำเดือน_$m.xlsx");
+    }
+
+    public function workDriv(){
+        return view('reportWorkDriv');
     }
 
     private function GetEmpName(){
@@ -403,14 +417,20 @@ class RateEmpDrivExport implements  FromView, ShouldAutoSize
         $Month      = $this->data['ExMonth'];
         $Year       = $this->data['ExYear'];
         $CarType    = $this->data['ExCarTypeCode'];
+        $groupCode  = $this->data['groupCode'];
 
         $Year = date('Y');
       
         $TitleRate = DB::table('LMSRateEmpDriv_Title')
                     ->where('Parent',0)
                     ->where('CarType',$CarType)
-                    ->where('UseYear',$Year)
-                    ->whereNull('CarGroupCode')
+                    ->where('UseYear',$Year);
+                    if($groupCode == "EG-0003"){
+                        $TitleRate  =    $TitleRate->where('CarGroupCode',$groupCode);
+                    }elseif($groupCode == "A"){
+                        $TitleRate  =    $TitleRate->whereNull('CarGroupCode');
+                    }
+                    $TitleRate  =    $TitleRate->whereNull('CarGroupCode')
                     ->get();
 
         $HeaderExcel = [];

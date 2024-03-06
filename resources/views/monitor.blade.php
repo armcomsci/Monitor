@@ -989,9 +989,10 @@ thead{
 
         let EmpDrivLink = {
                         'EmpCode' : EmpCodeDriv1,
-                        'EmpDrivCode' : response['Drive'].EmpDriverCode
+                        'EmpDrivCode' : response['Drive'].EmpDriverCode,
+                        'EmpGroupCode' : response['Drive'].EmpGroupCode
                     };
-
+        
         let jsonData = JSON.stringify(EmpDrivLink);
         
         EmpDrivLink = encodeURIComponent(window.btoa(jsonData));

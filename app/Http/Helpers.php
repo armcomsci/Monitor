@@ -68,11 +68,12 @@
         return $strMonthCut[$m];
     }
 
-    function GetScoreRateEmpDriv($empCode,$subId){
+    function GetScoreRateEmpDriv($empCode,$subId,$Month){
         $Score = DB::table('LMSRateEmpScore')
                     ->select('scoreRate','remark')
                     ->where('subTitleId',$subId)
                     ->where('empDrivCode',$empCode)
+                    ->whereMonth('created_time', '=', $Month)
                     ->first();
 
         $drivScore = [];

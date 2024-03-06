@@ -58,7 +58,7 @@ class monitorAdminController extends Controller
                         ->leftjoin('LMDBM.dbo.lmEmpContainers as contain','m_contain.ContainerNo','contain.ContainerNo')
                         ->join('LMDBM.dbo.lmEmpDriv as Driv','m_contain.Empcode','Driv.EmpDriverCode')
                         ->join('LMDBM.dbo.lmCarDriv as CDriv','Driv.EmpDriverCode','CDriv.EmpDriverCode')
-                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverCode','CDriv.VehicleCode','Driv.EmpDriverTel')
+                        ->select('m_contain.ContainerNo','Driv.EmpDriverName','Driv.EmpDriverlastName','Driv.EmpDriverCode','CDriv.VehicleCode','Driv.EmpDriverTel','Driv.EmpGroupCode')
                         ->selectRaw("(select top(1) status from LMSJobLog_Contain where ContainerNo = '$ContainerNo' order by Datetime desc) as statusTrans ")
                         ->where('CDriv.IsDefault','Y')
                         // ->where('contain.flag','N')

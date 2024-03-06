@@ -76,8 +76,8 @@ class RateEmpDrivController extends Controller
                         FROM            LMSRateEmpScore AS res
                         WHERE        (CONVERT(varchar, res.created_time, 112) BETWEEN '$firstM' AND '$lastM') AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
                         GROUP BY res.empDrivCode) AS SumScoreRate")
-                        ->selectRaw("(SELECT TOP(1) SubTitleName FROM LMSRateEmpScore as res2 WHERE (res2.empDrivCode = lmEmpDriv.EmpDriverCode) ORDER BY res2.created_time DESC ) as SubTitleName")
-                        ->selectRaw("(SELECT TOP(1) Fullname FROM LMSRateEmpScore as res3 INNER JOIN LMSusers as LMSusers ON res3.created_by = LMSusers.EmpCode WHERE (res3.empDrivCode = lmEmpDriv.EmpDriverCode) ORDER BY res3.created_time DESC ) as RateFullname")
+                        ->selectRaw("(SELECT TOP(1) SubTitleName FROM LMSRateEmpScore as res2 WHERE (res2.empDrivCode = lmEmpDriv.EmpDriverCode) AND  (CONVERT(varchar, res2.created_time, 112) BETWEEN '$firstM' AND '$lastM') ORDER BY res2.created_time DESC ) as SubTitleName")
+                        ->selectRaw("(SELECT TOP(1) Fullname FROM LMSRateEmpScore as res3 INNER JOIN LMSusers as LMSusers ON res3.created_by = LMSusers.EmpCode WHERE (res3.empDrivCode = lmEmpDriv.EmpDriverCode) AND (CONVERT(varchar, res3.created_time, 112) BETWEEN '$firstM' AND '$lastM') ORDER BY res3.created_time DESC ) as RateFullname")
                         ->where('lmCarDriv.IsDefault','Y')
                         ->where('lmEmpDriv.Active','Y')
                         ->orderByRaw("SumScoreRate DESC")
@@ -94,7 +94,7 @@ class RateEmpDrivController extends Controller
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
-                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel')
+                        ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','lmEmpDriv.EmpGroupCode')
                         ->selectRaw("lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                         ->selectRaw("(SELECT SUM(res.scoreRate) AS Expr1
                         FROM            LMSRateEmpScore AS res
@@ -105,12 +105,19 @@ class RateEmpDrivController extends Controller
                         ->where('lmEmpDriv.EmpDriverCode',$empCode)
                         ->first();
 
+        $groupCode = $EmpName->EmpGroupCode;
+
         $Year = date('Y');
         $RateTitle  = DB::table('LMSRateEmpDriv_Title')
                         ->where('parent',0)
                         ->where('CarType',$EmpName->CarTypeCode)
-                        ->where('UseYear',$Year)
-                        ->get();
+                        ->where('UseYear',$Year);
+        if($groupCode == "EG-0003"){
+            $RateTitle  =    $RateTitle->where('CarGroupCode',$groupCode);
+        }elseif($groupCode != "EG-0003"){
+            $RateTitle  =    $RateTitle->whereNull('CarGroupCode');
+        }
+        $RateTitle  =    $RateTitle->get();
                         
         return view('rateEmpCar.profileEmpRate',compact('EmpName','RateTitle'));
     }

@@ -82,7 +82,7 @@
                         @if($SubTitleItem != 0)
                         <td align="center" >
                             @php
-                                $drivScore = GetScoreRateEmpDriv($item->EmpDriverCode,$SubTitleItem);
+                                $drivScore = GetScoreRateEmpDriv($item->EmpDriverCode,$SubTitleItem,$Month);
                             @endphp
                             @if(count($drivScore) != 0)
                                 {{ $drivScore['score'] }}

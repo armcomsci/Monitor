@@ -10,6 +10,9 @@
     if($Export['CarTypeCode'] != ""){
         $url .= "&ExCarTypeCode=".$Export['CarTypeCode']; 
     }
+    if($Export['groupCode'] != ""){
+        $url .= "&groupCode=".$Export['groupCode']; 
+    }
 @endphp
 <div class="d-flex ">
     {{-- <div class="mr-auto p-2" style="width: 400px;">

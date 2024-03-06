@@ -135,6 +135,12 @@
                                                 <option value="CT003">รถใหญ่</option>
                                             </select>
                                         </div>
+                                        <div class="col-2">
+                                            <select class="form-control" id="groupCode" name="groupCode"  >
+                                                <option value="A"  >พนักงานในบริษัท</option>
+                                                <option value="EG-0003" >พนักงานนอกบริษัท</option>
+                                            </select>
+                                        </div>
                                         <div class="col-1 mt-1">
                                             <button type="button" class="btn btn-outline-primary" id="Find"><i class="fa-solid fa-magnifying-glass"></i></button>
                                         </div>
