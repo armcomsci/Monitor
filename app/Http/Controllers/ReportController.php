@@ -476,6 +476,12 @@ class RateEmpDrivExport implements  FromView, ShouldAutoSize
                         if($CarType != ''){
                             $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarType);
                         }
+                        if($groupCode != 'A'){
+                            $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
+                        }
+                        elseif($groupCode == 'A'){
+                            $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode','<>',$groupCode);
+                        }
                         $EmpName    = $EmpName->orderByRaw("CASE WHEN (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) IS NULL THEN 1 ELSE 0 END, (SELECT SUM(res.scoreRate) FROM LMSRateEmpScore AS res WHERE ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode) GROUP BY res.empDrivCode) ASC")
                         ->get();
   
