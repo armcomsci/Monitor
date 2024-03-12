@@ -137,6 +137,7 @@ class addEmpController extends Controller
                     $dateStart       =   Carbon::parse($DateWork);
 
                     $daysOff = [];
+                    // $daysLeave = [];
                     for ($i = 0; $i < $amount; $i++) {
 
                         $sqlHoliday =  $dateStart->addDays($i);
@@ -147,7 +148,8 @@ class addEmpController extends Controller
                                         ->count();
 
                         if (!$dateStart->isSunday() && $CheckHoliday == 0) {
-                            $daysOff[] = $dateStart->copy();
+                            $daysOff[]   = $dateStart->copy();
+                            // $daysLeave[] = $dateStart->format('Y-m-d');
                         } else {
                             $i--;
                         }
@@ -170,7 +172,7 @@ class addEmpController extends Controller
                     $Log['created_by']          = Auth::user()->EmpCode;
                     $Log['created_time']        = now();
 
-                    DB::table('LMSLogEmpDriv_Leave')->insert($Log);
+                    $lastId =  DB::table('LMSLogEmpDriv_Leave')->insertGetId($Log);
 
 
                     foreach ($daysOff as $key => $value) {
@@ -182,6 +184,12 @@ class addEmpController extends Controller
                             ->where('EmpDriverCode',$EmpCode)
                             ->whereRaw("CONVERT(varchar,SentDate,112) = '".$SqlDate."'")
                             ->update($UpdateWork);
+
+                        $Log_dt['day_off']      = $value->format('Y-m-d');
+                        $Log_dt['empDrivCode']  = $EmpCode;
+                        $Log_dt['leave_id']     = $lastId;
+
+                        DB::table('LMSLogEmpDriv_Leave_dt')->insert($Log_dt);
                     }
 
                 }elseif($day == "H"){

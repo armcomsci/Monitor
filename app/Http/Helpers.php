@@ -88,6 +88,50 @@
         return $drivScore;
     }
 
+    function GetLeaveWork($empCode,$Month,$Year,$leave_id){
+        $leave = DB::table('LMSLogEmpDriv_Leave')
+                ->where([
+                    'empDrivCode'=>$empCode,
+                ])
+                ->whereMonth('leave_date_start', '=', $Month)
+                ->whereYear('leave_date_start', '=', $Year)
+                ->where('leave_id',$leave_id)
+                ->get();
+        $H = 0;
+        if(count($leave) != 0){
+            foreach ($leave as $key => $value) {
+                if($value->leave_type == 'D'){
+                    $H += $value->leave_amount*8;
+                }elseif($value->leave_type == 'H'){
+                    $H += $value->leave_amount;
+                }  
+            }
+        }
+       
+     
+        return $H;
+    }
+
+    function ConvertLeaveStr($H){
+        if( $H%8 == 0 ) {
+            $H = $H/8;
+        } else{
+            $H = ($H/8)-0.15;
+        }
+
+        $H      = round($H,1 );
+        if( $H%8 == 0 ) {
+            $str_h  = str_replace('.','วัน ',$H)." ชั่วโมง";
+            
+        } else{
+            $str_h  = $H." วัน";
+        }
+
+        return $str_h;
+    }
+
+    
+
     function MonthThai($month){
         if($month == "00"){
             $month = "12";

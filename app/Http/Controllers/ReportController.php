@@ -378,6 +378,57 @@ class ReportController extends Controller
         return view('reportWorkDriv');
     }
 
+    public function dataWorkDriv(Request $req){
+        $Month       = $req->Month;
+        $Year        = $req->Year;
+        $CarTypeCode = $req->CarTypeCode;
+        $groupCode   = $req->groupCode;
+
+        $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
+                            ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
+                            ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','lmEmpDriv.EmpGroupCode')
+                            ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
+                            ->selectRaw("(SELECT        SUM(res.scoreRate) AS Expr1
+                            FROM            LMSRateEmpScore AS res
+                            WHERE       ( MONTH(res.created_time) = $Month AND YEAR(res.created_time) = $Year ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
+                            GROUP BY res.empDrivCode) AS SumScoreRate")
+                            ->where('lmCarDriv.IsDefault','Y')
+                            ->where('lmEmpDriv.Active','Y');
+                            if($CarTypeCode != ''){
+                                $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarTypeCode);
+                            }
+                            if($groupCode != 'A'){
+                                $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
+                            }
+                            elseif($groupCode == 'A'){
+                                $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode','<>',$groupCode);
+                            }
+                            $EmpName    = $EmpName->orderByRaw("SumScoreRate DESC")
+                            ->get();
+
+        $LeaveWork  = DB::table('LMSLeaveWork')->get();
+
+        return view('dataWorkDriv',compact('Month','EmpName','Year','LeaveWork'));
+    }
+
+    public function detailEmpWork(Request $req){
+        $Month = $req->Month;
+        $Year  = $req->Year;
+        $empCode = $req->empCode;
+
+        $leave = DB::table('LMSLogEmpDriv_Leave as LMSLogEmpDriv_Leave')
+                    ->join('LMSLeaveWork as LMSLeaveWork','LMSLogEmpDriv_Leave.leave_id','LMSLeaveWork.id')
+                    ->select('LMSLogEmpDriv_Leave.*','LMSLeaveWork.leave_name')
+                    ->where([
+                        'LMSLogEmpDriv_Leave.empDrivCode'=>$empCode,
+                    ])
+                    ->whereMonth('LMSLogEmpDriv_Leave.leave_date_start', '=', $Month)
+                    ->whereYear('LMSLogEmpDriv_Leave.leave_date_start', '=', $Year)
+                    ->get();
+
+        return view('dataEmpDrivWork',compact('leave','empCode'));
+    }
+
     private function GetEmpName(){
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
