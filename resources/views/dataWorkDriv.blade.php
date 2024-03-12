@@ -1,3 +1,19 @@
+@php
+    $url = url('/ExportEmpDrivWork')."?Month=".$Month."&Year=".$Year."&CarTypeCode=".$CarTypeCode;
+    $url2 = url('/ExportEmpDrivWorkAll')."?Month=".$Month."&Year=".$Year."&CarTypeCode=".$CarTypeCode;
+@endphp
+<div class="d-flex ">
+    <div class="p-2">
+        <a href="{{ $url }}">
+            <button class="btn btn-success mb-3"><i class="fa-solid fa-file-arrow-down"></i> Export Excel แบบรายเดือน</button>
+        </a>
+    </div>
+    <div class="p-2">
+        <a href="{{ $url2 }}">
+            <button class="btn btn-info mb-3"><i class="fa-solid fa-file-arrow-down"></i> Export Excel สรุปคงเหลือ</button>
+        </a>
+    </div>
+</div>
 <div class="table-responsive" style="height: 650px;" >
     <table class="table table-bordered mb-4" id="TableWorkLeave" border="1">
         <thead style="background: #76cedd">

@@ -207,7 +207,13 @@ class addEmpController extends Controller
                     $Log['created_by']          = Auth::user()->EmpCode;
                     $Log['created_time']        = now();
 
-                    DB::table('LMSLogEmpDriv_Leave')->insert($Log);
+                    $lastId = DB::table('LMSLogEmpDriv_Leave')->insertGetId($Log);
+
+                    $Log_dt['day_off']      = $WorkDate;
+                    $Log_dt['empDrivCode']  = $EmpCode;
+                    $Log_dt['leave_id']     = $lastId;
+
+                    DB::table('LMSLogEmpDriv_Leave_dt')->insert($Log_dt);
 
                     $UpdateWork['Status'] = $Status;
 

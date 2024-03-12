@@ -408,12 +408,12 @@ class ReportController extends Controller
 
         $LeaveWork  = DB::table('LMSLeaveWork')->get();
 
-        return view('dataWorkDriv',compact('Month','EmpName','Year','LeaveWork'));
+        return view('dataWorkDriv',compact('Month','EmpName','Year','LeaveWork','CarTypeCode'));
     }
 
     public function detailEmpWork(Request $req){
-        $Month = $req->Month;
-        $Year  = $req->Year;
+        $Month   = $req->Month;
+        $Year    = $req->Year;
         $empCode = $req->empCode;
 
         $leave = DB::table('LMSLogEmpDriv_Leave as LMSLogEmpDriv_Leave')
@@ -427,6 +427,50 @@ class ReportController extends Controller
                     ->get();
 
         return view('dataEmpDrivWork',compact('leave','empCode'));
+    }
+
+    public function exportExcelWork(){
+        $dataWork['Month']          = $_GET['Month'];
+        $dataWork['Year']           = $_GET['Year'];
+        $dataWork['CarTypeCode']    = $_GET['CarTypeCode'];
+
+        $m      = getMonth($dataWork['Month']);
+
+        switch ($dataWork['CarTypeCode']) {
+            case 'CT001':
+                $Carsize = 'รถเล็ก';
+                break;
+            case 'CT002':
+                $Carsize = 'รถกลาง';
+                break;
+            case 'CT003':
+                $Carsize = 'รถใหญ่';
+                break;
+        }
+
+        return Excel::download( new WorkEmpDrivExport($dataWork) , "สถิติลาคนรถประเภท_$Carsize"."_ประจำเดือน_$m.xlsx");
+    }
+
+    public function exportExcelWorkAll(){
+        $dataWorkAll['Month']          = $_GET['Month'];
+        $dataWorkAll['Year']           = $_GET['Year'];
+        $dataWorkAll['CarTypeCode']    = $_GET['CarTypeCode'];
+
+        $m      = getMonth($dataWorkAll['Month']);
+
+        switch ($dataWorkAll['CarTypeCode']) {
+            case 'CT001':
+                $Carsize = 'รถเล็ก';
+                break;
+            case 'CT002':
+                $Carsize = 'รถกลาง';
+                break;
+            case 'CT003':
+                $Carsize = 'รถใหญ่';
+                break;
+        }
+
+        return Excel::download( new WorkEmpDrivExportAll($dataWorkAll) , "สรุปคงเหลือการลาของคนรถประเภท_$Carsize"."_ประจำเดือน_$m.xlsx");
     }
 
     private function GetEmpName(){
@@ -540,4 +584,65 @@ class RateEmpDrivExport implements  FromView, ShouldAutoSize
     }
 
    
+}
+
+class WorkEmpDrivExport implements  FromView, ShouldAutoSize
+{    
+    private $dataWork;
+
+    public function __construct($dataWork)
+    {
+        $this->dataWork = $dataWork;
+
+    }
+    public function view(): View
+    {
+
+        $Month      = $this->dataWork['Month'];
+        $Year       = $this->dataWork['Year'];
+        $CarType    = $this->dataWork['CarTypeCode'];
+
+        $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
+                            ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
+                            ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','lmEmpDriv.EmpGroupCode')
+                            ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
+                            ->where('lmCarDriv.IsDefault','Y')
+                            ->where('lmEmpDriv.Active','Y')
+                            ->where('lmCarDriv.CarTypeCode',$CarType)
+                            ->get();
+
+        return view('exportExcel.workEmpDriv',compact('EmpName','Month','Year'));
+    }
+}
+
+
+class WorkEmpDrivExportAll implements  FromView, ShouldAutoSize
+{    
+    private $dataWorkAll;
+
+    public function __construct($dataWorkAll)
+    {
+        $this->dataWorkAll = $dataWorkAll;
+
+    }
+    public function view(): View
+    {
+
+        $Month      = $this->dataWorkAll['Month'];
+        $Year       = $this->dataWorkAll['Year'];
+        $CarType    = $this->dataWorkAll['CarTypeCode'];
+
+        $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
+                            ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
+                            ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','lmEmpDriv.EmpGroupCode')
+                            ->selectRaw("lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
+                            ->where('lmCarDriv.IsDefault','Y')
+                            ->where('lmEmpDriv.Active','Y')
+                            ->where('lmCarDriv.CarTypeCode',$CarType)
+                            ->get();
+
+        $LeaveWork  = DB::table('LMSLeaveWork')->get();
+
+        return view('exportExcel.workEmpDrivAll',compact('EmpName','Month','Year','LeaveWork'));
+    }
 }

@@ -19,7 +19,7 @@
                         @foreach ($leave as $item)
                             <tr>
                                <td>{{ ShowDate($item->leave_date_start,"d-m-Y")." ถึง ".ShowDate($item->leave_date_end,"d-m-Y") }}</td>
-                               <td>{{ $item->leave_amount }}</td>
+                               <td>{{ number_format($item->leave_amount,0) }}</td>
                                <td>
                                     @if ($item->leave_type == 'D')
                                     วัน

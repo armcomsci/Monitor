@@ -201,6 +201,8 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/ReportWorkDriv','ReportController@workDriv');
     Route::post('/FindLeaveWork','ReportController@dataWorkDriv');
     Route::post('/DetailEmpDrivWork','ReportController@detailEmpWork');
+    Route::get('/ExportEmpDrivWork','ReportController@exportExcelWork');
+    Route::get('/ExportEmpDrivWorkAll','ReportController@exportExcelWorkAll');
 
     Route::get('/CancelContain','cancelContainController@index');
     Route::post('/ReturnFlagContainer','cancelContainController@confirmReturn');

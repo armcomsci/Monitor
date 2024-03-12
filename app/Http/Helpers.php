@@ -106,25 +106,37 @@
                     $H += $value->leave_amount;
                 }  
             }
-        }
-       
-     
+        } 
         return $H;
     }
 
-    function ConvertLeaveStr($H){
-        if( $H%8 == 0 ) {
-            $H = $H/8;
-        } else{
-            $H = ($H/8)-0.15;
-        }
+    function GetWorkEmp_Day($empCode,$day){
+        $Leave_day = DB::table('LMSLogEmpDriv_Leave_dt as LMSLogEmpDriv_Leave_dt')
+                    ->join('LMSLogEmpDriv_Leave as LMSLogEmpDriv_Leave','LMSLogEmpDriv_Leave_dt.leave_id','LMSLogEmpDriv_Leave.id')
+                    ->join('LMSLeaveWork as LMSLeaveWork','LMSLogEmpDriv_Leave.leave_id','LMSLeaveWork.id')
+                    ->select('LMSLogEmpDriv_Leave.leave_type','LMSLogEmpDriv_Leave.leave_amount','LMSLogEmpDriv_Leave.empDrivCode','LMSLeaveWork.leave_name','LMSLeaveWork.leave_limit_date')
+                    ->where('LMSLogEmpDriv_Leave_dt.day_off',$day)
+                    ->where('LMSLogEmpDriv_Leave_dt.empDrivCode',$empCode)
+                    ->first();
+        return $Leave_day;
+    }
 
-        $H      = round($H,1 );
-        if( $H%8 == 0 ) {
-            $str_h  = str_replace('.','วัน ',$H)." ชั่วโมง";
-            
-        } else{
-            $str_h  = $H." วัน";
+    function ConvertLeaveStr($H){
+
+        $days = floor($H / 8);
+    
+        // หาจำนวนชั่วโมงที่เหลือหลังจากหักชั่วโมงของวัน
+        $remaining_hours = $H % 8;
+    
+        // แสดงผลลัพธ์
+        if ($days > 0) {
+            if ($remaining_hours > 0) {
+                $str_h =  "$days วัน $remaining_hours ชั่วโมง";
+            } else {
+                $str_h =  "$days วัน";
+            }
+        } else {
+            $str_h =  "$remaining_hours ชั่วโมง";
         }
 
         return $str_h;
