@@ -41,20 +41,7 @@
                     @endphp
                     <th style="vertical-align: middle; text-align: center">{{ $i  }}</th>
                 @endfor
-                <th rowspan="3" style="vertical-align: middle; text-align: center">รวม</th>
-                @php
-                    $LimitLeave = [];
-                @endphp
-                @foreach ($LeaveWork as $itemWork)
-                    <th>{{ $itemWork->leave_name }}</th>
-                    <th>คงเหลือ</th>
-                    @php
-                        $idLeave = $itemWork->id;
-                        $LimitLeave[$idLeave]['id']      = $itemWork->id;
-                        $LimitLeave[$idLeave]['name']    = $itemWork->leave_name;
-                        $LimitLeave[$idLeave]['limit']   = $itemWork->leave_limit_date;
-                    @endphp
-                @endforeach
+                <th rowspan="2" style="vertical-align: middle; text-align: center">รวม</th>
             </tr>
             <tr>
                 <th>รหัสพนักงาน</th>
