@@ -187,19 +187,19 @@
 
     function CheckCancelContainer($Container){
 
-        $tmConTain_bk = DB::table('tmConTain_bk')
+        $tmConTain_bk = DB::table('TMDBM.dbo.tmConTain_bk')
                         ->select('Flag_st')
                         ->where(['ContainerNO'=>$Container,
                                 'Flag_st'=>'R'])
                         ->first();
 
-        $tmConTain_dl = DB::table('tmConTain_dl')
+        $tmConTain_dl = DB::table('TMDBM.dbo.tmConTain_dl')
                         ->select('Flag_st')
                         ->where(['ContainerNO'=>$Container,
                                 'Flag_st'=>'R'])
                         ->first();
 
-       $tmConTain   = DB::table('tmConTain')
+       $tmConTain   = DB::table('TMDBM.dbo.tmConTain')
                         ->select('Flag_st')
                         ->where(['ContainerNO'=>$Container,
                                 'Flag_st'=>'R'])
