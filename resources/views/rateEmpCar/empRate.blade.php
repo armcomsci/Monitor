@@ -268,11 +268,12 @@
         $(".RateEmp").click(function (e) { 
             e.preventDefault();
             let empCode = $(this).data('id');
+            let Month_rate = $("select[name='Month_rate']").val();
             EmpDrivCode = empCode;
             $.ajax({
                 type: "post",
                 url: url+"/RateProfileEmpDriv",
-                data: {'empCode':empCode},
+                data: {'empCode':empCode,'Month_rate':Month_rate},
                 beforeSend:function(){
                     $('#ProfileRate').empty();
                 },
@@ -331,7 +332,9 @@
 
         if(required_status){
             let FormSave = new FormData($('#SaveRateEmpDriv')[0]);
+            let Month_rate = $("select[name='Month_rate']").val();
             FormSave.append('EmpCode', EmpDrivCode);
+            FormSave.append('Month_rate',Month_rate);
             $.ajax({
                 type: "post",
                 url: url+"/SaveRateEmpDriv",

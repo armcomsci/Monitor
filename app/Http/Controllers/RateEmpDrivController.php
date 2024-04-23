@@ -66,6 +66,8 @@ class RateEmpDrivController extends Controller
             $firstM  =  Carbon::now()->format('Ym01');
             $lastM   =  Carbon::now()->format('Ymt');
         }
+
+        $Year   =  Carbon::now()->format('Y');
         
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
@@ -74,10 +76,10 @@ class RateEmpDrivController extends Controller
                         ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                         ->selectRaw("(SELECT        SUM(res.scoreRate) AS Expr1
                         FROM            LMSRateEmpScore AS res
-                        WHERE        (CONVERT(varchar, res.created_time, 112) BETWEEN '$firstM' AND '$lastM') AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
+                        WHERE    ( res.scoreUseMonth = '$Month_rate' AND res.scoreUseYear = '$Year' )   AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
                         GROUP BY res.empDrivCode) AS SumScoreRate")
-                        ->selectRaw("(SELECT TOP(1) SubTitleName FROM LMSRateEmpScore as res2 WHERE (res2.empDrivCode = lmEmpDriv.EmpDriverCode) AND  (CONVERT(varchar, res2.created_time, 112) BETWEEN '$firstM' AND '$lastM') ORDER BY res2.created_time DESC ) as SubTitleName")
-                        ->selectRaw("(SELECT TOP(1) Fullname FROM LMSRateEmpScore as res3 INNER JOIN LMSusers as LMSusers ON res3.created_by = LMSusers.EmpCode WHERE (res3.empDrivCode = lmEmpDriv.EmpDriverCode) AND (CONVERT(varchar, res3.created_time, 112) BETWEEN '$firstM' AND '$lastM') ORDER BY res3.created_time DESC ) as RateFullname")
+                        ->selectRaw("(SELECT TOP(1) SubTitleName FROM LMSRateEmpScore as res2 WHERE (res2.empDrivCode = lmEmpDriv.EmpDriverCode) AND  ( res2.scoreUseMonth = '$Month_rate' AND res2.scoreUseYear = '$Year' ) ORDER BY res2.created_time DESC ) as SubTitleName")
+                        ->selectRaw("(SELECT TOP(1) Fullname FROM LMSRateEmpScore as res3 INNER JOIN LMSusers as LMSusers ON res3.created_by = LMSusers.EmpCode WHERE (res3.empDrivCode = lmEmpDriv.EmpDriverCode) AND ( res3.scoreUseMonth = '$Month_rate' AND res3.scoreUseYear = '$Year' ) ORDER BY res3.created_time DESC ) as RateFullname")
                         ->where('lmCarDriv.IsDefault','Y')
                         ->where('lmEmpDriv.Active','Y')
                         ->orderByRaw("SumScoreRate DESC")
@@ -87,10 +89,9 @@ class RateEmpDrivController extends Controller
     }
 
     public function proFileEmpDriv(Request $req){
-        $empCode = $req->empCode;
-
-        $firstM  =  Carbon::now()->format('Ym01');
-        $lastM   =  Carbon::now()->format('Ymt');
+        $empCode        = $req->empCode;
+        $Month_rate     = $req->Month_rate;
+        $Year           =  Carbon::now()->format('Y');
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
@@ -98,7 +99,7 @@ class RateEmpDrivController extends Controller
                         ->selectRaw("lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                         ->selectRaw("(SELECT SUM(res.scoreRate) AS Expr1
                         FROM            LMSRateEmpScore AS res
-                        WHERE        (CONVERT(varchar, res.created_time, 112) BETWEEN '$firstM' AND '$lastM') AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
+                        WHERE       ( res.scoreUseMonth = '$Month_rate' AND res.scoreUseYear = '$Year' ) AND (res.empDrivCode = lmEmpDriv.EmpDriverCode)
                         GROUP BY res.empDrivCode) AS SumScoreRate")
                         ->where('lmCarDriv.IsDefault','Y')
                         ->where('lmEmpDriv.Active','Y')
@@ -131,12 +132,14 @@ class RateEmpDrivController extends Controller
     }
 
     public function saveRateEmp(Request $req){
+
         $idRateTitle    = $req->RateTitle;
         $idRateSubTitle = $req->RateSubTitle;
         $RateRemark     = $req->RateRemark;
         $EmpCode        = $req->EmpCode;
         $photo          = $req->file('imgRate');
-
+        $Month_rate     = $req->Month_rate;
+        
         try {
             DB::beginTransaction();
 
@@ -170,6 +173,7 @@ class RateEmpDrivController extends Controller
             }
             $EmpScore['empDrivCode']    = $EmpCode;
             $EmpScore['created_by']     = Auth::user()->EmpCode;
+            $EmpScore['scoreUseMonth']  = $Month_rate;
             $EmpScore['created_time']   = now();
 
             DB::table('LMSRateEmpScore')->insert($EmpScore);

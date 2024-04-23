@@ -25,9 +25,12 @@ class LoginController extends Controller
     }
 
     public function index(){
-        // dd( DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain as m_contain')->limit(10)->get());
+     
         return view('login');
     }
+
+  
+
     
     public function checkLogin(Request $req){
         DB::beginTransaction();

@@ -3,7 +3,7 @@
         <img src="https://images.jtpackconnect.com/empdrive/{{ $empCode.".jpg" }}" class="" alt="..."  onerror="this.onerror=null;this.src='{{ asset('theme/assets/img/90x90.jpg') }}';" style="width: 100%; height: 300px;">
     </div>
     <div class="col-9">
-        <div class="table-responsive">
+        <div class="table-responsive" style="height: 480px; overflow: scroll;">
             <table class="table table-bordered table-hover table-condensed mb-4">
                 <thead>
                     <tr>
