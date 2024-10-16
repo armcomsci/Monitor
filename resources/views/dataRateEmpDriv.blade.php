@@ -1,17 +1,21 @@
 @php
     $url = url('/ExportRateEmpDriv')."?";
-
+    $url2 = url('/ExportRateEmpYear')."?";
     if($Export['Month'] != ""){
         $url .= "ExMonth=".$Export['Month']; 
+        $url2 .= "ExMonth=".$Export['Month']; 
     }
     if($Export['Year'] != ""){
         $url .= "&ExYear=".$Export['Year']; 
+        $url2 .= "&ExYear=".$Export['Year']; 
     }
     if($Export['CarTypeCode'] != ""){
         $url .= "&ExCarTypeCode=".$Export['CarTypeCode']; 
+        $url2 .= "&ExCarTypeCode=".$Export['CarTypeCode']; 
     }
     if($Export['groupCode'] != ""){
         $url .= "&groupCode=".$Export['groupCode']; 
+        $url2 .= "&groupCode=".$Export['groupCode']; 
     }
 @endphp
 <div class="d-flex ">
@@ -20,7 +24,10 @@
     </div> --}}
     <div class="p-2">
         <a href="{{ $url }}">
-            <button class="btn btn-success mb-3"><i class="fa-solid fa-file-arrow-down"></i> Export Excel</button>
+            <button class="btn btn-success mb-3"><i class="fa-solid fa-file-arrow-down"></i> ดูรายงานของรายเดือน</button>
+        </a>
+        <a href="{{ $url2 }}">
+            <button class="btn btn-info mb-3"><i class="fa-solid fa-file-arrow-down"></i> ดูรายงานของรายปี</button>
         </a>
     </div>
 </div>

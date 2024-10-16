@@ -21,7 +21,7 @@
             <tr>
                 @for ($i = 1; $i < $lastM; $i++)
                     @php
-                        $date = date("Y-m-$i");
+                        $date = date("Y-$Month-$i");
                         $day  = date('w',strtotime($date));
                         if($day == 0){
                             continue;
@@ -33,7 +33,7 @@
             <tr>
                 @for ($i = 1; $i < $lastM; $i++)
                     @php
-                        $date = date("Y-m-$i");
+                        $date = date("Y-$Month-$i");
                         $day  = date('w',strtotime($date));
                         if($day == 0){
                             continue;
@@ -62,11 +62,13 @@
                     </td>
                     @for ($n = 1; $n < $lastM; $n++)
                         @php
-                            $date = date("Y-m-$n");
+                            $dateFormat = str_pad($n,2,"0",STR_PAD_LEFT);
+                            $date = date("Y$Month$dateFormat");
                             $day  = date('w',strtotime($date));
                             if($day == 0){
                                 continue;
                             }
+                    
                             $leaveWork = GetWorkEmp_Day($item->EmpDriverCode,$date);
                         @endphp
                         <td style="vertical-align: middle; text-align: center">

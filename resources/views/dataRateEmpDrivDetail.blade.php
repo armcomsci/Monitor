@@ -13,6 +13,7 @@
                         <th>ผู้ดำเนินการ</th>
                         <th>วันที่</th>
                         <th>หัก/คะแนน</th>
+                        <th>ลบ</th>
                     </tr>
                 </thead>
                 @php
@@ -38,17 +39,20 @@
                                 <td>{{ $item->Fullname }}</td>
                                 <td>{{ ShowDate($item->created_time,"d-m-Y H:i") }}</td>
                                 <td class="text-center">{{ $item->scoreRate }}</td>
+                                <td>
+                                    <button class="btn btn-outline-danger mb-2 deleteRateEmp" data-rateid="{{ $item->id }}" data-empcode="{{ $item->empDrivCode }}"><i class="fa-solid fa-trash"></i></button>
+                                </td>
                             </tr>
                         @endforeach
                     @else 
                     <tr>
-                        <td class="text-center" colspan="6"> <h5>ไม่พบรายการ</h5></td>
+                        <td class="text-center" colspan="7"> <h5>ไม่พบรายการ</h5></td>
                     </tr>
                     @endif
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="5" class="text-right">คงเหลือ</td>
+                        <td colspan="6" class="text-right">คงเหลือ</td>
                         <td class="text-center">
                             {{ 100-array_sum($SumScore)  }}
                         </td>

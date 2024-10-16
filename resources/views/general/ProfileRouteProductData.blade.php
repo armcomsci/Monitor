@@ -21,7 +21,7 @@
         </div>
     </div>
     <div class="col-6">
-        <button class="btn btn-success mb-2 mr-2" style="float: right"><i class="fa-solid fa-plus"></i></button>
+        <button class="btn btn-success mb-2 mr-2" style="float: right" id="AddTrans"><i class="fa-solid fa-plus"></i></button>
         <div class="table-responsive" style="height: 650px;">
             <table class="table table-bordered mb-4" >
                 <thead style="background: #0683f8b4">

@@ -837,138 +837,69 @@ thead{
 
     function initialize(response) {
         $('#map').addClass('border-map');
+        var mapOptions = {
+                zoom: 6,
+                center: { lat: 13.858573, lng: 100.3791033 }, // Initial center (adjust as needed)
+                scrollwheel: true, // Set to false to disable scroll zoom
+                gestureHandling: 'auto' // Can be 'cooperative', 'none', or 'greedy'
+            };
+
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
         if(response['location'] != null){
-            var points = [];
-            // console.log(moment(response['location'].trx_date).format('D MMMM YYYY HH:mm'));
-            $('#TimeGps').text("แผนที่อัพเดทเมื่อเวลา : "+moment(response['location'].trx_date).format('D MMMM YYYY HH:mm'))
+             
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
 
-            map = new nostra.maps.Map("map", {
-                id: "mapTest",
-                logo: true,
-                scalebar: true,
-                slider: true,
-                level: 16,
-                lat: response['location'].lat,
-                lon: response['location'].lon
-            });
+            if(response['Route'] != null){
+                const waypoints =   response['Route'].map((item, index) => ({
+                                        location: new google.maps.LatLng(parseFloat(item.Late), parseFloat(item.Long)),
+                                        stopover: true, // Specify whether this location is a stopover point
+                                        title: `${item.CustName} - ${item.ShiptoAddr1}`, // Add a label for the marker
+                                    }));
 
-            nostra.config.Language.setLanguage(nostra.language.L);
-            layerMarker = new nostra.maps.layers.GraphicsLayer(map, { id: "layerMarker" });
-            gLayer      = new nostra.maps.layers.GraphicsLayer(map, { id: "gLayerPoint" });
-            routeLayer  = new nostra.maps.layers.GraphicsLayer(map, { id: "routeLayer" });
-            carLayer    = new nostra.maps.layers.GraphicsLayer(map, { id: "carLayer" });
 
-            map.addLayer(gLayer);
-            map.addLayer(layerMarker);
-            map.addLayer(routeLayer);
-            map.addLayer(carLayer);
+                const destination = waypoints.pop().location; // Last item is the destination
 
-            route = new nostra.services.network.route();
-            route.country = "TH";
+                const request = {
+                    origin: { lat: 13.858573, lng: 100.3791033}, 
+                    destination: destination, 
+                    waypoints: waypoints.map(
+                            waypoint => ({ 
+                                location: waypoint.location, 
+                                stopover: waypoint.stopover 
+                            })
+                        ),
+                    travelMode: google.maps.TravelMode.DRIVING,
+                };
 
-            map.events.load = function () {
-                if(response['Route'] != null){
-                    // ------------- เพิ่มจุดเริ่มต้น -----------------
-                    let name,lat,lon
-                    let Marker = new Array({
-                        name :  "JT Branch 3",
-                        lat  :  "13.858573",
-                        lon  :  "100.3791033",
-                        Addr :  "JT Branch 3"
-                    });
-                   
-                    points.push([13.858573, 100.3791033]);
-                    const stop = new nostra.services.network.stopPoint({
-                        lat: 13.858573,
-                        lon: 100.3791033,
-                    })
-                    route.addStopPoint(stop);
-                    // ------------------------------------------
-
-                    let a = 0;
-                    response['Route'].forEach( List => {
-                     
-                        lat      = List.Late;
-                        lon      = List.Long;
-                        name     = List.CustName;
-
-                        Marker.push({
-                            name : name,
-                            lat  : lat,
-                            lon  : lon,
-                            Addr : List.ShiptoAddr1
-                        });
-                        points.push([lat, lon]);
-                        isFirstLoad = false;
-
-                        const stop = new nostra.services.network.stopPoint({
-                            lat: lat,
-                            lon: lon,
-                        })
-                        route.addStopPoint(stop);
-                        a++;
-                    });
-                    // console.log(Marker);
-                    route.returnedRouteDetail = "true";
-                    
-                    route.solve((result) => {
-                        routeLayer.clear();
-                        carLayer.clear();
-                        route.clearStopPoint();
-
-                        if (result.isRouteDetailReturned == "true" || result.isRouteDetailReturned == true) {
-         
-                            routeLayer.addRoute(result,"#009EFF", 1);
-                            
-                            // //ทำการซูมแบบ focus ไปยังเส้นทางที่วาด
-                            map.zoomToNetworkResult(result);
-
-                            if (result.nostraResults != null) {
-                                routeStopPoint = result.nostraResults;
-                            } else {
-                                routeStopPoint = result.agsResults;
-                            }
-                        } else {
-                            if (result.nostraResults != null) {
-                                routeStopPoint = result.nostraResults;
-                            } else {
-                                routeStopPoint = result.agsResults; 
-                            }
-                        }
-
-                        var imgCarTempUrl = "https://developer-test.nostramap.com/developer/V2/images/car_topview.png";
-                        carMarker = new nostra.maps.symbols.Marker({
-                            url: imgCarTempUrl, width: 27, height: 50
-                        });
-                        carLayer.addMarker(response['location'].lat,response['location'].lon, carMarker);
-
-                        points.push([response['location'].lat, response['location'].lon]);
-                    });
-
-                    // console.log(Marker);
-                    let i = 1;
-                    Marker.forEach(mark => {
-                        
-                        nostraCallout = new nostra.maps.Callout({ title: mark.name, content: "ตำแหน่ง : "+mark.Addr });
-                        var marker = new nostra.maps.symbols.Marker(
-                        {
-                            url: "https://jtpackoffoods.co.th/Ecommerce/images/pin_"+i+".png",
-                            width: 42, 
-                            height: 42, 
-                            attributes: {POI_NAME: "ตำแหน่ง", POI_ROAD: name}, 
-                            callout: nostraCallout, 
-                            draggable: false, 
-                            isAnimateHover: true
-                        });
-                        layerMarker.addMarker(mark.lat, mark.lon, marker);
-                        i++;
-                    });
-                }
+                directionsService.route(request, (result, status) => {
+                    if (status == "OK") {
+                        directionsRenderer.setDirections(result);
+                    } else {
+                        window.alert("Directions request failed due to " + status);
+                    }
+                });
             }
 
-            setTimeout(() => {
-                    map.setExtent(points)
-            }, 1000);
+            const carMarker =   new google.maps.Marker({
+                position: new google.maps.LatLng(parseFloat(response['location'].lat), parseFloat(response['location'].lon)),
+                map: map,
+                icon: {
+                    url: url+'/icon/car.png', // Use a custom car icon if needed
+                    scaledSize: new google.maps.Size(40, 40), // Resize the icon if needed
+                },
+                title: `${response['location'].vehicle_id}`, // Marker label
+            });
+
+            // Add a click listener to open the InfoWindow
+            google.maps.event.addListener(carMarker,"click", function () {
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<h4>ทะเบียนรถ : ${response['location'].vehicle_id}</h4>`
+                });
+                infoWindow.open(map, carMarker);
+            });
 
             // hideLoading();
         }else{
@@ -1044,14 +975,17 @@ thead{
         // console.log(response['Drive'].statusTrans);
         let profilePath = 'https://images.jtpackconnect.com/empdrive/'+response['Drive'].EmpDriverCode+'.jpg';
         $('.ProfileDrive').attr('src',profilePath);
-        if(response['AddBill'].ContainerNO != null && response['Drive'].statusTrans != "W"){
-            $('#ConfirmCloseJob').attr('data-container',response['AddBill'].ContainerNO);
-            $('#closeJob,#AddBillTime').fadeIn(500);
-            $('#AddBillTime').text('ส่งบิลเมื่อ : '+moment(response['AddBill'].Addbill_Time).format('D MMMM YYYY HH:mm'));
-        }else if(response['Drive'].statusTrans == "W"){
-            $('#AddBillTime').fadeIn(500);
-            $('#AddBillTime').text('ไม่สามารถปิดงานได้ : โอนงานไม่สำเร็จ');
+        if(response['AddBill'] !== null){
+            if(response['AddBill'].ContainerNO != null && response['Drive'].statusTrans != "W"){
+                $('#ConfirmCloseJob').attr('data-container',response['AddBill'].ContainerNO);
+                $('#closeJob,#AddBillTime').fadeIn(500);
+                $('#AddBillTime').text('ส่งบิลเมื่อ : '+moment(response['AddBill'].Addbill_Time).format('D MMMM YYYY HH:mm'));
+            }else if(response['Drive'].statusTrans == "W"){
+                $('#AddBillTime').fadeIn(500);
+                $('#AddBillTime').text('ไม่สามารถปิดงานได้ : โอนงานไม่สำเร็จ');
+            }
         }
+        
     }
 
     function getDataTransfer(){

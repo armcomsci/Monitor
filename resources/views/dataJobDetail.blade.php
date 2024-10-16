@@ -46,7 +46,7 @@
         @endif
        
         {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
-        <div id="map"></div>
+        <div id="mapDt" style="height: 270px; width: 100%;"></div>
     </div>
     <div class="col-5" style="height: 520px;">
         <div class="d-flex justify-content-start">
@@ -121,147 +121,83 @@
         
     </div>
 </div>
+
 <script>
     dataApi = {!! json_encode($Data,true) !!};
 
     function initialize(dataApi) {
         $('#map').addClass('border-map');
+        var mapOptions = {
+                zoom: 6,
+                center: { lat: 13.858573, lng: 100.3791033 }, // Initial center (adjust as needed)
+                scrollwheel: true, // Set to false to disable scroll zoom
+                gestureHandling: 'auto' // Can be 'cooperative', 'none', or 'greedy'
+            };
+
+        var map = new google.maps.Map(document.getElementById("mapDt"), mapOptions);
 
         if(dataApi['location'] != null){
-            var points = [];
-            map = new nostra.maps.Map("map", {
-                id: "mapTest",
-                height : "350px",
-                logo: true,
-                scalebar: true,
-                slider: true,
-                level: 16,
-                lat: dataApi['location'].lat,
-                lon: dataApi['location'].lon
-            });
+           
+            const directionsService = new google.maps.DirectionsService();
+            const directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
 
-            nostra.config.Language.setLanguage(nostra.language.L);
-            layerMarker = new nostra.maps.layers.GraphicsLayer(map, { id: "layerMarker" });
-            gLayer      = new nostra.maps.layers.GraphicsLayer(map, { id: "gLayerPoint" });
-            routeLayer  = new nostra.maps.layers.GraphicsLayer(map, { id: "routeLayer" });
-            carLayer    = new nostra.maps.layers.GraphicsLayer(map, { id: "carLayer" });
+            if(dataApi['Route'] != null){
+                const waypoints =   dataApi['Route'].map((item, index) => ({
+                                        location: new google.maps.LatLng(parseFloat(item.Late), parseFloat(item.Long)),
+                                        stopover: true, // Specify whether this location is a stopover point
+                                        title: `${item.CustName} - ${item.ShiptoAddr1}`, // Add a label for the marker
+                                    }));
 
-            map.addLayer(gLayer);
-            map.addLayer(layerMarker);
-            map.addLayer(routeLayer);
-            map.addLayer(carLayer);
 
-            route = new nostra.services.network.route();
-            route.country = "TH";
+                const destination = waypoints.pop().location; // Last item is the destination
 
-            map.events.load = function () {
-                if(dataApi['Route'] != null){
-                    // ------------- เพิ่มจุดเริ่มต้น -----------------
-                    let name,lat,lon
-                    let Marker = new Array({
-                        name :  "JT Branch 3",
-                        lat  :  "13.858573",
-                        lon  :  "100.3791033",
-                        Addr :  "JT Branch 3"
-                    });
-                   
-                    points.push([13.858573, 100.3791033]);
-                    const stop = new nostra.services.network.stopPoint({
-                        lat: 13.858573,
-                        lon: 100.3791033,
-                    })
-                    route.addStopPoint(stop);
-                    // ------------------------------------------
+                const request = {
+                    origin: { lat: 13.858573, lng: 100.3791033}, 
+                    destination: destination, 
+                    waypoints: waypoints.map(
+                            waypoint => ({ 
+                                location: waypoint.location, 
+                                stopover: waypoint.stopover 
+                            })
+                        ),
+                    travelMode: google.maps.TravelMode.DRIVING,
+                };
 
-                    let a = 0;
-                    dataApi['Route'].forEach( List => {
-                     
-                        lat      = List.Late;
-                        lon      = List.Long;
-                        name     = List.CustName;
-
-                        Marker.push({
-                            name : name,
-                            lat  : lat,
-                            lon  : lon,
-                            Addr : List.ShiptoAddr1
-                        });
-                        points.push([lat, lon]);
-                        isFirstLoad = false;
-
-                        const stop = new nostra.services.network.stopPoint({
-                            lat: lat,
-                            lon: lon,
-                        })
-                        route.addStopPoint(stop);
-                        a++;
-                    });
-                    // console.log(Marker);
-                    route.returnedRouteDetail = "true";
-                    
-                    route.solve((result) => {
-                        routeLayer.clear();
-                        carLayer.clear();
-                        route.clearStopPoint();
-
-                        if (result.isRouteDetailReturned == "true" || result.isRouteDetailReturned == true) {
-         
-                            routeLayer.addRoute(result,"#009EFF", 1);
-                            
-                            // //ทำการซูมแบบ focus ไปยังเส้นทางที่วาด
-                            map.zoomToNetworkResult(result);
-
-                            if (result.nostraResults != null) {
-                                routeStopPoint = result.nostraResults;
-                            } else {
-                                routeStopPoint = result.agsResults;
-                            }
-                        } else {
-                            if (result.nostraResults != null) {
-                                routeStopPoint = result.nostraResults;
-                            } else {
-                                routeStopPoint = result.agsResults; 
-                            }
-                        }
-
-                        var imgCarTempUrl = "https://developer-test.nostramap.com/developer/V2/images/car_topview.png";
-                        carMarker = new nostra.maps.symbols.Marker({
-                            url: imgCarTempUrl, width: 27, height: 50
-                        });
-                        carLayer.addMarker(dataApi['location'].lat,dataApi['location'].lon, carMarker);
-
-                        points.push([dataApi['location'].lat, dataApi['location'].lon]);
-                    });
-
-                    console.log(Marker);
-                    let i = 1;
-                    Marker.forEach(mark => {
-                        
-                        nostraCallout = new nostra.maps.Callout({ title: mark.name, content: "ตำแหน่ง : "+mark.Addr });
-                        var marker = new nostra.maps.symbols.Marker(
-                        {
-                            url: "https://jtpackoffoods.co.th/Ecommerce/images/pin_"+i+".png",
-                            width: 42, 
-                            height: 42, 
-                            attributes: {POI_NAME: "ตำแหน่ง", POI_ROAD: name}, 
-                            callout: nostraCallout, 
-                            draggable: false, 
-                            isAnimateHover: true
-                        });
-                        layerMarker.addMarker(mark.lat, mark.lon, marker);
-                        i++;
-                    });
-                }
+                directionsService.route(request, (result, status) => {
+                    if (status == "OK") {
+                        directionsRenderer.setDirections(result);
+                    } else {
+                        window.alert("Directions request failed due to " + status);
+                    }
+                });
             }
 
-            setTimeout(() => {
-                    map.setExtent(points)
-            }, 1000);
+            const carMarker =   new google.maps.Marker({
+                position: new google.maps.LatLng(parseFloat(dataApi['location'].lat), parseFloat(dataApi['location'].lon)),
+                map: map,
+                icon: {
+                    url: url+'/icon/car.png', // Use a custom car icon if needed
+                    scaledSize: new google.maps.Size(40, 40), // Resize the icon if needed
+                },
+                title: `${dataApi['location'].vehicle_id}`, // Marker label
+            });
 
-            // hideLoading();
+            // Add a click listener to open the InfoWindow
+            google.maps.event.addListener(carMarker,"click", function () {
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<h4>ทะเบียนรถ : ${dataApi['location'].vehicle_id}</h4>`
+                });
+                infoWindow.open(map, carMarker);
+            });
+               
+        
         }else{
             $('#map').html('<h2>ไม่พบตำแหน่ง GPS</h2>')
         }
     }
+
     initialize(dataApi);
+    // hideLoading();
+   
 </script>

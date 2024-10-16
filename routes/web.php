@@ -197,10 +197,13 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/ReportRateEmpDriv','ReportController@reportRate');
     Route::post('/FindRateEmpDriv','ReportController@dataRateEmpDriv');
     Route::post('/DetailRateEmpDriv','ReportController@detailRateEmp');
+    Route::post('/ClearRateEmp','ReportController@ClearRateEmp');
     Route::get('/ExportRateEmpDriv','ReportController@exportExcelRate');
+    Route::get('/ExportRateEmpYear','ReportController@exportExcelRateYear');
     Route::get('/ReportWorkDriv','ReportController@workDriv');
     Route::post('/FindLeaveWork','ReportController@dataWorkDriv');
     Route::post('/DetailEmpDrivWork','ReportController@detailEmpWork');
+    Route::post('/ClearWorkEmp','ReportController@clearWorkEmp');
     Route::get('/ExportEmpDrivWork','ReportController@exportExcelWork');
     Route::get('/ExportEmpDrivWorkAll','ReportController@exportExcelWorkAll');
 

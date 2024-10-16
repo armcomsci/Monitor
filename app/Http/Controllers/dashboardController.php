@@ -129,7 +129,11 @@ class dashboardController extends Controller
     }
 
     public function gpsCarAll(){
-        $data = DB::table('LMSLogGps_temp')->get();
+        $data = DB::table('LMSLogGps_temp')
+                // ->leftjoin('LMDBM.dbo.lmCarDriv as lmCarDriv','lmCarDriv.VehicleCode','LMSLogGps_temp.vehicle_id')
+                // ->leftjoin('LMDBM.dbo.lmEmpDriv as lmEmpDriv','lmCarDriv.EmpDriverCode','lmEmpDriv.EmpDriverCode')
+                // ->select('LMSLogGps_temp.*','lmEmpDriv.EmpDriverName','lmEmpDriv.EmpDriverLastName')
+                ->get();
         return response()->json($data, 200);
     }
 

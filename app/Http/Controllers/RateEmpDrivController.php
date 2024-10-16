@@ -55,7 +55,7 @@ class RateEmpDrivController extends Controller
     }
 
     public function rateEmp(Request $req){
-        $Month_rate = '';
+        $Month_rate = Carbon::now()->format('m');
         if($req->Month_rate != ""){
             $Month_rate     = $req->Month_rate;
 
@@ -68,7 +68,7 @@ class RateEmpDrivController extends Controller
         }
 
         $Year   =  Carbon::now()->format('Y');
-        
+        // dd($Month_rate,$Year);
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
@@ -84,7 +84,7 @@ class RateEmpDrivController extends Controller
                         ->where('lmEmpDriv.Active','Y')
                         ->orderByRaw("SumScoreRate DESC")
                         ->get();
-
+        // dd($EmpName);
         return view('rateEmpCar.empRate',compact('EmpName','Month_rate'));
     }
 

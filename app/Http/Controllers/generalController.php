@@ -401,9 +401,15 @@ class generalController extends Controller
     public function ProfileRouteProduct(){
         $AreaZone = DB::table('LMDBM.dbo.lmAreaZone')->get();
 
-        $lmBkkMart_tm   =   DB::table('LMDBM.dbo.lmBkkMart_tm')->get();
+        $lmBkkMart_tm   =   DB::table('LMDBM.dbo.lmBkkMart_tm')->where('Remark','New Delivery Area')->get();
 
-        return view('general.ProfileRouteProduct',compact('AreaZone','lmBkkMart_tm'));
+        $lmTrans_tm   =   DB::table('LMDBM.dbo.lmTrnZone_tm as lmTrnZone_tm')
+                            ->join('LMDBM.dbo.lmGrpZone_tm as lmGrpZone_tm','lmTrnZone_tm.ZoneID','lmGrpZone_tm.ZoneID')
+                            ->leftjoin('LMDBM.dbo.lmGrpTran_tm as lmGrpTran_tm','lmGrpZone_tm.TranGroupID','lmGrpTran_tm.TranGroupID')
+                            ->select('lmGrpTran_tm.TranGroupName','lmGrpTran_tm.Remark','lmTrnZone_tm.ZoneName','lmTrnZone_tm.ZoneID','lmGrpTran_tm.TranGroupID')
+                            ->get();
+
+        return view('general.ProfileRouteProduct',compact('AreaZone','lmBkkMart_tm','lmTrans_tm'));
     }
 
     public function ProfileRouteProductData(Request $req){

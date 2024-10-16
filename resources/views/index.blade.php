@@ -214,7 +214,7 @@
                         </div>
                     </div>
                     <div class="widget-content widget-content-area">
-                        <div id="dlgLoading" class="loadingWidget"></div>
+                        {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
                         <div id="map"></div>
                     </div>
                 </div>
@@ -314,23 +314,19 @@
     <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS -->
 
     <script src="{{ asset('theme/plugins/counter/jquery.countTo.js') }}"></script>
-   
+  
     <script type="text/javascript">
 
 
         var initExtent, map, gLayer, route, routeLayer, layerMarker, chkRoutedResult;
         var points = [];
-        nostra.onready = function () {
-            loadCarMark();
-            // initialize();
-        };
-
-        function showLoading() {
-            document.getElementById("dlgLoading").style.display = "block";
-        }
-        function hideLoading() {
-            document.getElementById("dlgLoading").style.display = "none";
-        }
+      
+        // function showLoading() {
+        //     document.getElementById("dlgLoading").style.display = "block";
+        // }
+        // function hideLoading() {
+        //     document.getElementById("dlgLoading").style.display = "none";
+        // }
 
         function loadCarMark(){
             $.ajax({
@@ -339,7 +335,7 @@
                 dataType : 'json',
                 // data: $('#FindLocal').serialize(),
                 beforeSend: function() {
-                    showLoading();
+                    // showLoading();
                 },
                 success: function (response) {
                     initialize(response);
@@ -348,63 +344,64 @@
         }
     
         function initialize(response) {
-            showLoading();
-   
-            map = new nostra.maps.Map("map", {
-                id: "mapTest",
-                logo: true,
-                scalebar: true,
-                slider: true,
-                level: 18,
-                lat: 13.8916823,
-                lon: 100.4118694
-            });
-            nostra.config.Language.setLanguage(nostra.language.L);
-            layerMarker = new nostra.maps.layers.GraphicsLayer(map, { id: "layerMarker" });
-            gLayer      = new nostra.maps.layers.GraphicsLayer(map, { id: "gLayerPoint" });
+            // Map options
+            var mapOptions = {
+                zoom: 6,
+                center: { lat: 13.5, lng: 100.5 }, // Initial center (adjust as needed)
+                scrollwheel: true, // Set to false to disable scroll zoom
+                gestureHandling: 'auto' // Can be 'cooperative', 'none', or 'greedy'
+            };
 
-            map.addLayer(gLayer);
-            map.addLayer(layerMarker);
+            // Create the map
+            var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-            route = new nostra.services.network.route();
-            route.country = "TH";
-
-            map.events.load = function () {
-                response.forEach( List => {
-                    // console.log(List);
-                    let lat     = List.lat;
-                    let lon     = List.lon;
-                    let name    = List.vehicle_id;
-
-                    nostraCallout = new nostra.maps.Callout({ title: "ตำแหน่ง ", content: "ทะเบียนรถ : "+name });
-
-                    var marker = new nostra.maps.symbols.Marker(
-                    {
-                        url: url+"/public/icon/location.png",
-                        width: 32, 
-                        height: 32, 
-                        attributes: {POI_NAME: "ตำแหน่ง", POI_ROAD: name}, 
-                        callout: nostraCallout, 
-                        draggable: false, 
-                        isAnimateHover: true
-                    });
-                    layerMarker.addMarker(lat, lon, marker);
-                    const stop = new nostra.services.network.stopPoint({
-                        lat: lat,
-                        lon: lon,
-                    })
-                    route.addStopPoint(stop);
-                    points.push([lat, lon]);
-                });
-            }
-
-            setTimeout(() => {
-                    map.setExtent(points)
-            }, 1500);
             
-            map.disableDoubleClickZoom();
-            hideLoading();
+            const convertedData = [];
+            // console.log(response);
+            response.forEach(record => {
+                convertedData.push({
+                    coords: {
+                        lat: parseFloat(record.lat), // Convert string to float
+                        lng: parseFloat(record.lon)  // Convert string to float
+                    },
+                    title : {
+                        vehicle_id : record.vehicle_id
+                    }
+                });
+            });
+
+            // Create a new LatLngBounds object
+            var bounds = new google.maps.LatLngBounds();
+
+            // Loop through markers and add them to the map
+            convertedData.forEach(function (markerInfo) {
+                // console.log(markerInfo);
+                var marker = new google.maps.Marker({
+                    position: markerInfo.coords,
+                    map: map,
+                    title: markerInfo.title.vehicle_id
+                });
+
+                // Extend the bounds to include each marker's position
+                bounds.extend(marker.position);
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<h4>ทะเบียนรถ : ${markerInfo.title.vehicle_id}</h4>`
+                });
+
+                // Add a click listener to open the InfoWindow
+                marker.addListener("click", function () {
+                    infoWindow.open(map, marker);
+                });
+            });
+
+            // Adjust the map to fit all markers
+            map.fitBounds(bounds);
         }
+        $(document).ready(function () {
+            loadCarMark();
+        });
+   
        
     </script>
 @endsection

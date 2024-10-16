@@ -185,6 +185,7 @@
 <script src="{{ asset('theme/plugins/table/datatable/button-ext/buttons.html5.min.js') }}"></script>
 <script src="{{ asset('theme/plugins/table/datatable/button-ext/buttons.print.min.js') }}"></script>
 <script>
+    var EmpDriveCode;
     $('#Find').click(function (e) { 
         $.ajax({
             type: "post",
@@ -229,7 +230,7 @@
         let empcode         = $(this).data('empcode');
         let Month           = $("select[name='Month']").val();
         let Year            = $("select[name='Year']").val();
-
+        EmpDriveCode        = empcode;
         $.ajax({
             type: "post",
             url: url+"/DetailEmpDrivWork",
@@ -244,6 +245,44 @@
             }
         });
 
+    });
+
+    $(document).on('click','.deleteWorkEmp',function(e){
+        let workid  = $(this).data('workid');
+        let tagTr   = $(this).parent().parent();
+        swal({
+            title: 'ต้องการลบ ?',
+            text: '',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก',
+            padding: '2em'
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: "post",
+                    url: url+"/ClearWorkEmp",
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                    data: {workid:workid},
+                    // dataType: "dataType",
+                    success: function (response) {
+                        if(response == "success"){
+                            // alert(empcode);
+                            // console.log($(".DetailRate[data-empcode='" + EmpDriveCode + "']"));
+                            $(".DetailWorkLeave[data-empcode='"+EmpDriveCode+"']").click();
+                            $('#Find').click();
+                        }else{
+                            swal({
+                                title: 'เกิดข้อผิดพลาด',
+                                text: response,
+                                type: 'error' 
+                            })
+                        }
+                    }
+                });
+            }
+        });
     });
     
 </script>

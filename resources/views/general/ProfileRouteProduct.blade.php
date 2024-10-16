@@ -155,6 +155,56 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="DataTrans" tabindex="-1" role="dialog" aria-labelledby="DataTrans" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ข้อมูลเส้นทาง</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 770px;"> 
+                <form id="SaveMarketZone" action="javascript:void(0);">
+                    <div class="table-responsive" style="height: 700px;">
+                        <div class="col-3 mb-3">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search">
+                        </div>
+                        
+                            <table class="table table-bordered mb-4" id="MarketTable">
+                                <thead style="background: #60eb9a">
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" class="Check_all_market">                              
+                                        </th>
+                                        <th>ชื่อศูนย์ขนส่ง</th>
+                                        <th>ชื่อกลุ่มขนส่ง</th>
+                                        <th>ชื่อพื้นที่ขนส่ง</th>
+                                        <th>หมายเหตุ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($lmTrans_tm as $item)
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="TranGroupID[]" value="{{ $item->TranGroupID }}">
+                                            </td>
+                                            <td>{{ $item->TranGroupName }}</td>
+                                            <td>{{ $item->ZoneName }}</td>
+                                            <td>{{ $item->Remark }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                    </div>
+                    <input type="hidden" id="AreaCode" name="AreaCode">
+                    <button class="btn btn-primary mt-2" type="submit">บันทึกข้อมูล</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('script')
@@ -282,5 +332,11 @@
         e.preventDefault();
         $('#DataMarket').modal('show');
     });
+    
+    $(document).on('click','#AddTrans',function(e){
+        e.preventDefault();
+        $('#DataTrans').modal('show');
+    });
+
 </script>
 @endsection

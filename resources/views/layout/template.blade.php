@@ -52,15 +52,16 @@
         top: 0px;
         left: 0px;
     }
-    .map {
-        position: relative;
-        left: 0;
+    #map {
+        /* position: relative; */
+        /* left: 0;
         top: 0;
         right: 0;
-        bottom: 0;
+        bottom: 0; */
+        max-height: 450px;
         width: 100%;
-        height: 510px;
     }
+
     .blink_me {
         animation: blinker 1s linear infinite;
     }
@@ -119,7 +120,9 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
 
-    <script type="text/javascript" src="https://api.nostramap.com/nostraapi/v2.0/?key=Guh))FJkjZARKECd46rfcoQI53dnBDfmR2AOQc0KiJqdhf1e1i28Gskpn7CGLqYCxmAxLz9TPk1eMTRxdGcEFs0=====2"></script>
+    {{-- <script type="text/javascript" src="https://api.nostramap.com/nostraapi/v2.0/?key=Guh))FJkjZARKECd46rfcoQI53dnBDfmR2AOQc0KiJqdhf1e1i28Gskpn7CGLqYCxmAxLz9TPk1eMTRxdGcEFs0=====2"></script> --}}
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWHJGPcZvlcw1s1ettvCJSuJ_q4UNoOgo"></script>
     @php
         $Empcode = auth()->user()->EmpCode;
     @endphp

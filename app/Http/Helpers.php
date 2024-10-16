@@ -68,12 +68,22 @@
         return $strMonthCut[$m];
     }
 
-    function GetScoreRateEmpDriv($empCode,$subId,$Month){
+    function GetScoreSumRate($empCode,$Month,$Year){
+        $Score = DB::table('LMSRateEmpScore')
+                ->selectRaw("SUM(scoreRate) AS sumScore , COUNT(scoreRate) as countScore")
+                ->where('empDrivCode',$empCode)
+                ->whereRaw("( scoreUseMonth = '$Month' AND scoreUseYear = '$Year') ")
+                ->first();
+        return $Score;
+    }
+
+    function GetScoreRateEmpDriv($empCode,$subId,$Month,$Year){
         $Score = DB::table('LMSRateEmpScore')
                     ->select('scoreRate','remark')
                     ->where('subTitleId',$subId)
                     ->where('empDrivCode',$empCode)
-                    ->whereMonth('created_time', '=', $Month)
+                    ->where('scoreUseMonth', $Month)
+                    ->where('scoreUseYear', $Year)
                     ->first();
 
         $drivScore = [];
@@ -115,8 +125,7 @@
                     ->join('LMSLogEmpDriv_Leave as LMSLogEmpDriv_Leave','LMSLogEmpDriv_Leave_dt.leave_id','LMSLogEmpDriv_Leave.id')
                     ->join('LMSLeaveWork as LMSLeaveWork','LMSLogEmpDriv_Leave.leave_id','LMSLeaveWork.id')
                     ->select('LMSLogEmpDriv_Leave.leave_type','LMSLogEmpDriv_Leave.leave_amount','LMSLogEmpDriv_Leave.empDrivCode','LMSLeaveWork.leave_name','LMSLeaveWork.leave_limit_date')
-                    ->where('LMSLogEmpDriv_Leave_dt.day_off',$day)
-                    ->where('LMSLogEmpDriv_Leave_dt.empDrivCode',$empCode)
+                    ->whereRaw("CONVERT(varchar,LMSLogEmpDriv_Leave_dt.day_off, 112) = '$day' AND LMSLogEmpDriv_Leave_dt.empDrivCode = $empCode ")
                     ->first();
         return $Leave_day;
     }
