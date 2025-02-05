@@ -215,7 +215,7 @@
                     </div>
                     <div class="widget-content widget-content-area">
                         {{-- <div id="dlgLoading" class="loadingWidget"></div> --}}
-                        <div id="map"></div>
+                        <div id="mapAll" style="height: 350px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -318,7 +318,7 @@
     <script type="text/javascript">
 
 
-        var initExtent, map, gLayer, route, routeLayer, layerMarker, chkRoutedResult;
+        // var initExtent, map, gLayer, route, routeLayer, layerMarker, chkRoutedResult;
         var points = [];
       
         // function showLoading() {
@@ -344,20 +344,19 @@
         }
     
         function initialize(response) {
+
             // Map options
             var mapOptions = {
                 zoom: 6,
-                center: { lat: 13.5, lng: 100.5 }, // Initial center (adjust as needed)
+                center: { lat: 13.858573, lng: 100.3791033 }, // Initial center (adjust as needed)
                 scrollwheel: true, // Set to false to disable scroll zoom
                 gestureHandling: 'auto' // Can be 'cooperative', 'none', or 'greedy'
             };
 
-            // Create the map
-            var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            var map = new google.maps.Map(document.getElementById("mapAll"), mapOptions);
 
-            
             const convertedData = [];
-            // console.log(response);
+            // // console.log(response);
             response.forEach(record => {
                 convertedData.push({
                     coords: {
@@ -375,7 +374,7 @@
 
             // Loop through markers and add them to the map
             convertedData.forEach(function (markerInfo) {
-                // console.log(markerInfo);
+                // console.log(markerInfo.coords);
                 var marker = new google.maps.Marker({
                     position: markerInfo.coords,
                     map: map,

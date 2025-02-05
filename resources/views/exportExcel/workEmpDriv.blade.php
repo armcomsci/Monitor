@@ -48,11 +48,14 @@
                 <th>ชื่อ-นามสกุล</th>
             </tr>
         </thead>
+        @php
+            $sumLeave = array();
+        @endphp
         <tbody>
             @foreach ($EmpName as $item)
                 <tr>
                     @php
-                        $LeaveAmount = 0;
+                        $LeaveAmount_last_td = 0;
                     @endphp
                     <td style="vertical-align: middle; text-align: center">
                         {{ $item->EmpDriverCode }}
@@ -62,13 +65,16 @@
                     </td>
                     @for ($n = 1; $n < $lastM; $n++)
                         @php
+                            $LeaveAmount = 0;
                             $dateFormat = str_pad($n,2,"0",STR_PAD_LEFT);
                             $date = date("Y$Month$dateFormat");
                             $day  = date('w',strtotime($date));
                             if($day == 0){
                                 continue;
                             }
-                    
+                            if(!isset($sumLeave[$date])){
+                                $sumLeave[$date][]  = 0;
+                            }
                             $leaveWork = GetWorkEmp_Day($item->EmpDriverCode,$date);
                         @endphp
                         <td style="vertical-align: middle; text-align: center">
@@ -77,24 +83,52 @@
                                 <br>
                                 @if ($leaveWork->leave_type == 'D')
                                     @php
-                                        $LeaveAmount += 8;
+                                        $LeaveAmount_last_td += $leaveWork->leave_amount*8;
+                                        $LeaveAmount += $leaveWork->leave_amount*8;
                                     @endphp
                                     1(วัน)
                                 @elseif ($leaveWork->leave_type == 'H')
                                     @php
-                                        $LeaveAmount += $leaveWork->leave_amount;
+                                        $LeaveAmount_last_td += $leaveWork->leave_amount;
+                                        $LeaveAmount         += $leaveWork->leave_amount;
                                     @endphp
                                     {{ $leaveWork->leave_amount }}(ชั่วโมง)
                                 @endif
+                                @php
+                                    $sumLeave[$date][]  = $LeaveAmount;
+                                @endphp
+                            @else
+                                @php
+                                    $sumLeave[$date][]  = 0;
+                                @endphp
                             @endif
                         </td>
                     @endfor
                     <td style="vertical-align: middle;">
-                        {{ ConvertLeaveStr($LeaveAmount) }}
+                        {{ ConvertLeaveStr($LeaveAmount_last_td) }}
                     </td>
                 </tr>
             @endforeach
         </tbody>
+        {{-- {{ dd($sumLeave) }} --}}
+        <tfoot>
+            <tr>
+                <td colspan="2" style="text-align: right;">รวม</td>
+                @for ($b = 1; $b < $lastM; $b++)
+                    @php
+                        $dateFormat = str_pad($b,2,"0",STR_PAD_LEFT);
+                        $date = date("Y$Month$dateFormat");
+                        $day  = date('w',strtotime($date));
+                        if($day == 0){
+                            continue;
+                        }
+                    @endphp
+                    <td style="vertical-align: middle; text-align: center">
+                        {{ ConvertLeaveStr(array_sum($sumLeave[$date])) }}
+                    </td>
+                @endfor
+            </tr>
+        </tfoot>
     </table>
 </body>
 

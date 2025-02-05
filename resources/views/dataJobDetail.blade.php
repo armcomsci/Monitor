@@ -126,23 +126,28 @@
     dataApi = {!! json_encode($Data,true) !!};
 
     function initialize(dataApi) {
-        $('#map').addClass('border-map');
-        var mapOptions = {
+        $('#mapDt').addClass('border-map');
+       
+        // console.log(dataApi);
+    
+        if(dataApi['location'] !== null){
+            
+            var mapOptions = {
                 zoom: 6,
                 center: { lat: 13.858573, lng: 100.3791033 }, // Initial center (adjust as needed)
                 scrollwheel: true, // Set to false to disable scroll zoom
                 gestureHandling: 'auto' // Can be 'cooperative', 'none', or 'greedy'
             };
 
-        var map = new google.maps.Map(document.getElementById("mapDt"), mapOptions);
+            var map = new google.maps.Map(document.getElementById("mapDt"), mapOptions);
 
-        if(dataApi['location'] != null){
-           
-            const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
+         
 
-            if(dataApi['Route'] != null){
+            if(dataApi['Route'] != null && dataApi['Route'].length != 0){
+                const directionsService = new google.maps.DirectionsService();
+                const directionsRenderer = new google.maps.DirectionsRenderer();
+                directionsRenderer.setMap(map);
+
                 const waypoints =   dataApi['Route'].map((item, index) => ({
                                         location: new google.maps.LatLng(parseFloat(item.Late), parseFloat(item.Long)),
                                         stopover: true, // Specify whether this location is a stopover point
@@ -172,7 +177,7 @@
                     }
                 });
             }
-
+            
             const carMarker =   new google.maps.Marker({
                 position: new google.maps.LatLng(parseFloat(dataApi['location'].lat), parseFloat(dataApi['location'].lon)),
                 map: map,
@@ -193,7 +198,8 @@
                
         
         }else{
-            $('#map').html('<h2>ไม่พบตำแหน่ง GPS</h2>')
+
+            $('#mapDt').html("<img src='"+url+"/icon/not-found.png' class='text-center' style='margin-left: auto; margin-right: auto; display: block;' /><h2 style='color:red;' class='text-center mt-5' >X ไม่พบตำแหน่ง GPS</h2>")
         }
     }
 

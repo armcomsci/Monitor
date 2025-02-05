@@ -139,6 +139,7 @@ class RateEmpDrivController extends Controller
         $EmpCode        = $req->EmpCode;
         $photo          = $req->file('imgRate');
         $Month_rate     = $req->Month_rate;
+        $RateAmount     = $req->RateAmount;
         
         try {
             DB::beginTransaction();
@@ -161,22 +162,24 @@ class RateEmpDrivController extends Controller
                 Storage::disk('ftp_local')->put('empDrivRate/'.$filename, $fileContents);
             }
                     
-
-            $EmpScore['scoreRate']      = $SubRateTitle->Score;
-            $EmpScore['mainTitleId']    = $idRateTitle;
-            $EmpScore['mainTitleName']  = $RateTitle->Title;
-            $EmpScore['subTitleId']     = $idRateSubTitle;
-            $EmpScore['subTitleName']   = $SubRateTitle->Title;
-            $EmpScore['remark']         = $RateRemark;
-            if($filename != ""){
-                $EmpScore['imgUrl']     = "https://images.jtpackconnect.com/ImageAllProducts/empDrivRate/".$filename;
+            for ($i=0; $i < $RateAmount ; $i++) { 
+                $EmpScore['scoreRate']      = $SubRateTitle->Score;
+                $EmpScore['mainTitleId']    = $idRateTitle;
+                $EmpScore['mainTitleName']  = $RateTitle->Title;
+                $EmpScore['subTitleId']     = $idRateSubTitle;
+                $EmpScore['subTitleName']   = $SubRateTitle->Title;
+                $EmpScore['remark']         = $RateRemark;
+                if($filename != ""){
+                    $EmpScore['imgUrl']     = "https://images.jtpackconnect.com/ImageAllProducts/empDrivRate/".$filename;
+                }
+                $EmpScore['empDrivCode']    = $EmpCode;
+                $EmpScore['created_by']     = Auth::user()->EmpCode;
+                $EmpScore['scoreUseMonth']  = $Month_rate;
+                $EmpScore['created_time']   = now();
+    
+                DB::table('LMSRateEmpScore')->insert($EmpScore);
             }
-            $EmpScore['empDrivCode']    = $EmpCode;
-            $EmpScore['created_by']     = Auth::user()->EmpCode;
-            $EmpScore['scoreUseMonth']  = $Month_rate;
-            $EmpScore['created_time']   = now();
-
-            DB::table('LMSRateEmpScore')->insert($EmpScore);
+           
             DB::commit();
 
             return "success";
@@ -305,16 +308,19 @@ class RateEmpDrivController extends Controller
         $MainID     = $req->MainID;
         $Year       = $req->Year;
         $groupCode  = $req->groupCode;
-
+        
         try {
             DB::beginTransaction();
 
             $SumScoreMain   = DB::table('LMSRateEmpDriv_Title')
                                 ->where('id',$MainID)
-                                ->where('UseYear',$Year)
-                                ->where('CarGroupCode',$groupCode)
-                                ->Sum('Score');    
-
+                                ->where('UseYear',$Year);
+            if($groupCode != "A"){
+                $SumScoreMain   = $SumScoreMain->where('CarGroupCode',$groupCode);
+            }
+            
+            $SumScoreMain   = $SumScoreMain->Sum('Score');    
+     
             if($type == 0){    
             
                 $SumScore       = DB::table('LMSRateEmpDriv_Title')
@@ -322,7 +328,7 @@ class RateEmpDrivController extends Controller
                                     ->where('UseYear',$Year)
                                     ->where('CarGroupCode',$groupCode)
                                     ->Sum('Score');
-
+                
                 if($SumScore+$score > $SumScoreMain){
                     return "scoreError";
                 }
@@ -351,7 +357,7 @@ class RateEmpDrivController extends Controller
                                     ->where('UseYear',$Year)
                                     ->where('CarGroupCode',$groupCode)
                                     ->Sum('Score');
-
+          
                 if($SumScore+$score > $SumScoreMain){
                     return "scoreError";
                 }

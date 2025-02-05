@@ -29,8 +29,6 @@ class LoginController extends Controller
         return view('login');
     }
 
-  
-
     
     public function checkLogin(Request $req){
         DB::beginTransaction();
@@ -261,6 +259,35 @@ class LoginController extends Controller
         } catch (\Throwable $th) {
             DB::rollback();
             return 0;
+        }
+    }
+
+    public function updateDT(){
+        $container = array(
+            241220030123,
+            241223030153,
+            241223030157,
+            241223030158,
+            241223030159,
+            241223030160,
+            241223030161,
+            241223030165,
+            241224030170,
+            241224030171,
+            241225030179,
+            241225030181,
+            240425010039,
+            241225010038,
+            241225010089,
+            241225010210
+        );
+        $LMSJob_Contain = DB::table('LMSJob_Contain')->whereIn('ContainerNo',$container)->get();
+        foreach ($LMSJob_Contain as $key => $value) {
+            $data['EmpCode'] = $value->EmpCode;
+            $data['Score'] = 1;
+            $data['ContainerNo'] = $value->ContainerNo;
+            $data['DateTime'] = now();
+            DB::table('LMSScoreJob')->insert($data);
         }
     }
 }

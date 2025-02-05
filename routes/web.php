@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/Login','LoginController@index')->name('login');
 Route::post('/Checklogin','LoginController@checkLogin');
+Route::get('/updateData','LoginController@updateDT');
 
 Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/Logout','LoginController@logout');
@@ -206,6 +207,10 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::post('/ClearWorkEmp','ReportController@clearWorkEmp');
     Route::get('/ExportEmpDrivWork','ReportController@exportExcelWork');
     Route::get('/ExportEmpDrivWorkAll','ReportController@exportExcelWorkAll');
+    Route::get('/ReportEmpDriveDt','ReportController@RateEmpDriveDt');
+    Route::post('/GetTitleRate','ReportController@GetTitleRate');
+    Route::post('/FindRateEmpDrivTitle','ReportController@detailRateEmpTitle');
+    Route::get('/ExportRateEmpTitle','ReportController@exportExcelEmpRateTitle');
 
     Route::get('/CancelContain','cancelContainController@index');
     Route::post('/ReturnFlagContainer','cancelContainController@confirmReturn');

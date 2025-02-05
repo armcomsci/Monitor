@@ -77,6 +77,54 @@
         return $Score;
     }
 
+    function GetRateTitle_Sub($year,$title_id,$sub_id = null){
+        $GetDataTitle = DB::table('LMSRateEmpDriv_Title')
+                        ->where([
+                            'id' => $title_id,
+                            'UseYear' => $year
+                        ]);
+        $GetDataTitle = $GetDataTitle->get();
+
+        
+        $SubTitle = DB::table('LMSRateEmpDriv_Title')
+                        ->where([
+                            'Parent' => $title_id,
+                            'UseYear' => $year
+                        ]);
+        if($sub_id != ""){
+            $SubTitle = $SubTitle->whereIn('id',$sub_id);
+        }
+        $SubTitle = $SubTitle->get();
+
+        
+        $data['Title']      = $GetDataTitle;
+        $data['SubTitle']   = $SubTitle;
+
+        return $data;
+    }
+
+    function GetScore_Count_RateEmp($empCode,$subId,$Month,$Year){
+        $Score = DB::table('LMSRateEmpScore')
+                    ->where('subTitleId',$subId)
+                    ->where('empDrivCode',$empCode)
+                    ->where('scoreUseMonth', $Month)
+                    ->where('scoreUseYear', $Year)
+                    ->sum('scoreRate');
+
+        $CountScore = DB::table('LMSRateEmpScore')
+                    ->where('subTitleId',$subId)
+                    ->where('empDrivCode',$empCode)
+                    ->where('scoreUseMonth', $Month)
+                    ->where('scoreUseYear', $Year)
+                    ->count();
+
+
+        $data['TotalScore']         = $Score;
+        $data['CountTotalScore']    = $CountScore;
+
+        return $data;
+    }
+
     function GetScoreRateEmpDriv($empCode,$subId,$Month,$Year){
         $Score = DB::table('LMSRateEmpScore')
                     ->select('scoreRate','remark')
@@ -103,7 +151,7 @@
                 ->where([
                     'empDrivCode'=>$empCode,
                 ])
-                ->whereMonth('leave_date_start', '=', $Month)
+                ->whereMonth('leave_date_start', '<=', $Month)
                 ->whereYear('leave_date_start', '=', $Year)
                 ->where('leave_id',$leave_id)
                 ->get();

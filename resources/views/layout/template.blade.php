@@ -18,6 +18,7 @@
     <!-- toastr -->
     <link href="{{ asset('theme/plugins/notification/snackbar/snackbar.min.css') }}" rel="stylesheet" type="text/css" />
 
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWHJGPcZvlcw1s1ettvCJSuJ_q4UNoOgo&loading=async&libraries=marker"></script>
     @yield('css')
 
     <title>JT Driver Monitor</title>
@@ -122,7 +123,6 @@
 
     {{-- <script type="text/javascript" src="https://api.nostramap.com/nostraapi/v2.0/?key=Guh))FJkjZARKECd46rfcoQI53dnBDfmR2AOQc0KiJqdhf1e1i28Gskpn7CGLqYCxmAxLz9TPk1eMTRxdGcEFs0=====2"></script> --}}
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWHJGPcZvlcw1s1ettvCJSuJ_q4UNoOgo"></script>
     @php
         $Empcode = auth()->user()->EmpCode;
     @endphp

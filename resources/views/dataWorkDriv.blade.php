@@ -1,6 +1,6 @@
 @php
-    $url = url('/ExportEmpDrivWork')."?Month=".$Month."&Year=".$Year."&CarTypeCode=".$CarTypeCode;
-    $url2 = url('/ExportEmpDrivWorkAll')."?Month=".$Month."&Year=".$Year."&CarTypeCode=".$CarTypeCode;
+    $url = url('/ExportEmpDrivWork')."?Month=".$Month."&Year=".$Year."&CarTypeCode=".$CarTypeCode."&groupCode=".$groupCode;
+    $url2 = url('/ExportEmpDrivWorkAll')."?Month=".$Month."&Year=".$Year."&CarTypeCode=".$CarTypeCode."&groupCode=".$groupCode;
 @endphp
 <div class="d-flex ">
     <div class="p-2">
@@ -14,7 +14,7 @@
         </a>
     </div>
 </div>
-<div class="table-responsive" style="height: 650px;" >
+<div class="table-responsive" style="height: 500px;" >
     <table class="table table-bordered mb-4" id="TableWorkLeave" border="1">
         <thead style="background: #76cedd">
             <tr>

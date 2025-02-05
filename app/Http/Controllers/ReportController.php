@@ -313,11 +313,11 @@ class ReportController extends Controller
                         if($CarTypeCode != ''){
                             $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarTypeCode);
                         }
-                        if($groupCode != 'A'){
+                        if($groupCode == 'EG-0003'){
                             $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
                         }
-                        elseif($groupCode == 'A'){
-                            $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode','<>',$groupCode);
+                        else{
+                            $EmpName    = $EmpName->where('lmEmpDriv.EmpGroupCode','<>','EG-0003');
                         }
                         $EmpName    = $EmpName->orderByRaw("SumScoreRate DESC")
                         ->get();
@@ -449,7 +449,6 @@ class ReportController extends Controller
         return Excel::download( new RateEmpDrivExport($data) , "คะแนนพนักงานประเภท_$Carsize"."_ประจำเดือน_$m.xlsx");
     }
 
-
     public function exportExcelRateYear(){
 
         if(isset($_GET['ExMonth'])){
@@ -493,6 +492,7 @@ class ReportController extends Controller
         $CarTypeCode = $req->CarTypeCode;
         $groupCode   = $req->groupCode;
 
+
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                             ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
                             ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','lmEmpDriv.EmpGroupCode')
@@ -517,7 +517,7 @@ class ReportController extends Controller
 
         $LeaveWork  = DB::table('LMSLeaveWork')->get();
 
-        return view('dataWorkDriv',compact('Month','EmpName','Year','LeaveWork','CarTypeCode'));
+        return view('dataWorkDriv',compact('Month','EmpName','Year','LeaveWork','CarTypeCode','groupCode'));
     }
 
     public function detailEmpWork(Request $req){
@@ -542,6 +542,7 @@ class ReportController extends Controller
         $dataWork['Month']          = $_GET['Month'];
         $dataWork['Year']           = $_GET['Year'];
         $dataWork['CarTypeCode']    = $_GET['CarTypeCode'];
+        $dataWork['groupCode']      = $_GET['groupCode'];
 
         $m      = getMonth($dataWork['Month']);
 
@@ -582,13 +583,140 @@ class ReportController extends Controller
         return Excel::download( new WorkEmpDrivExportAll($dataWorkAll) , "สรุปคงเหลือการลาของคนรถประเภท_$Carsize"."_ประจำเดือน_$m.xlsx");
     }
 
-    private function GetEmpName(){
+    public function RateEmpDriveDt(){
+        $Year = date('Y');
+
+        $RateTitle  = DB::table('LMSRateEmpDriv_Title')
+                        ->where('parent',0)
+                        ->where('CarType','CT001')
+                        ->where('UseYear',$Year);
+        $RateTitle  =    $RateTitle->whereNull('CarGroupCode');
+        $RateTitle  =    $RateTitle->get();
+
+        // $SubRateTitle = '';
+        // if(count($RateTitle) != 0){
+        //     $SubRateTitle  = DB::table('LMSRateEmpDriv_Title')->where('parent',$RateTitle[0]->id)->get();
+        // }
+       
+
+        return view('reportRateEmpDt',compact('RateTitle'));
+    }
+
+    public function GetTitleRate(Request $req){
+        $CarTypeCode = $req->CarTypeCode;
+        $groupCode   = $req->groupCode;
+        $Year        = $req->Year;
+        // dd($req);
+        $RateTitle  = DB::table('LMSRateEmpDriv_Title')
+                        ->where('parent',0)
+                        ->where('CarType',$CarTypeCode)
+                        ->where('UseYear',$Year);
+        if($groupCode != 'A'){
+            $RateTitle  =    $RateTitle->where('CarGroupCode',$groupCode);
+        }else{
+            $RateTitle  =    $RateTitle->whereNull('CarGroupCode');
+        }
+        $RateTitle  =    $RateTitle->get();
+        
+        $SubRateTitle = '';
+        if(count($RateTitle) != 0 && isset($req->TitleRate) ){
+            $SubRateTitle  =    DB::table('LMSRateEmpDriv_Title')
+                                ->where('CarType',$CarTypeCode)
+                                ->where('UseYear',$Year);
+            if($groupCode != 'A'){
+                $SubRateTitle  =    $SubRateTitle->where('CarGroupCode',$groupCode);
+            }else{
+                $SubRateTitle  =    $SubRateTitle->whereNull('CarGroupCode');
+            }
+            $SubRateTitle  =    $SubRateTitle->whereIn('parent',$req->TitleRate);
+            $SubRateTitle  =    $SubRateTitle->get();
+        }
+    
+        $res['title'] = $RateTitle;
+        $res['Sub']   = $SubRateTitle;
+
+        return response()->json($res);
+
+    }
+
+    public function detailRateEmpTitle(Request $req){
+        $Month          = $req->Month;
+        $Year           = $req->Year;
+        $CarTypeCode    = $req->CarTypeCode;
+        $groupCode      = $req->groupCode;
+        $TitleRate      = $req->TitleRate;
+        $SubTitleRate   = $req->SubTitleRate;
+        $Export         = $req->all();
+
+
+        $RateEmp = DB::table('LMSRateEmpScore')
+                    ->join('LMSusers as LMSusers','LMSRateEmpScore.created_by','LMSusers.EmpCode')
+                    ->join('LMDBM.dbo.lmEmpDriv as EmpDriv','LMSRateEmpScore.empDrivCode','EmpDriv.EmpDriverCode')
+                    ->join('LMDBM.dbo.lmCarDriv as CarDriv','LMSRateEmpScore.empDrivCode','CarDriv.EmpDriverCode')
+                    ->select('LMSRateEmpScore.*','LMSusers.Fullname');
+                    if(isset($req->SubTitleRate)){
+                        $RateEmp = $RateEmp->whereIn('LMSRateEmpScore.subTitleId',$SubTitleRate);
+                    }else{
+                        $RateEmp = $RateEmp->where('LMSRateEmpScore.mainTitleId',$TitleRate);
+                    }
+                    if($groupCode != 'A'){
+                        $RateEmp  =    $RateEmp->where('EmpDriv.EmpGroupCode',$groupCode);
+                    }else{
+                        $RateEmp  =    $RateEmp->where('EmpDriv.EmpGroupCode','!=','EG-0003');
+                    }
+        $RateEmp = $RateEmp->where('CarDriv.CarTypeCode',$CarTypeCode);
+        $RateEmp = $RateEmp->whereRaw("scoreUseMonth = '$Month' AND scoreUseYear = '$Year' ");
+        $RateEmp = $RateEmp->get();
+        
+        $EmpName    =  $this->GetEmpName($groupCode,$CarTypeCode);
+        
+
+        return view('dataRateEmpTitle',compact('Month','Year','RateEmp','CarTypeCode','TitleRate','SubTitleRate','EmpName','Export'));
+
+    }
+
+    public function exportExcelEmpRateTitle(){
+        $dataWorkAll['Month']          = $_GET['ExMonth'];
+        $dataWorkAll['Year']           = $_GET['ExYear'];
+        $dataWorkAll['CarTypeCode']    = $_GET['ExCarTypeCode'];
+        $dataWorkAll['groupCode']      = $_GET['groupCode'];
+        $dataWorkAll['TitleRate']      = $_GET['TitleRate'];
+        if(isset($_GET['SubTitleRate'])){
+            $dataWorkAll['SubTitleRate']   = $_GET['SubTitleRate'];
+        }
+
+        $m      = getMonth($dataWorkAll['Month']);
+
+        switch ($dataWorkAll['CarTypeCode']) {
+            case 'CT001':
+                $Carsize = 'รถเล็ก';
+                break;
+            case 'CT002':
+                $Carsize = 'รถกลาง';
+                break;
+            case 'CT003':
+                $Carsize = 'รถใหญ่';
+                break;
+        }
+
+        return Excel::download( new RateEmpTitle($dataWorkAll) , "สรุปคงเหลือการลาของคนรถประเภท_$Carsize"."_แยกตามหัวข้อ_ประจำเดือน_$m.xlsx");
+    }
+
+    private function GetEmpName($groupCode = null, $CarTypeCode = null){
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                         ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
                         ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode')
                         ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
-                        ->where('lmCarDriv.IsDefault','Y')
-                        ->where('lmEmpDriv.Active','Y')
+                        ->where('lmCarDriv.IsDefault','Y');
+                        if($CarTypeCode !=  null){
+                            $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarTypeCode);
+                        }
+                        if($groupCode != 'A' && $groupCode != null){
+                            $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
+                        }else{
+                            $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode','!=','EG-0003');
+                        }
+                        $EmpName  =    $EmpName->where('lmEmpDriv.Active','Y')
                         ->orderBy('lmEmpDriv.EmpDriverCode')
                         ->get();
         return $EmpName;
@@ -605,6 +733,8 @@ class ReportController extends Controller
 
         return $Car;
     }
+
+
 }
 
 class RateEmpDrivExport implements  FromView, ShouldAutoSize
@@ -783,6 +913,73 @@ class RateEmpDrivExportYear implements  FromView, ShouldAutoSize
    
 }
 
+class RateEmpTitle implements  FromView, ShouldAutoSize
+{    
+    private $data;
+
+    public function __construct($data)
+    {
+        $this->data = $data;
+
+    }
+    public function view(): View
+    {
+        $Month          = $this->data['Month'];
+        $Year           = $this->data['Year'];
+        $CarTypeCode    = $this->data['CarTypeCode'];
+        $groupCode      = $this->data['groupCode'];
+        $TitleRate      = json_decode(base64_decode($this->data['TitleRate']),true);
+        if(isset($this->data['SubTitleRate'])){
+            $SubTitleRate   = json_decode(base64_decode($this->data['SubTitleRate']),true);
+        }else{
+            $SubTitleRate = null;
+        }
+
+        $Year = date('Y');
+      
+        $RateEmp = DB::table('LMSRateEmpScore')
+                    ->join('LMSusers as LMSusers','LMSRateEmpScore.created_by','LMSusers.EmpCode')
+                    ->join('LMDBM.dbo.lmEmpDriv as EmpDriv','LMSRateEmpScore.empDrivCode','EmpDriv.EmpDriverCode')
+                    ->join('LMDBM.dbo.lmCarDriv as CarDriv','LMSRateEmpScore.empDrivCode','CarDriv.EmpDriverCode')
+                    ->select('LMSRateEmpScore.*','LMSusers.Fullname');
+                    if(isset($req->SubTitleRate)){
+                        $RateEmp = $RateEmp->whereIn('LMSRateEmpScore.subTitleId',$SubTitleRate);
+                    }else{
+                        $RateEmp = $RateEmp->where('LMSRateEmpScore.mainTitleId',$TitleRate);
+                    }
+                    if($groupCode != 'A'){
+                        $RateEmp  =    $RateEmp->where('EmpDriv.EmpGroupCode',$groupCode);
+                    }else{
+                        $RateEmp  =    $RateEmp->where('EmpDriv.EmpGroupCode','!=','EG-0003');
+                    }
+        $RateEmp = $RateEmp->where('CarDriv.CarTypeCode',$CarTypeCode);
+        $RateEmp = $RateEmp->whereRaw("scoreUseMonth = '$Month' AND scoreUseYear = '$Year' ");
+        $RateEmp = $RateEmp->get();
+        
+        $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
+                    ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
+                    ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode')
+                    ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
+                    ->where('lmCarDriv.IsDefault','Y');
+                    if($CarTypeCode != ''){
+                        $EmpName    = $EmpName->where('lmCarDriv.CarTypeCode',$CarTypeCode);
+                    }
+                    if($groupCode != 'A' && $groupCode != null){
+                        $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
+                    }else{
+                        $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode','!=','EG-0003');
+                    }
+                    $EmpName  =    $EmpName->where('lmEmpDriv.Active','Y')
+                    ->orderBy('lmEmpDriv.EmpDriverCode')
+                    ->get();
+
+  
+        return view('exportExcel.rateEmpDrivTitle',compact('Month','Year','RateEmp','CarTypeCode','TitleRate','SubTitleRate','EmpName'));
+    }
+
+   
+}
+
 class WorkEmpDrivExport implements  FromView, ShouldAutoSize
 {    
     private $dataWork;
@@ -798,14 +995,20 @@ class WorkEmpDrivExport implements  FromView, ShouldAutoSize
         $Month      = $this->dataWork['Month'];
         $Year       = $this->dataWork['Year'];
         $CarType    = $this->dataWork['CarTypeCode'];
+        $groupCode  = $this->dataWork['groupCode'];
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                             ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
                             ->select('lmEmpDriv.EmpDriverCode','lmCarDriv.VehicleCode','lmCarDriv.CarTypeCode','lmEmpDriv.TranspID','lmEmpDriv.EmpDriverCode','lmEmpDriv.EmpDriverTel','lmEmpDriv.EmpGroupCode')
                             ->selectRaw("lmEmpDriv.EmpDriverCode + ' : ' + lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                             ->where('lmCarDriv.IsDefault','Y')
-                            ->where('lmEmpDriv.Active','Y')
-                            ->where('lmCarDriv.CarTypeCode',$CarType)
+                            ->where('lmEmpDriv.Active','Y');
+                            if($groupCode != 'A' && $groupCode != null){
+                                $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
+                            }else{
+                                $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode','!=','EG-0003');
+                            }
+                            $EmpName  =    $EmpName->where('lmCarDriv.CarTypeCode',$CarType)
                             ->get();
             return view('exportExcel.workEmpDriv',compact('EmpName','Month','Year'));
     }
@@ -827,6 +1030,7 @@ class WorkEmpDrivExportAll implements  FromView, ShouldAutoSize
         $Month      = $this->dataWorkAll['Month'];
         $Year       = $this->dataWorkAll['Year'];
         $CarType    = $this->dataWorkAll['CarTypeCode'];
+        $groupCode  = $this->dataWork['groupCode'];
 
         $EmpName    = DB::table('LMDBM.dbo.lmEmpDriv AS lmEmpDriv')
                             ->join('LMDBM.dbo.lmCarDriv AS lmCarDriv','lmEmpDriv.EmpDriverCode','lmCarDriv.EmpDriverCode')
@@ -834,8 +1038,13 @@ class WorkEmpDrivExportAll implements  FromView, ShouldAutoSize
                             ->selectRaw("lmEmpDriv.EmpDriverName + ' ' + lmEmpDriv.EmpDriverLastName AS EmpDriverName")
                             ->where('lmCarDriv.IsDefault','Y')
                             ->where('lmEmpDriv.Active','Y')
-                            ->where('lmCarDriv.CarTypeCode',$CarType)
-                            ->get();
+                            ->where('lmCarDriv.CarTypeCode',$CarType);
+                            if($groupCode != 'A' && $groupCode != null){
+                                $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode',$groupCode);
+                            }else{
+                                $EmpName  =    $EmpName->where('lmEmpDriv.EmpGroupCode','!=','EG-0003');
+                            }
+                            $EmpName  =    $EmpName->get();
 
         $LeaveWork  = DB::table('LMSLeaveWork')->get();
 

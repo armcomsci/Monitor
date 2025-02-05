@@ -72,9 +72,13 @@
             <select class="form-control required" id="RateSubTitle" name="RateSubTitle">
             </select>
         </div>
-        <div class="col-md-12 mb-4">
+        <div class="col-md-10 mb-4">
             <label>หมายเหตุ</label>
             <input type="text" class="form-control " name="RateRemark" placeholder="หมายเหตุ" >
+        </div>
+        <div class="col-md-2 mb-4">
+            <label>จำนวนครั้ง</label>
+            <input type="number" class="form-control " name="RateAmount" placeholder="ระบุจำนวน" min="1" value="1" max="10" >
         </div>
         <div class="col-md-12 mt-2 mb-2">
             <input type="file" name="imgRate" accept="image/*" >

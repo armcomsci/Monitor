@@ -837,22 +837,23 @@ thead{
 
     function initialize(response) {
         $('#map').addClass('border-map');
-        var mapOptions = {
+      
+        if(response['location'] != null){
+            var mapOptions = {
                 zoom: 6,
                 center: { lat: 13.858573, lng: 100.3791033 }, // Initial center (adjust as needed)
                 scrollwheel: true, // Set to false to disable scroll zoom
                 gestureHandling: 'auto' // Can be 'cooperative', 'none', or 'greedy'
             };
 
-        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+           
+            if(response['Route'] != null && response['Route'].length != 0){
+                const directionsService = new google.maps.DirectionsService();
+                const directionsRenderer = new google.maps.DirectionsRenderer();
+                directionsRenderer.setMap(map);
 
-        if(response['location'] != null){
-             
-            const directionsService = new google.maps.DirectionsService();
-            const directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
 
-            if(response['Route'] != null){
                 const waypoints =   response['Route'].map((item, index) => ({
                                         location: new google.maps.LatLng(parseFloat(item.Late), parseFloat(item.Long)),
                                         stopover: true, // Specify whether this location is a stopover point
@@ -903,7 +904,8 @@ thead{
 
             // hideLoading();
         }else{
-            $('#map').html('<h2>ไม่พบตำแหน่ง GPS</h2>')
+
+            $('#map').html("<img src='"+url+"/icon/not-found.png' class='text-center' style='margin-left: auto; margin-right: auto; display: block;' /><h2 style='color:red;' class='text-center mt-5' >X ไม่พบตำแหน่ง GPS</h2>")
         }
     }
     var EmpCodeDriv1 = '{{ auth()->user()->EmpCode }}';
