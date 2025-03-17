@@ -296,7 +296,7 @@
                                     <select class="form-control" name="EmpDriv" id="EmpDriv" data-count="0">
                                         <option value=""></option>
                                         @foreach ($GetEmpDriv as $EmpDriv)
-                                            <option value="{{ $EmpDriv->EmpDriverCode.":".$EmpDriv->EmpDriverName." ".$EmpDriv->EmpDriverLastName }}">{{ $EmpDriv->EmpDriverCode." : ".$EmpDriv->EmpDriverName." ".$EmpDriv->EmpDriverLastName }}</option>
+                                            <option value="{{ $EmpDriv->EmpDriverCode }}">{{ $EmpDriv->EmpDriverCode." : ".$EmpDriv->EmpDriverName." ".$EmpDriv->EmpDriverLastName }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -666,7 +666,7 @@
                 $("select[name='CoFormulaCode']").val(response.coFormulaCode+":"+response.coFormulaDetail);
                 $("input[name='CoTel']").val(response.CoTel);
                 $("input[name='CoEmpName']").val(response.CoEmpName);
-                $("select[name='EmpDriv']").val(response.EmpDriverCode+":"+response.EmpDriverName+" "+response.EmpDriverLastName);
+                $("select[name='EmpDriv']").val(response.EmpDriverCode);
                 $("select[name='EmpDriv']").trigger( "change" );
                 $("select[name='EmpDriv']").attr('data-count',0);
 
@@ -882,6 +882,8 @@
         } 
     });
 
+    $('.change_st_flag').change(function(e){
 
+    });
 </script>
 @endsection

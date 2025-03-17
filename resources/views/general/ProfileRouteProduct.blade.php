@@ -166,41 +166,7 @@
                 </button>
             </div>
             <div class="modal-body" style="height: 770px;"> 
-                <form id="SaveMarketZone" action="javascript:void(0);">
-                    <div class="table-responsive" style="height: 700px;">
-                        <div class="col-3 mb-3">
-                            <input type="text" class="form-control" id="searchInput" placeholder="Search">
-                        </div>
-                        
-                            <table class="table table-bordered mb-4" id="MarketTable">
-                                <thead style="background: #60eb9a">
-                                    <tr>
-                                        <th>
-                                            <input type="checkbox" class="Check_all_market">                              
-                                        </th>
-                                        <th>ชื่อศูนย์ขนส่ง</th>
-                                        <th>ชื่อกลุ่มขนส่ง</th>
-                                        <th>ชื่อพื้นที่ขนส่ง</th>
-                                        <th>หมายเหตุ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($lmTrans_tm as $item)
-                                        <tr>
-                                            <td>
-                                                <input type="checkbox" name="TranGroupID[]" value="{{ $item->TranGroupID }}">
-                                            </td>
-                                            <td>{{ $item->TranGroupName }}</td>
-                                            <td>{{ $item->ZoneName }}</td>
-                                            <td>{{ $item->Remark }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                    </div>
-                    <input type="hidden" id="AreaCode" name="AreaCode">
-                    <button class="btn btn-primary mt-2" type="submit">บันทึกข้อมูล</button>
-                </form>
+                
             </div>
         </div>
     </div>
@@ -280,6 +246,17 @@
             $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
         });
     });
+    $(document).on('input','#searchInput_trans',function (e) { 
+        let searchText = $(this).val().toLowerCase();
+        $(".highlight").removeClass("highlight");
+        
+        // Filter the table rows based on the input
+        $("#TransTable tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
+        });
+    });
+
+    
 
     $(document).on('change','.Check_all_market', function (e) { 
         e.preventDefault();
@@ -335,8 +312,49 @@
     
     $(document).on('click','#AddTrans',function(e){
         e.preventDefault();
-        $('#DataTrans').modal('show');
+        let AreaCode = $("select[name='AreaCode']").val();
+        $.ajax({
+            type: "get",
+            url: url+"/GetlmCenTran",
+            data: {'AreaCode':AreaCode},
+            // dataType: "dataType",
+            success: function (response) {
+                $('#DataTrans').find('.modal-body').html(response);
+                $('#DataTrans').modal('show');
+            }
+        });
     });
 
+    $(document).on('submit','#SaveTranCenZone', function (e) { 
+        let TranCenID =  $('input[name="TranCenID[]"]:checked').map(function () {
+                                    return this.value;
+                                }).get();
+
+        if(TranCenID.length == 0){
+            swal({
+                title: 'กรุณาเลือกรายการ',
+                text: '',
+                type: 'error',
+                padding: '2em'
+            })
+            return;
+        }
+
+        $.ajax({
+            type: "post",
+            url: url+"/ProfileRouteTransSave",
+            data: $(this).serialize(),
+            beforeSend:function(){
+                // $('#DataArea').empty();
+                // $('.loaddingModal').css('display','block');
+            },
+            success: function (response) {
+                if(response == 'success'){
+                    $('#DataTrans').modal('hide');
+                    $('#FindRoute').submit();
+                } 
+            }
+        });
+    });
 </script>
 @endsection

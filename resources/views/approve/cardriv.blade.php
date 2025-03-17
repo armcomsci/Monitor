@@ -86,6 +86,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+            
                                             @if (count($LogEdit) == 0)
                                                 <tr>
                                                     <td colspan="6" class="text-center"><h5>ไม่พบข้อมูล</h5></td>
@@ -103,9 +104,11 @@
                                                                 $data = json_decode($item->data_update,true);
                                                                 // dd($data);
                                                             @endphp
-                                                            @foreach ($data as $item2)
-                                                                {{ $item2['text']." : ".$item2['val'] }} <br>
-                                                            @endforeach
+                                                            @if($data != null)
+                                                                @foreach ($data as $item2)
+                                                                    {{ $item2['text']." : ".$item2['val'] }} <br>
+                                                                @endforeach
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             {{ $item->Fullname }}

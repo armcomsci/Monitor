@@ -33,6 +33,7 @@ class ApproveController extends Controller
                 $DataEdit = DB::table('LMSTemp_EditlmCarDriv')->where('id',$id)->first();
 
                 $data = json_decode($DataEdit->data_update,true);
+ 
 
                 $selectedData = ['CarTypeCode','ProvinceID','CarBrandCode','CarSerieCode','OilTypeCode','FormulaCode','CarComp','CoFormulaCode','EmpDriv','InsureTypeCode','InsureCompCode','InsureTypeCode_Form','InsureCompCode_Form','FinanceCode'];
 
@@ -43,7 +44,7 @@ class ApproveController extends Controller
 
                 $lmCoDriver  = ['CoFormulaCode','CoTel','CoEmpName','CarComp'];
                 
-                $lmCarDriv   = ['EmpDriv'];
+                $lmCarDriv   = ['EmpDrivCode'];
 
                 $lmCarInsure = ['InsureStart_End_Date','PolicyInsureNo','InsureTypeCode','InsureCompCode','InsureCap','InsureValue'];
 

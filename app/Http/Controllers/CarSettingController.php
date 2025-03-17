@@ -125,7 +125,7 @@ class CarSettingController extends Controller
 
     public function save(Request $req){
         DB::beginTransaction();
-        // dd($req);
+
         try { 
             $type_save      =   $req->type_save;
             if($type_save == 0){
@@ -159,7 +159,7 @@ class CarSettingController extends Controller
                 $CarDetail['Status'] = 'Y';
                 $CarDetail['GPS']    = $GPS;
                 $CarDetail['Remark'] = $Remark;
-    
+               
                 DB::table('LMDBM.dbo.lmCarDetail')->insert($CarDetail);
                 
     
@@ -173,10 +173,10 @@ class CarSettingController extends Controller
                 $lmCoDriver['CoEmpName']    =   $CoEmpName;
                 $lmCoDriver['CoTel']        =   $CoTel;
                 $lmCoDriver['CarComp']      =   $CarComp;
-    
+   
                 DB::table('LMDBM.dbo.lmCoDriver')->insert($lmCoDriver);
     
-                $EmpDriv        =   $this->explodeVal($req->EmpDriv);
+                $EmpDriv        =   $req->EmpDriv;
                 $CarDriv =  DB::table('LMDBM.dbo.lmCarDriv')
                             ->where([
                                 'VehicleCode' => $VehicleCode,
@@ -196,7 +196,7 @@ class CarSettingController extends Controller
                 $lmCarDriv['VehicleCode']   = $VehicleCode;
                 $lmCarDriv['CarTypeCode']   = $CarTypeCode;
                 $lmCarDriv['IsDefault']     = 'N';
-
+     
                 DB::table('LMDBM.dbo.lmCarDriv')->insert($lmCarDriv);
     
                 $dateRange  = $req->InsureStart_End_Date;

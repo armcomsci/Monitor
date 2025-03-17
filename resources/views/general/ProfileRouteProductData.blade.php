@@ -20,6 +20,7 @@
             </table>
         </div>
     </div>
+
     <div class="col-6">
         <button class="btn btn-success mb-2 mr-2" style="float: right" id="AddTrans"><i class="fa-solid fa-plus"></i></button>
         <div class="table-responsive" style="height: 650px;">
@@ -31,7 +32,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    
+                    @foreach ($AreaRoute2 as $item)
+                    <tr class="market-{{ $item->TranCenID }}">
+                        <td>{{ $item->TranCenName }}</td>
+                        <td>{{ $item->remark }}</td>
+                    </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>

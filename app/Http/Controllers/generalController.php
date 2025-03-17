@@ -403,13 +403,7 @@ class generalController extends Controller
 
         $lmBkkMart_tm   =   DB::table('LMDBM.dbo.lmBkkMart_tm')->where('Remark','New Delivery Area')->get();
 
-        $lmTrans_tm   =   DB::table('LMDBM.dbo.lmTrnZone_tm as lmTrnZone_tm')
-                            ->join('LMDBM.dbo.lmGrpZone_tm as lmGrpZone_tm','lmTrnZone_tm.ZoneID','lmGrpZone_tm.ZoneID')
-                            ->leftjoin('LMDBM.dbo.lmGrpTran_tm as lmGrpTran_tm','lmGrpZone_tm.TranGroupID','lmGrpTran_tm.TranGroupID')
-                            ->select('lmGrpTran_tm.TranGroupName','lmGrpTran_tm.Remark','lmTrnZone_tm.ZoneName','lmTrnZone_tm.ZoneID','lmGrpTran_tm.TranGroupID')
-                            ->get();
-
-        return view('general.ProfileRouteProduct',compact('AreaZone','lmBkkMart_tm','lmTrans_tm'));
+        return view('general.ProfileRouteProduct',compact('AreaZone','lmBkkMart_tm'));
     }
 
     public function ProfileRouteProductData(Request $req){
@@ -420,7 +414,43 @@ class generalController extends Controller
                     ->where('lmAreaRoute.AreaCode',$AreaCode)
                     ->get();
 
-        return view('general.ProfileRouteProductData',compact('AreaRoute'));
+        $AreaRoute2 = DB::table('LMDBM.dbo.lmAreaRoute as lmAreaRoute')
+                    ->leftjoin('LMDBM.dbo.lmCenTran_tm as lmCenTran_tm ','lmAreaRoute.TranCenID','lmCenTran_tm.TranCenID')
+                    ->select('lmAreaRoute.TranCenID', 'lmCenTran_tm.TranCenName', 'lmCenTran_tm.remark')
+                    ->where('lmAreaRoute.TranCenID','<>','0')
+                    ->where('lmAreaRoute.AreaCode',$AreaCode)
+                    ->get();
+
+
+        return view('general.ProfileRouteProductData',compact('AreaRoute','AreaRoute2'));
+    }
+
+    public function GetlmCenTran(){
+        $AreaCode[] = $_GET['AreaCode'];
+        
+
+        $TransID  = DB::table('LMDBM.dbo.lmAreaRoute')->select('TranCenID')->where('AreaCode',$AreaCode)->first();
+
+        $GetData  = DB::table('LMDBM.dbo.lmCenTran_tm as lmCenTran_tm')
+                        ->join('LMDBM.dbo.lmGrpCent_tm as lmGrpCent_tm', 'lmCenTran_tm.TranCenID', '=', 'lmGrpCent_tm.TranCenID')
+                        ->join('LMDBM.dbo.lmGrpTran_tm as lmGrpTran_tm', 'lmGrpCent_tm.TranGroupID', '=', 'lmGrpTran_tm.TranGroupID')
+                        ->join('LMDBM.dbo.lmGrpZone_tm as lmGrpZone_tm', 'lmGrpZone_tm.TranGroupID', '=', 'lmGrpTran_tm.TranGroupID')
+                        ->join('LMDBM.dbo.lmTrnZone_tm as lmTrnZone_tm', 'lmTrnZone_tm.ZoneID', '=', 'lmGrpZone_tm.ZoneID')
+                        ->select(
+                            'lmCenTran_tm.TranCenID', 
+                            'lmCenTran_tm.TranCenName', 
+                            'lmGrpTran_tm.TranGroupID', 
+                            'lmGrpTran_tm.TranGroupName', 
+                            'lmTrnZone_tm.ZoneID', 
+                            'lmTrnZone_tm.ZoneName', 
+                            'lmCenTran_tm.IndexCen', 
+                            'lmCenTran_tm.remark'
+                        )
+                    ->whereNotNull('lmCenTran_tm.TranCenID')
+                    ->whereNotIn('lmCenTran_tm.TranCenID',$AreaCode)
+                    ->get();
+        $AR_Code = $_GET['AreaCode'];
+        return view('general.ProfileRouteTran_tm_modal',compact('GetData','AR_Code'))->render();
     }
 
     public function ProfileRouteProductSave(Request $req){
@@ -435,6 +465,21 @@ class generalController extends Controller
             DB::table('LMDBM.dbo.lmAreaRoute')->insert($data);
         }
 
+        return 'success';
+    }
+
+    public function ProfileRouteTransSave(Request $req){
+        // dd($req);
+        $TranCenID = $req->TranCenID;
+        $AreaCode    = $req->AreaCode;
+
+        foreach ($TranCenID as $key => $value) {
+            $data['AreaCode'] = $AreaCode;
+            $data['MarketID'] = 0;
+            $data['TranCenID'] = $value;
+            
+            DB::table('LMDBM.dbo.lmAreaRoute')->insert($data);
+        }
         return 'success';
     }
 

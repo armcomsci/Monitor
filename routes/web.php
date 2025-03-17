@@ -62,7 +62,9 @@ Route::group(['middleware' => ['auth','check.remember.token'] ], function () {
     Route::get('/ProfileRouteProductCode','generalController@ProfileRouteProductCode');
     Route::get('/ProfileRouteProduct','generalController@ProfileRouteProduct');
     Route::post('/ProfileRouteProductData','generalController@ProfileRouteProductData');
+    Route::get('/GetlmCenTran','generalController@GetlmCenTran');
     Route::post('/ProfileRouteProductSave','generalController@ProfileRouteProductSave');
+    Route::post('/ProfileRouteTransSave','generalController@ProfileRouteTransSave');
 
     Route::get('/ProfileSetCalTrans','generalController@ProfileSetCalTrans');
     Route::post('/profileSetCalTransGet','generalController@ProfileSetCalTransGet');
