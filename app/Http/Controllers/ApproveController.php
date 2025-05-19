@@ -34,7 +34,7 @@ class ApproveController extends Controller
 
                 $data = json_decode($DataEdit->data_update,true);
  
-
+                // dd($data);
                 $selectedData = ['CarTypeCode','ProvinceID','CarBrandCode','CarSerieCode','OilTypeCode','FormulaCode','CarComp','CoFormulaCode','EmpDriv','InsureTypeCode','InsureCompCode','InsureTypeCode_Form','InsureCompCode_Form','FinanceCode'];
 
                 $dateRangeData = ['InsureStart_End_Date','Insure_Form_Start_End_Date','CarFin_Start_End_Date','CompCar_Start_End_Date'];
@@ -52,7 +52,7 @@ class ApproveController extends Controller
 
                 $lmCarFinan  = ['FinanceCode','ContractNo','CarValue','CarTotalValue','CarDownValue','CarInterest','CarLoanValue','CarInstallmentValue','CarInstallment','CarInstallmentLeft','CarBalanceValue','CarFin_Start_End_Date','CarFinRemark','CarFinStatus'];
 
-                $lmCarComp   = ['CompCarValue','CompCarTotal','CompDownValue','CompCarInterest','CompCarLoan','CompInstallmentValue','CompInstallment','CompInstallmentLeft','CompCarBalance','CompCar_Remark','CarCompStatus'];
+                $lmCarComp   = ['CompCarValue','CompCarTotal','CompDownValue','CompCarInterest','CompCarLoan','CompInstallmentValue','CompCarInstallment','CompInstallmentLeft','CompCarBalance','CompCar_Remark','CarCompStatus'];
                 
                 $update_lmCarDetail = [];
                 $update_lmCoDriver  = [];
@@ -61,7 +61,7 @@ class ApproveController extends Controller
                 $update_lmCarForm   = [];
                 $update_lmCarFinan  = [];
                 $update_lmCarComp   = [];
-
+               
                 foreach ($data as $key => $value) {
     
                     $name = $value['name'];
@@ -71,7 +71,7 @@ class ApproveController extends Controller
                     if (in_array($name,$selectedData)) {
                         $val  =  $this->explodeVal($value['val']);
                     }
-
+         
                     if (in_array($name,$lmCarDetail)) {
                         if($name == "RegistDate"){
                             $val = Carbon::createFromFormat('d/m/Y',$val)->format('Y-m-d');
@@ -174,7 +174,7 @@ class ApproveController extends Controller
                 }
                 // dd($update_lmCarDetail,$update_lmCoDriver,$update_lmCarDriv,$update_lmCarInsure,$update_lmCarForm,$update_lmCarFinan,$update_lmCarComp);
                 $tableUpdate = '';
-
+                
                 if(count($update_lmCarDetail) > 0){
                 
                     DB::table('LMDBM.dbo.lmCarDetail')->where('VehicleCode',$DataEdit->vehicleCode)->update($update_lmCarDetail);
@@ -200,6 +200,7 @@ class ApproveController extends Controller
                     DB::table('LMDBM.dbo.lmCarForm')->where('VehicleCode',$DataEdit->vehicleCode)->update($update_lmCarForm);
 
                 }
+                // dd($update_lmCarFinan);
                 if(count($update_lmCarFinan) > 0){
 
                     DB::table('LMDBM.dbo.lmCarFinan')->where('VehicleCode',$DataEdit->vehicleCode)->update($update_lmCarFinan);

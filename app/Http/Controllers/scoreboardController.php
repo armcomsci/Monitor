@@ -103,7 +103,7 @@ class scoreboardController extends Controller
                                 ->union($selectAddBill_Temp)
                                 ->where('ContainerNO',$Container)
                                 ->first();
-
+  
         $Data['Comment']     = DB::table('LKJTCLOUD_DTDBM.DTDBM.dbo.nlmMatchContain_rm')->where('ContainerNO',$Container)->whereNotNull('Remark')->count();
 
         $Data['AddBill']     = $selectAddBill_Ref;
@@ -195,6 +195,7 @@ class scoreboardController extends Controller
         // $userOnline  = $userOnline->where('LMSLog_login.Status_online','Y');
         $userOnline  = $userOnline->where('LMSusers.EmpCode','<>',Auth::user()->EmpCode);
         $userOnline  = $userOnline->where('LMSusers.type','1');
+        $userOnline  = $userOnline->where('LMSusers.status','Y');
         // $userOnline  = $userOnline->whereRaw("CONVERT(varchar,LMSLog_login.Login_time,112) LIKE '%$Curent_date%' ");
         $userOnline  = $userOnline->get();
 
@@ -619,14 +620,19 @@ class scoreboardController extends Controller
                                     ->where('flag_st','Y')
                                     ->sum('GoodQty');
         // เวลาวางบิล
-        $selectAddBill      = DB::table('LMDBM.dbo.lmAddBill_Now_hd')->select('ContainerNO','Addbill_Time')->where('ContainerNO',$Container);
+        $selectAddBill        = DB::table('LMDBM.dbo.lmAddBill_Now_hd')->select('ContainerNO','Addbill_Time')->where('ContainerNO',$Container);
 
-        $selectAddBill_Temp = DB::table('LMDBM.dbo.lmAddBill_Temp_hd')->select('ContainerNO','Addbill_Time')->where('ContainerNO',$Container)
+        $selectAddBill_Temp   = DB::table('LMDBM.dbo.lmAddBill_Temp_hd')->select('ContainerNO','Addbill_Time')->where('ContainerNO',$Container);
+
+
+        $selectAddBill_Ref   = DB::table('LMDBM.dbo.lmAddBill_Ref_hd')
+                                ->select('ContainerNO','Addbill_Time')
                                 ->union($selectAddBill)
+                                ->union($selectAddBill_Temp)
                                 ->where('ContainerNO',$Container)
                                 ->first();
                             
-        $data['AddBill']    = $selectAddBill_Temp;
+        $data['AddBill']    = $selectAddBill_Ref;
 
 
         $data['SendTo']     = DB::table('LMSJobLog_Contain')

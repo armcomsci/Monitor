@@ -12,6 +12,9 @@
     if($Export['CarTypeCode'] != ""){
         $url .= "&ExCarTypeCode=".$Export['CarTypeCode']; 
         $url2 .= "&ExCarTypeCode=".$Export['CarTypeCode']; 
+    }else{
+        $url .= "&ExCarTypeCode=A"; 
+        $url2 .= "&ExCarTypeCode=A"; 
     }
     if($Export['groupCode'] != ""){
         $url .= "&groupCode=".$Export['groupCode']; 

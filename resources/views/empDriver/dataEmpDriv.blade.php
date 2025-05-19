@@ -567,7 +567,7 @@
         }
     });
 
-    $("input[name='Year']").mask('0000');
+    $("input[name='Year'],input[name='CompInstallment'],input[name='CarInstallment']").mask('0000');
 
     function formatDate(inputDate) {
         // Parse the input date string
@@ -629,7 +629,7 @@
             // data: {},
             // dataType: "dataType",
             success: function (response) {
-                // console.log(response);
+                console.log(response);
                 $("input[name='VehicleCode']").val(response.VehicleCode);
                 $("select[name='CarTypeCode']").val(response.CarTypeCode+":"+response.CarTypeName);
                 $("input[name='ProvinceID']").val(response.ProvinceID+":"+response.ProvinceName);
@@ -719,8 +719,7 @@
                 $("input[name='CompCarInterest']").val(response.CompCarInterest);
                 $("input[name='CompCarLoan']").val(response.CompCarLoan);
                 $("input[name='CompInstallmentValue']").val(response.CompInstallmentValue);
-                $("input[name='CompInstallment']").val(response.CompInstallment);
-                $("input[name='CompInstallment']").val(response.CompInstallment);
+                $("input[name='CompInstallment']").val(response.CompCarInstallment);
                 $("input[name='CompInstallmentLeft']").val(response.CompInstallmentLeft);
                 $("input[name='CompCarBalance']").val(response.CompCarBalance);
                 $("input[name='CarCompStatus']").val(response.CarCompStatus);

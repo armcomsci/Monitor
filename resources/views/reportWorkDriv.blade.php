@@ -129,6 +129,7 @@
                                         </div>
                                         <div class="col-2">
                                             <select class="form-control" name="CarTypeCode" >
+                                                <option value="">-- ทั้งหมด --</option>
                                                 <option value="CT001">รถเล็ก</option>
                                                 <option value="CT002">รถกลาง</option>
                                                 <option value="CT003">รถใหญ่</option>

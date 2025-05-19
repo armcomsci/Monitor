@@ -62,7 +62,7 @@
                     <nav class="breadcrumb-one" aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ url('/') }}">หน้าหลัก</a></li>
-                            <li class="breadcrumb-item active" aria-current="page"><span>กำหนดข้อมูลปลายทางขนส่งสินค้า</span></li>
+                            <li class="breadcrumb-item active" aria-current="page"><span>กำหนดข้อมูลพื้นที่การขนส่งสินค้า</span></li>
                         </ol>
                     </nav>
                 </div>
@@ -84,7 +84,7 @@
                                 <form id="FindRoute" action="javascript:void(0);">
                                     <div class="form-row">
                                         <div class="col-md-4 mb-4">
-                                            <label>รหัสปลายทาง</label>
+                                            <label>พื้นที่การขนส่งสินค้า</label>
                                             <select class="form-control required" name="AreaCode">
                                                 <option value=""></option>
                                                 @foreach ($AreaZone as $item)
@@ -133,6 +133,7 @@
                                         </th>
                                         <th>ชื่อโซน</th>
                                         <th>หมายเหตุ</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -246,6 +247,7 @@
             $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
         });
     });
+
     $(document).on('input','#searchInput_trans',function (e) { 
         let searchText = $(this).val().toLowerCase();
         $(".highlight").removeClass("highlight");
@@ -255,8 +257,6 @@
             $(this).toggle($(this).text().toLowerCase().indexOf(searchText) > -1);
         });
     });
-
-    
 
     $(document).on('change','.Check_all_market', function (e) { 
         e.preventDefault();
@@ -355,6 +355,64 @@
                 } 
             }
         });
+    });
+
+    $(document).on('click','.del_tran', function (e) { 
+        e.preventDefault();
+        let id = $(this).data('id');
+        let AreaCode = $("select[name='AreaCode']").val();
+        swal({
+            title: 'ต้องการลบ',
+            text: '',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก',
+            padding: '2em'
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: "post",
+                    url: url+"/ProfileRouteProductDelTran",
+                    data: {'id':id,'AreaCode':AreaCode},
+                    // dataType: "dataType",
+                    success: function (response) {
+                        if(response == "success"){
+                            $('#FindRoute').submit();
+                        }
+                    }
+                });
+            }
+        })
+    });
+
+    $(document).on('click','.del_mark', function (e) { 
+        e.preventDefault();
+        let id = $(this).data('id');
+        let AreaCode = $("select[name='AreaCode']").val();
+        swal({
+            title: 'ต้องการลบ',
+            text: '',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก',
+            padding: '2em'
+        }).then(function(result) {
+            if (result.value) {
+                $.ajax({
+                    type: "post",
+                    url: url+"/ProfileRouteProductDelMark",
+                    data: {'id':id,'AreaCode':AreaCode},
+                    // dataType: "dataType",
+                    success: function (response) {
+                        if(response == "success"){
+                            $('#FindRoute').submit();
+                        }
+                    }
+                });
+            }
+        })
     });
 </script>
 @endsection

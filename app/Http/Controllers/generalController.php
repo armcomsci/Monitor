@@ -411,6 +411,7 @@ class generalController extends Controller
 
         $AreaRoute = DB::table('LMDBM.dbo.lmAreaRoute as lmAreaRoute')
                     ->join('LMDBM.dbo.lmBkkMart_tm as lmBkkMart_tm','lmAreaRoute.MarketID','lmBkkMart_tm.MarketID')
+                    ->where('lmAreaRoute.MarketID','<>','0')
                     ->where('lmAreaRoute.AreaCode',$AreaCode)
                     ->get();
 
@@ -423,6 +424,30 @@ class generalController extends Controller
 
 
         return view('general.ProfileRouteProductData',compact('AreaRoute','AreaRoute2'));
+    }
+
+    public function ProfileRouteProduct_Del_Mark(Request $req){
+        $id = $req->id;
+        $areaCode = $req->AreaCode;
+
+        DB::table('LMDBM.dbo.lmAreaRoute')
+            ->where('AreaCode',$areaCode)
+            ->where('MarketID',$id)
+            ->delete();
+
+        return 'success';
+    }
+
+    public function ProfileRouteProduct_Del_Tran(Request $req){
+        $id = $req->id;
+        $AreaCode = $req->AreaCode;
+
+        DB::table('LMDBM.dbo.lmAreaRoute')
+            ->where('AreaCode',$areaCode)
+            ->where('TranCenID',$id)
+            ->delete();
+
+        return 'success';
     }
 
     public function GetlmCenTran(){

@@ -19,6 +19,7 @@
                 @endphp
                 @foreach ($LeaveWork as $itemWork)
                     <th style="vertical-align: middle; text-align: center">{{ $itemWork->leave_name }}</th>
+                    <th style="vertical-align: middle; text-align: center">ใช้ไป</th>
                     <th style="vertical-align: middle; text-align: center">คงเหลือ</th>
                     @php
                         $idLeave = $itemWork->id;
@@ -43,6 +44,13 @@
                 <td style="vertical-align: middle; text-align: center">
                     {{ $LimitLeave[$LeaveDayId]['limit'] }} วัน
                 </td> 
+                <td style="vertical-align: middle; text-align: center">
+                    @if($Day > 0)
+                       {{ ConvertLeaveStr($Day) }}
+                    @else 
+                        0 วัน 
+                    @endif
+                </td>
                 <td style="vertical-align: middle; text-align: center"> 
                 @php
                     $Work_leave = ($LimitLeave[$LeaveDayId]['limit']*8)-$Day;

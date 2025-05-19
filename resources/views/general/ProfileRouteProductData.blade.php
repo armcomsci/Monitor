@@ -7,6 +7,7 @@
                     <tr>
                        <th>ชื่อตลาด</th>
                        <th>หมายเหตุ</th>
+                       <th>ลบ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -14,6 +15,11 @@
                         <tr class="market-{{ $item->MarketID }}">
                             <td>{{ $item->MarketName }}</td>
                             <td>{{ $item->Remark }}</td>
+                            <td>
+                                <button type="button" class="btn btn-danger del_mark" data-id="{{ $item->MarketID }}">
+                                    <i class="fa fa-minus" aria-hidden="true"></i>
+                                </button>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -29,6 +35,7 @@
                     <tr>
                        <th>ชื่อศูนย์ขนส่ง</th>
                        <th>หมายเหตุ</th>
+                       <th>ลบ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,6 +43,11 @@
                     <tr class="market-{{ $item->TranCenID }}">
                         <td>{{ $item->TranCenName }}</td>
                         <td>{{ $item->remark }}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger del_tran" data-id="{{ $item->TranCenID }}">
+                                <i class="fa fa-minus" aria-hidden="true"></i>
+                            </button>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
